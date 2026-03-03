@@ -1,0 +1,3 @@
+[submodule "sms-gateway-app"]
+	path = sms-gateway-app
+	url = git@github.com:Varyshop/sms-gateway-app.git
