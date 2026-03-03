@@ -77,14 +77,42 @@ Settings → Apps → Update Apps List → Search "SMS Gateway" → Install
 
 ### 3. Install the Mobile App
 
-See [sms-gateway-app/](sms-gateway-app/) for build instructions. In summary:
+#### Download the APK (recommended)
+
+Go to [Releases](https://github.com/Varyshop/sms-gateway-app/releases) on GitHub and download the latest `.apk` file directly to your Android phone.
+
+On the phone:
+1. Open the downloaded `.apk` file
+2. If prompted, enable **"Install from unknown sources"** for your browser/file manager
+3. Complete the installation
+
+> **Note:** The app is not published on Google Play. It uses `SEND_SMS` and `READ_SMS` permissions which require special review on the Play Store. Sideloading the APK is the intended distribution method.
+
+#### Build from source
 
 ```bash
 cd sms-gateway-app
 npm install  # or yarn
 npx expo prebuild
-npx expo run:android
+npx expo run:android        # debug build on connected device
 ```
+
+To build a release APK:
+
+```bash
+eas build --profile production-apk --platform android
+```
+
+The built APK can be uploaded as a GitHub Release:
+
+```bash
+gh release create v1.0.0 ./build/*.apk \
+  --repo Varyshop/sms-gateway-app \
+  --title "v1.0.0" \
+  --notes "Initial release"
+```
+
+#### First launch
 
 On first launch, scan the QR code from the Odoo phone record. The app will:
 - Send heartbeats every 30 seconds
