@@ -259,6 +259,140 @@ curl -X POST https://your-odoo.com/sms-gateway/confirm/42 \
 - A 160-char Czech message uses 3 segments, not 1
 - Check `sms_gateway/tools/sms_utils.py` for the exact algorithm
 
+## Roadmap: Polling → Event-Driven Architecture
+
+### Current Problem
+
+The app uses **interval-based polling** — every 10s it calls `/sms-gateway/pending` and every 60s sends a heartbeat. This has several downsides:
+
+| Problem | Impact |
+|---------|--------|
+| **Latency** | SMS waits up to 10s in queue before the app picks it up |
+| **Battery drain** | Constant HTTP requests even when queue is empty |
+| **Server load** | N phones × 6 requests/min = unnecessary Odoo worker load |
+| **Wasted bandwidth** | 99% of poll responses return empty `sms_list: []` |
+| **Background kill** | Android aggressively kills background apps; polling stops |
+
+### Proposed Solutions
+
+#### Option A: Firebase Cloud Messaging (FCM) — Recommended
+
+The most battery-efficient and reliable approach for Android. Odoo sends a push notification when new SMS are queued, the app wakes up and fetches them.
+
+```
+┌──────────┐    1. SMS queued     ┌──────────┐    2. push     ┌─────────┐
+│  Odoo    │ ──────────────────►  │  FCM     │ ────────────►  │  App    │
+│  module  │                      │  (Google)│                │         │
+└──────────┘                      └──────────┘                └────┬────┘
+      ▲                                                           │
+      └───────── 3. GET /pending ──────── 4. send SMS ────────────┘
+```
+
+**Odoo side changes:**
+- New field `fcm_token` on `sms.gateway.phone` (app registers its token after pairing)
+- After `_send()` assigns SMS to a phone, call FCM HTTP v1 API to send a **data-only** message (no notification, just wake-up signal)
+- Minimal payload: `{"data": {"type": "sms_pending", "count": "15"}}`
+
+**App side changes:**
+- Add `@react-native-firebase/messaging`
+- Register FCM token on pairing and send to Odoo via new endpoint `/sms-gateway/register-token`
+- On receiving data message → call `pollAndSend()` immediately
+- Keep heartbeat at 5 min interval (health check only, not for SMS discovery)
+- Remove polling interval entirely
+
+**Pros:** Works when app is in background/killed (FCM wakes it), near-zero latency, minimal battery usage, proven at scale.
+
+**Cons:** Depends on Google Play Services, requires Firebase project setup, adds external dependency.
+
+#### Option B: WebSocket (Persistent Connection)
+
+Bidirectional real-time channel between Odoo and the app.
+
+```
+┌──────────┐                    ┌─────────┐
+│  Odoo    │ ◄══ WebSocket ══►  │  App    │
+│  module  │   persistent conn  │         │
+└──────────┘                    └─────────┘
+  push: new_sms event             heartbeat via WS ping
+  push: config_update             confirm via WS message
+```
+
+**Implementation approach:**
+- Add a lightweight WebSocket server alongside Odoo (e.g. standalone Python process with `websockets` or `FastAPI WebSocket`) — Odoo workers don't support long-lived connections well
+- Odoo module signals the WS server via internal HTTP call or Redis pub/sub when SMS are queued
+- App connects to WS on startup, auto-reconnects on disconnect
+- Heartbeat becomes a WS ping/pong (free, no HTTP overhead)
+
+**Pros:** True real-time, bidirectional, no third-party dependency, single connection replaces both polling and heartbeat.
+
+**Cons:** Needs a separate process (Odoo workers can't hold WebSockets), connection management complexity (reconnect, auth refresh), mobile OS may kill background WS connections.
+
+#### Option C: Server-Sent Events (SSE)
+
+Lightweight server-push over HTTP. The app opens a long-lived GET connection and Odoo pushes events.
+
+```
+┌──────────┐   SSE stream    ┌─────────┐
+│  Odoo    │ ─────────────►  │  App    │
+│  /stream │  event: sms     │         │
+└──────────┘  data: {...}    └─────────┘
+```
+
+**Implementation approach:**
+- New endpoint `/sms-gateway/stream` that holds the connection open
+- Odoo sends `event: sms_pending\ndata: {"count": 5}\n\n` when SMS are queued
+- App uses `EventSource` or `fetch` with streaming reader
+- Fallback to polling if SSE connection drops
+
+**Pros:** Simple protocol (HTTP), works through proxies/CDN, no external dependency, native browser support.
+
+**Cons:** Unidirectional (app still needs POST for confirm/heartbeat), Odoo workers aren't designed for long-lived connections (same problem as WebSocket), needs dedicated process or Odoo bus module customization.
+
+#### Option D: Hybrid — FCM Push + Adaptive Polling (Pragmatic)
+
+Minimal changes, biggest impact. Add FCM for instant wake-up, keep polling as fallback with adaptive intervals.
+
+```python
+# Adaptive polling logic in the app:
+if pending_count > 0:
+    next_poll = 2s      # queue is active, poll fast
+elif last_sms_sent < 5min:
+    next_poll = 10s     # recently active
+else:
+    next_poll = 60s     # idle, rely on FCM for wake-up
+```
+
+**App side changes:**
+- Add FCM (same as Option A)
+- Replace fixed `setInterval` with adaptive timer
+- On FCM wake-up → immediate poll → fast-poll mode until queue drains → back to slow
+
+**Pros:** Best of both worlds — FCM for instant delivery, polling as reliable fallback, graceful degradation if FCM fails, minimal Odoo changes.
+
+**Cons:** Still has polling (though much less frequent), FCM dependency.
+
+### Recommendation
+
+**Start with Option D (Hybrid)**, then evaluate if pure FCM (Option A) is sufficient:
+
+1. **Phase 1** — Adaptive polling (app-only change, no Odoo changes needed)
+2. **Phase 2** — Add FCM push for instant wake-up
+3. **Phase 3** — Evaluate: if FCM is reliable enough, remove polling entirely (Option A)
+
+WebSocket (Option B) makes sense only if you later need server-initiated config changes, remote control, or real-time dashboard sync. For pure SMS dispatch, FCM is simpler and more battery-friendly.
+
+### Comparison Matrix
+
+| Criteria | Polling (current) | FCM (A) | WebSocket (B) | SSE (C) | Hybrid (D) |
+|----------|:-:|:-:|:-:|:-:|:-:|
+| Latency | ~10s | <1s | <1s | <1s | <2s |
+| Battery | poor | excellent | moderate | moderate | good |
+| Background reliability | poor | excellent | poor | poor | good |
+| Odoo complexity | none | low | high | high | low |
+| External dependencies | none | Firebase | none | none | Firebase |
+| Bidirectional | yes | no (needs HTTP) | yes | no | no (needs HTTP) |
+| Works without Google Play | yes | no | yes | yes | fallback yes |
+
 ## License
 
 LGPL-3
