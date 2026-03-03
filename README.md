@@ -2,6 +2,8 @@
 
 Send SMS through physical Android phones instead of Odoo IAP. Supports multiple phones with load balancing, rate limiting, domain filtering, dual SIM, and integration with mass mailing campaigns.
 
+**[User Guide](https://varyshop.github.io/sms-gateway/)** | **[Developer & API Docs](https://varyshop.github.io/sms-gateway/developer.html)** | **[Download APK](https://github.com/Varyshop/sms-gateway-app/releases)**
+
 ## Architecture
 
 ```
