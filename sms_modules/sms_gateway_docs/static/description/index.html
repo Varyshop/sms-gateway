@@ -1,0 +1,1506 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.8;
+        color: #1f2937;
+        margin: 0;
+        padding: 0;
+        background: #f8fafc;
+      }
+
+      /* ===== LAYOUT: sidebar + main ===== */
+      .page-wrapper {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar navigation */
+      .sidebar {
+        width: 260px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        background: #fff;
+        border-right: 1px solid #e5e7eb;
+        padding: 24px 0;
+        z-index: 10;
+      }
+      .sidebar-logo {
+        padding: 0 20px 16px;
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 12px;
+      }
+      .sidebar-logo h2 {
+        margin: 0;
+        font-size: 1.15em;
+        color: #111827;
+        border: none;
+        padding: 0;
+      }
+      .sidebar-logo small {
+        color: #6b7280;
+        font-size: 0.8em;
+      }
+      .sidebar nav {
+        padding: 0 8px;
+      }
+      .sidebar nav a {
+        display: block;
+        padding: 7px 14px;
+        margin: 1px 0;
+        color: #6b7280;
+        text-decoration: none;
+        font-size: 0.85em;
+        border-radius: 6px;
+        transition: all 0.15s ease;
+        line-height: 1.4;
+      }
+      .sidebar nav a:hover {
+        color: #1f2937;
+        background: #f3f4f6;
+      }
+      .sidebar nav a.active {
+        color: #1e40af;
+        background: #eff6ff;
+        font-weight: 600;
+      }
+      .sidebar nav .nav-group {
+        margin-top: 16px;
+        padding: 0 14px;
+        font-size: 0.7em;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9ca3af;
+        margin-bottom: 4px;
+      }
+
+      /* Main content */
+      .main-content {
+        flex: 1;
+        max-width: 820px;
+        padding: 32px 40px 80px;
+        margin: 0 auto;
+      }
+
+      /* ===== TYPOGRAPHY ===== */
+      h1 {
+        color: #111827;
+        border-bottom: 3px solid #2563eb;
+        padding-bottom: 12px;
+        font-size: 2em;
+        margin-bottom: 8px;
+        margin-top: 0;
+      }
+      .subtitle {
+        color: #6b7280;
+        font-size: 1.1em;
+        margin-bottom: 32px;
+      }
+      h2 {
+        color: #111827;
+        margin-top: 48px;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 8px;
+        font-size: 1.5em;
+        scroll-margin-top: 24px;
+      }
+      h3 {
+        color: #374151;
+        margin-top: 28px;
+        font-size: 1.15em;
+      }
+      strong {
+        color: #111827;
+      }
+
+      /* ===== COMPONENTS ===== */
+      .highlight-box {
+        background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+        border: 1px solid #bfdbfe;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin: 20px 0;
+      }
+      .info {
+        background: #eff6ff;
+        border-left: 4px solid #3b82f6;
+        padding: 14px 18px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+      }
+      .tip {
+        background: #ecfdf5;
+        border-left: 4px solid #10b981;
+        padding: 14px 18px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+      }
+      .warning {
+        background: #fffbeb;
+        border-left: 4px solid #f59e0b;
+        padding: 14px 18px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+      }
+      .danger {
+        background: #fef2f2;
+        border-left: 4px solid #ef4444;
+        padding: 14px 18px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+      }
+      ol.steps {
+        counter-reset: step;
+        list-style: none;
+        padding-left: 0;
+      }
+      ol.steps > li {
+        counter-increment: step;
+        padding: 10px 0 10px 48px;
+        position: relative;
+        border-left: 2px solid #e5e7eb;
+        margin-left: 16px;
+      }
+      ol.steps > li:last-child {
+        border-left-color: transparent;
+      }
+      ol.steps > li::before {
+        content: counter(step);
+        position: absolute;
+        left: -15px;
+        top: 8px;
+        width: 28px;
+        height: 28px;
+        background: #2563eb;
+        color: #fff;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 0.85em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .path {
+        display: inline-block;
+        background: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        padding: 2px 10px;
+        border-radius: 6px;
+        font-size: 0.9em;
+        color: #374151;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .btn {
+        display: inline-block;
+        background: #e0e7ff;
+        border: 1px solid #c7d2fe;
+        padding: 3px 12px;
+        border-radius: 6px;
+        font-size: 0.85em;
+        color: #3730a3;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .field-table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 14px 0;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .field-table th {
+        background: #f8fafc;
+        font-weight: 600;
+        text-align: left;
+        padding: 10px 14px;
+        border-bottom: 2px solid #e2e8f0;
+        color: #475569;
+        font-size: 0.9em;
+      }
+      .field-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: top;
+      }
+      .field-table tr:last-child td {
+        border-bottom: none;
+      }
+      .field-table tr:hover td {
+        background: #f8fafc;
+      }
+      .status {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.8em;
+      }
+      .status-green {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .status-red {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .flow {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .flow-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 8px 0;
+        flex-wrap: wrap;
+      }
+      .flow-box {
+        background: #fff;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px 16px;
+        text-align: center;
+        min-width: 120px;
+      }
+      .flow-box strong {
+        display: block;
+        font-size: 0.85em;
+        color: #374151;
+      }
+      .flow-box small {
+        color: #6b7280;
+        font-size: 0.8em;
+      }
+      .flow-arrow {
+        font-size: 1.4em;
+        color: #9ca3af;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 16px 0;
+      }
+      .two-col > div {
+        background: #fff;
+        border-radius: 10px;
+        padding: 16px;
+        border: 1px solid #e2e8f0;
+      }
+      .faq-q {
+        font-weight: 700;
+        color: #1e40af;
+        margin-top: 20px;
+        margin-bottom: 4px;
+      }
+      .faq-a {
+        margin-bottom: 16px;
+        padding-left: 16px;
+        border-left: 2px solid #e5e7eb;
+      }
+      hr {
+        border: none;
+        border-top: 1px solid #e5e7eb;
+        margin: 40px 0;
+      }
+
+      /* ===== MOBILE: hide sidebar, show hamburger ===== */
+      .mobile-header {
+        display: none;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: #fff;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 16px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .mobile-header h2 {
+        margin: 0;
+        font-size: 1em;
+        color: #111827;
+        border: none;
+        padding: 0;
+      }
+      .mobile-header button {
+        background: none;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 1.2em;
+        color: #374151;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 15;
+      }
+
+      @media (max-width: 860px) {
+        .mobile-header {
+          display: flex;
+        }
+        .sidebar {
+          position: fixed;
+          left: -280px;
+          top: 0;
+          height: 100vh;
+          transition: left 0.25s ease;
+          z-index: 20;
+          box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar.open {
+          left: 0;
+        }
+        .sidebar-overlay.open {
+          display: block;
+        }
+        .main-content {
+          padding: 20px 16px 60px;
+        }
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+        h2 {
+          scroll-margin-top: 72px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Mobile header -->
+    <div class="mobile-header">
+      <h2>Varyshop SMS</h2>
+      <button onclick="toggleSidebar()" aria-label="Menu">&#9776;</button>
+    </div>
+    <div
+      class="sidebar-overlay"
+      id="sidebarOverlay"
+      onclick="toggleSidebar()"
+    ></div>
+
+    <div class="page-wrapper">
+      <!-- ===== SIDEBAR ===== -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+          <h2>Varyshop SMS</h2>
+          <small>Uzivatelska prirucka</small>
+        </div>
+        <nav id="sidebarNav">
+          <div class="nav-group">Zakladni informace</div>
+          <a href="#jak-to-funguje" data-section="jak-to-funguje"
+            >Jak to funguje</a
+          >
+          <a href="#co-potrebujete" data-section="co-potrebujete"
+            >Co potrebujete</a
+          >
+
+          <div class="nav-group">Nastaveni</div>
+          <a href="#nastaveni-v-Varyshop" data-section="nastaveni-v-Varyshop"
+            >Nastaveni v administraci</a
+          >
+          <a href="#pridani-telefonu" data-section="pridani-telefonu"
+            >Pridani telefonu</a
+          >
+          <a href="#instalace-aplikace" data-section="instalace-aplikace"
+            >Instalace aplikace</a
+          >
+          <a href="#sparovani" data-section="sparovani">Sparovani telefonu</a>
+
+          <div class="nav-group">Kampane</div>
+          <a href="#prvni-kampan" data-section="prvni-kampan"
+            >Vase prvni kampan</a
+          >
+          <a href="#jak-se-odesilaji" data-section="jak-se-odesilaji"
+            >Jak se odesilaji SMS</a
+          >
+          <a href="#pozastaveni" data-section="pozastaveni"
+            >Pozastaveni kampane</a
+          >
+
+          <div class="nav-group">Pokrocile funkce</div>
+          <a href="#vice-telefonu" data-section="vice-telefonu"
+            >Vice telefonu</a
+          >
+          <a href="#filtrovani" data-section="filtrovani">Smerovani SMS</a>
+          <a href="#limity" data-section="limity">Limity a rychlost</a>
+          <a href="#dual-sim" data-section="dual-sim">Dual SIM</a>
+
+          <div class="nav-group">Sledovani a GDPR</div>
+          <a href="#odkazy" data-section="odkazy">Odkazy a kliknuti</a>
+          <a href="#odhlaseni" data-section="odhlaseni">Odhlaseni a STOP</a>
+          <a href="#statistiky" data-section="statistiky">Statistiky</a>
+
+          <div class="nav-group">Pomoc</div>
+          <a href="#overeni" data-section="overeni">Overeni funkce</a>
+          <a href="#casty-dotazy" data-section="casty-dotazy">Caste dotazy</a>
+        </nav>
+      </aside>
+
+      <!-- ===== MAIN CONTENT ===== -->
+      <main class="main-content">
+        <h1>Varyshop SMS</h1>
+        <p class="subtitle">
+          Odesilani SMS kampani primo z vasich Android telefonu &mdash; bez
+          externiho poskytovatele, bez poplatku za kazde SMS.
+        </p>
+
+        <div class="highlight-box">
+          <strong>Co tento modul dela?</strong><br />
+          Misto placeni za kazdou odeslanou SMS pres cloudovou sluzbu pouzijete
+          vlastni Android telefon(y) jako SMS branu. Telefon se spoji s vasim
+          systemem, automaticky prijima zpravy z front a odesila je jako bezne
+          SMS. Muzete pouzit vice telefonu najednou &mdash; system sam rozdeli
+          zatez.
+        </div>
+
+        <!-- ==================== JAK TO FUNGUJE ==================== -->
+        <h2 id="jak-to-funguje">Jak to funguje</h2>
+
+        <p>Cely system ma tri casti, ktere spolupracuji:</p>
+
+        <div class="flow">
+          <div class="flow-row">
+            <div class="flow-box" style="border-color: #2563eb">
+              <strong>1. Vaše Varyshop instance</strong>
+              <small>Vytvari kampane a frontu SMS</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #059669">
+              <strong>2. Aplikace na telefonu</strong>
+              <small>Vyzveda SMS z fronty a odesila</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #d97706">
+              <strong>3. Prijemce</strong>
+              <small>Dostane beznou SMS zpravu</small>
+            </div>
+          </div>
+        </div>
+
+        <p>V praxi to vypada takto:</p>
+        <ol class="steps">
+          <li>
+            V administraci vytvorite SMS kampan a kliknete
+            <span class="btn">Odeslat</span>
+          </li>
+          <li>Varyshop pripravi SMS zpravy a zaradi je do fronty</li>
+          <li>
+            Aplikace na vasem Android telefonu se kazdy par sekund pta:
+            <em>&bdquo;Mate pro me neco k odeslani?&ldquo;</em>
+          </li>
+          <li>
+            Kdyz najde novou zpravu, odesle ji jako normalni SMS z vaseho
+            telefonniho cisla
+          </li>
+          <li>
+            Po odeslani hlasi zpet do Varyshopu:
+            <em>&bdquo;Odeslano&ldquo;</em> nebo
+            <em>&bdquo;Nepodario se&ldquo;</em>
+          </li>
+        </ol>
+
+        <div class="tip">
+          <strong>Proc to tak funguje?</strong> Protoze SMS odesilate z
+          vlastniho cisla, neplatiite zadne poplatky za SMS sluzbu. Plati se
+          pouze standardni cena SMS dle vaseho tarifu u operatora. U vetsiny
+          paualnich tarifu je to tedy zadarmo.
+        </div>
+
+        <!-- ==================== CO POTREBUJETE ==================== -->
+        <h2 id="co-potrebujete">Co potrebujete</h2>
+
+        <div class="two-col">
+          <div>
+            <strong>Na strane Varyshopu:</strong>
+            <ul>
+              <li>
+                Varyshop instance s Odoo 18 s modulem Varyshop SMS (nainstaluje
+                vas spravce)
+              </li>
+              <li>Pristup do sekce <em>Email Marketing</em></li>
+            </ul>
+          </div>
+          <div>
+            <strong>Na strane telefonu:</strong>
+            <ul>
+              <li>Android telefon (verze 12 nebo novejsi)</li>
+              <li>SIM karta s aktivnim tarifem pro SMS</li>
+              <li>Pripojeni k internetu (Wi-Fi nebo mobilni data)</li>
+              <li>Aplikace Varyshop SMS (nainstaluje vas spravce)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ==================== NASTAVENI V Varyshop ==================== -->
+        <h2 id="nastaveni-v-Varyshop">Nastaveni ve Varyshop administraci</h2>
+
+        <p>
+          Po instalaci modulu (tu provede vas technik) najdete novou sekci v
+          menu:
+        </p>
+
+        <p>
+          <span class="path"
+            >Email Marketing &rarr; Varyshop SMS &rarr; Gateway Phones</span
+          >
+        </p>
+
+        <p>Zde budete spravovat vsechny telefony pripojene k vasemu systemu.</p>
+
+        <div class="info">
+          <strong>Kde najdu nastaveni?</strong> Pokud mate modul nainstalovany,
+          uvidite v hlavnim menu <em>Email Marketing</em> polozku
+          <em>Varyshop SMS</em>. Pokud ji nevidite, kontaktujte svého spravce
+          &mdash; je mozne ze modul jeste neni nainstalovany nebo nemate
+          dostatecna opravneni.
+        </div>
+
+        <!-- ==================== PRIDANI TELEFONU ==================== -->
+        <h2 id="pridani-telefonu">Pridani telefonu</h2>
+
+        <p>
+          Kazdy fyzicky telefon, ktery chcete pouzit pro odesilani, musite
+          zaregistrovat ve Varyshop administraci.
+        </p>
+
+        <ol class="steps">
+          <li>
+            Prejdete do
+            <span class="path"
+              >Email Marketing &rarr; Varyshop SMS &rarr; Gateway Phones</span
+            >
+          </li>
+          <li>Kliknete <span class="btn">Novy</span></li>
+          <li>
+            Vyplnte zakladni udaje:
+            <table class="field-table">
+              <tr>
+                <th>Pole</th>
+                <th>Co vyplnit</th>
+                <th>Priklad</th>
+              </tr>
+              <tr>
+                <td><strong>Nazev</strong></td>
+                <td>Pojmenujte si telefon, at ho pozdej pozinate</td>
+                <td>Samsung &ndash; O2</td>
+              </tr>
+              <tr>
+                <td><strong>Telefonni cislo</strong></td>
+                <td>Cislo SIM karty v mezinarodnim formatu</td>
+                <td>+420777123456</td>
+              </tr>
+              <tr>
+                <td><strong>Druhe cislo</strong></td>
+                <td>Pokud ma telefon dve SIM, zadejte i druhe (nepovinne)</td>
+                <td>+420608987654</td>
+              </tr>
+              <tr>
+                <td><strong>Denni limit</strong></td>
+                <td>Kolik SMS maximalne muze telefon odeslat za den</td>
+                <td>500</td>
+              </tr>
+              <tr>
+                <td><strong>SMS za minutu</strong></td>
+                <td>Maximalni rychlost odesilani</td>
+                <td>100</td>
+              </tr>
+            </table>
+          </li>
+          <li>
+            Kliknete <span class="btn">Generovat API klic</span> &mdash; objevi
+            se QR kod, ktery pouzijete k parovani
+          </li>
+          <li>Zaznam ulozte</li>
+        </ol>
+
+        <div class="tip">
+          <strong>Kolik telefonu potrebuji?</strong> Pro zacatek staci jeden.
+          Pokud planuete rozsilat tisice SMS denne, doporucujeme pridat vice
+          telefonu &mdash; system zatez automaticky rozdeli.
+        </div>
+
+        <!-- ==================== INSTALACE APLIKACE ==================== -->
+        <h2 id="instalace-aplikace">Instalace aplikace na telefon</h2>
+
+        <p>
+          Na Android telefon je potreba nainstalovat aplikaci
+          <strong>Varyshop SMS</strong>. Instalaci za vas provede vas
+          technik/spravce.
+        </p>
+
+        <p>Po spusteni aplikace budete pozadani o nasledujici opravneni:</p>
+
+        <table class="field-table">
+          <tr>
+            <th>Opravneni</th>
+            <th>Proc ho potrebujeme</th>
+          </tr>
+          <tr>
+            <td><strong>Odesilani SMS</strong></td>
+            <td>Aby aplikace mohla odesilat SMS zpravy z vaseho cisla</td>
+          </tr>
+          <tr>
+            <td><strong>Prijimani SMS</strong></td>
+            <td>Aby aplikace zachytila odpovedi s textem STOP (odhlaseni)</td>
+          </tr>
+          <tr>
+            <td><strong>Kamera</strong></td>
+            <td>Pro naskenovat QR kodu pri parovani</td>
+          </tr>
+          <tr>
+            <td><strong>Informace o telefonu</strong></td>
+            <td>Pro zjisteni cisel vasich SIM karet</td>
+          </tr>
+        </table>
+
+        <div class="warning">
+          <strong>Dulezite:</strong> Vsechna opravneni je treba povolit, jinak
+          nebude aplikace spravne fungovat. Pokud jste omylem opravneni
+          zamitnuli, muzete ho dodatecne povolit v
+          <em
+            >Nastaveni telefonu &rarr; Aplikace &rarr; Varyshop SMS &rarr;
+            Opravneni</em
+          >.
+        </div>
+
+        <!-- ==================== SPAROVANI ==================== -->
+        <h2 id="sparovani">Sparovani telefonu s Varyshop administrací</h2>
+
+        <p>
+          Po instalaci aplikace ji musite propojit s vasim Varyshop systemem. To
+          se dela jednorazove pomoci QR kodu.
+        </p>
+
+        <ol class="steps">
+          <li>
+            V Varyshop administraci otevrete zaznam vaseho telefonu (tam kde
+            jste klikli <em>Generovat API klic</em>) &mdash; uvidite QR kod
+          </li>
+          <li>Na telefonu otevrete aplikaci <strong>Varyshop SMS</strong></li>
+          <li>
+            Prejdete na zarazku <strong>Nastaveni</strong> (ikona ozubeného kola
+            dole)
+          </li>
+          <li>Kliknete na <span class="btn">Naskenovat QR kod</span></li>
+          <li>
+            Namirte kameru telefonu na QR kod zobrazeny na obrazovce v Varyshop
+            administraci
+          </li>
+          <li>Aplikace potvrdi uspesne sparovani &mdash; hotovo!</li>
+        </ol>
+
+        <div class="tip">
+          <strong>Jak poznam, ze to funguje?</strong> Po uspesnem sparovani se
+          stav telefonu v administraci Varyshop zmeni z
+          <span class="status status-red">Offline</span> na
+          <span class="status status-green">Online</span>. To znamena, ze
+          telefon je pripojeny a pripraveny odesilat SMS.
+        </div>
+
+        <div class="warning">
+          <strong>Telefon zustavava Offline?</strong> Zkontrolujte:
+          <ul style="margin-bottom: 0">
+            <li>Ma telefon pripojeni k internetu? (Wi-Fi nebo mobilni data)</li>
+            <li>
+              Bezi aplikace na telefonu? (neni zavrena, neni v uspornem rezimu)
+            </li>
+            <li>
+              Je adresa serveru spravna? (v nastaveni aplikace vidite URL)
+            </li>
+          </ul>
+        </div>
+
+        <!-- ==================== PRVNI KAMPAN ==================== -->
+        <h2 id="prvni-kampan">Vase prvni SMS kampan</h2>
+
+        <p>
+          Kdyz mate alespon jeden telefon
+          <span class="status status-green">Online</span>, muzete odeslat prvni
+          kampan.
+        </p>
+
+        <ol class="steps">
+          <li>
+            Prejdete do
+            <span class="path">Email Marketing &rarr; SMS Marketing</span>
+          </li>
+          <li>Kliknete <span class="btn">Novy</span></li>
+          <li>
+            Vyplnte kampan:
+            <table class="field-table">
+              <tr>
+                <th>Pole</th>
+                <th>Co vyplnit</th>
+              </tr>
+              <tr>
+                <td><strong>Nazev</strong></td>
+                <td>Interni nazev kampane (zakaznik ho neuvidi)</td>
+              </tr>
+              <tr>
+                <td><strong>Prijemci</strong></td>
+                <td>
+                  Komu se SMS posle &mdash; vyberete skupinu kontaktu nebo
+                  nastavite filtr
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Text zpravy</strong></td>
+                <td>
+                  Samotny text SMS (max. 160 znaku pro jednu SMS, delsi se
+                  rozdeli)
+                </td>
+              </tr>
+            </table>
+          </li>
+          <li>Zkontrolujte nahled zpravy</li>
+          <li>
+            Kliknete <span class="btn">Odeslat</span> (pro okamzite odeslani)
+            nebo <span class="btn">Naplanovat</span> (pro odeslani v urcity cas)
+          </li>
+        </ol>
+
+        <h3>Priklad textu SMS</h3>
+        <div
+          style="
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 10px;
+            padding: 16px;
+            font-family: monospace;
+            margin: 12px 0;
+          "
+        >
+          Ahoj {{ object.name }}! Mate 20% slevu na cely sortiment do konce
+          tydne. Nakupte na https://www.example.cz/akce
+        </div>
+
+        <div class="info">
+          <strong>Personalizace:</strong> Pomoci
+          <code>{{ object.name }}</code> vlozite do textu jmeno kazdeho
+          prijemce. Dalsi pole najdete pres tlacitko dynamickeho obsahu v
+          editoru zpravy.
+        </div>
+
+        <!-- ==================== JAK SE ODESILAJI ==================== -->
+        <h2 id="jak-se-odesilaji">Jak se odesilaji SMS</h2>
+
+        <p>Po kliknuti na <em>Odeslat</em> se deje nasledujici:</p>
+
+        <div class="flow">
+          <div class="flow-row">
+            <div class="flow-box">
+              <strong>Pripraveno</strong>
+              <small>Varyshop vytvori SMS pro kazdeho prijemce</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #2563eb">
+              <strong>Ve fronte</strong>
+              <small>SMS se priradi jednomu z vasich telefonu</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #d97706">
+              <strong>Odesila se</strong>
+              <small>Telefon prevzal SMS a odesila</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #059669">
+              <strong>Odeslano</strong>
+              <small>Uspesne odeslano</small>
+            </div>
+          </div>
+        </div>
+
+        <p>Prubeh muzete sledovat v realnem case:</p>
+        <ul>
+          <li>
+            <strong>V kampani</strong> &mdash; pocitadla v zahlavi ukazuji kolik
+            SMS je odeslano, kolik ceka, kolik selhalo
+          </li>
+          <li>
+            <strong>Na telefonu</strong> &mdash; aplikace ukazuje kolik SMS
+            odesila a kolik jich jeste ceka ve fronte
+          </li>
+          <li>
+            <strong>U telefonu v administraci Varyshop</strong> &mdash; na kartě
+            telefonu vidite <em>Odeslano dnes</em> a <em>Cekajici</em>
+          </li>
+        </ul>
+
+        <!-- ==================== POZASTAVENI ==================== -->
+        <h2 id="pozastaveni">Pozastaveni kampane</h2>
+
+        <p>
+          Pokud potrebujete kampan docasne zastavit (treba jste si vsimli chyby
+          v textu), muzete ji pozastavit bez zruseni:
+        </p>
+
+        <ol class="steps">
+          <li>Otevrete kampan, ktera se prave odesila</li>
+          <li>
+            Zapnete prepinac <span class="btn">Paused</span> (Pozastaveno)
+          </li>
+          <li>SMS, ktere jsou jeste ve fronte, se nebudou odesilat</li>
+          <li>
+            SMS, ktere uz byly odeslany, zustanou odeslane &mdash; ty nelze vzit
+            zpet
+          </li>
+        </ol>
+
+        <p>
+          Pro obnoveni odesilani jednodusse prepinac <em>Paused</em> vypnete.
+        </p>
+
+        <div class="info">
+          <strong>Co kdyz se SMS nevytvorily?</strong> Nekdy se stane, ze se SMS
+          pro nektere prijemce nevytvorily (treba kvuli chybe). V tom pripade
+          pouzijte tlacitko <span class="btn">Force Create SMS Queue</span>
+          &mdash; system dotvori SMS pro vsechny prijemce, kteri je jeste
+          nemaji.
+        </div>
+
+        <!-- ==================== VICE TELEFONU ==================== -->
+        <h2 id="vice-telefonu">Vice telefonu a rozdeleni zateze</h2>
+
+        <p>
+          Muzete pripojit libovolny pocet telefonu. System automaticky rozdeluje
+          SMS rovnomerne &mdash; kazda nova SMS se priradi telefonu, ktery ma
+          momentalne
+          <strong>nejmene prace</strong> (nejmene cekajicich SMS ve fronte).
+        </p>
+
+        <h3>Priklad se tremi telefony</h3>
+        <table class="field-table">
+          <tr>
+            <th>Telefon</th>
+            <th>Ceka ve fronte</th>
+            <th>Dostane dalsi SMS?</th>
+          </tr>
+          <tr>
+            <td>Samsung &ndash; O2</td>
+            <td>15 SMS</td>
+            <td>Ne</td>
+          </tr>
+          <tr>
+            <td>Xiaomi &ndash; T-Mobile</td>
+            <td>8 SMS</td>
+            <td>Ne</td>
+          </tr>
+          <tr>
+            <td>Pixel &ndash; Vodafone</td>
+            <td style="color: #059669; font-weight: 600">3 SMS</td>
+            <td style="color: #059669; font-weight: 600">
+              Ano &mdash; ma nejmene
+            </td>
+          </tr>
+        </table>
+
+        <div class="tip">
+          <strong>Doporuceni:</strong> Pro rozsilku vice nez 500 SMS denne
+          doporucujeme alespon 2 telefony. Pro tisice SMS denne pouzijte
+          3&ndash;5 telefonu. System si porada &mdash; vy se nemusite o nic
+          starat.
+        </div>
+
+        <!-- ==================== FILTROVANI ==================== -->
+        <h2 id="filtrovani">Smerovani SMS na konkretni telefony</h2>
+
+        <p>
+          Pokrocila funkce: muzete nastavit, aby urcity telefon odesilal SMS
+          <strong>pouze pro urcitou skupinu zakazniku</strong>. Napriklad
+          chcete, aby SMS pro VIP zakazniky sly z jineho cisla nez SMS pro
+          ostatni.
+        </p>
+
+        <h3>Jak to nastavit</h3>
+        <ol class="steps">
+          <li>
+            Otevrete zaznam telefonu v
+            <span class="path">Varyshop SMS &rarr; Gateway Phones</span>
+          </li>
+          <li>Najdete pole <strong>Partner Domain Filter</strong></li>
+          <li>
+            Zadejte podminku, kteri zakaznici maji byt smerovani na tento
+            telefon
+          </li>
+        </ol>
+
+        <h3>Priklady</h3>
+        <table class="field-table">
+          <tr>
+            <th>Chci aby telefon odesilal pro...</th>
+            <th>Co zadat do filtru</th>
+          </tr>
+          <tr>
+            <td>Vsechny zakazniky (bez omezeni)</td>
+            <td><em>Nechat prazdne</em></td>
+          </tr>
+          <tr>
+            <td>Pouze VIP zakazniky (kategorie s ID 10)</td>
+            <td>[("category_id", "in", [10])]</td>
+          </tr>
+          <tr>
+            <td>Pouze zakazniky z Ceska</td>
+            <td>[("country_id.code", "=", "CZ")]</td>
+          </tr>
+          <tr>
+            <td>Pouze firemni zakazniky</td>
+            <td>[("is_company", "=", True)]</td>
+          </tr>
+        </table>
+
+        <div class="warning">
+          <strong>Dulezite:</strong> Pokud pouzivate filtry,
+          <strong>nechte alespon jeden telefon bez filtru</strong> (prazdne
+          pole). Ten bude slouzit jako zalon &mdash; dostane SMS pro zakazniky,
+          kteri neodpovidaji zadnemu jinemu filtru. Pokud by zadny telefon
+          neodpovidel, SMS se oznaci jako chyba.
+        </div>
+
+        <div class="info">
+          <strong>Pro pokrocile uzivatele:</strong> Filtr pouziva stejny format
+          jako filtry v Varyshop pohledech (doménovy zapis). Pokud si nejste
+          jisti syntaxi, pozadejte svého spravce o pomoc.
+        </div>
+
+        <!-- ==================== LIMITY ==================== -->
+        <h2 id="limity">Denni limity a rychlost odesilani</h2>
+
+        <p>Kazdy telefon ma dva limity, ktere muzete nastavit:</p>
+
+        <table class="field-table">
+          <tr>
+            <th>Limit</th>
+            <th>Co dela</th>
+            <th>Vychozi hodnota</th>
+          </tr>
+          <tr>
+            <td><strong>Denni limit</strong></td>
+            <td>
+              Maximalni pocet SMS, ktere telefon odesle za jeden den. O pulnoci
+              se pocitadlo automaticky resetuje.
+            </td>
+            <td>500 SMS/den</td>
+          </tr>
+          <tr>
+            <td><strong>SMS za minutu</strong></td>
+            <td>
+              Jak rychle za sebou telefon odesila SMS. Vyssi cislo = rychlejsi,
+              ale hrozilo riziko blokovani operatorem.
+            </td>
+            <td>100 SMS/min</td>
+          </tr>
+        </table>
+
+        <h3>Co se stane kdyz telefon dosahne limitu?</h3>
+        <ul>
+          <li>Nove SMS se automaticky presmeruji na dalsi dostupny telefon</li>
+          <li>
+            Pokud zadny dalsi telefon neni k dispozici, SMS zustane ve fronte do
+            dalsiho dne
+          </li>
+          <li>
+            V Varyshop uvidite na kartě telefonu, kolik SMS jeste muze dnes
+            odeslat
+          </li>
+        </ul>
+
+        <div class="warning">
+          <strong>Upozorneni na limit Androidu:</strong> Nektera Android
+          zarizeni maji vlastni omezeni na pocet odeslanych SMS (typicky ~30 SMS
+          za 30 minut). Pokud na to narazite, aplikace to ohlasi jako chybu.
+          Toto omezeni resi vas technik v nastaveni telefonu.
+        </div>
+
+        <!-- ==================== DUAL SIM ==================== -->
+        <h2 id="dual-sim">Telefony s dvema SIM kartami</h2>
+
+        <p>
+          Pokud ma vas telefon dve SIM karty, muzete je obe zaregistrovat u
+          jednoho zaznamu telefonu v Varyshop:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Telefonni cislo</strong> &mdash; cislo prvni SIM karty
+          </li>
+          <li><strong>Druhe cislo</strong> &mdash; cislo druhe SIM karty</li>
+        </ul>
+
+        <p>
+          Aplikace automaticky rozpozna obe SIM karty a zobrazi je v nastaveni.
+          SMS se odesilaji pres spravnou SIM kartu podle toho, kteremu cislu
+          byly v Varyshop prirazeny.
+        </p>
+
+        <div class="info">
+          <strong>V praxi:</strong> Jeden telefon s dvema SIM kartami se chova
+          jako dva odesilajici telefony. Kazde cislo ma svoji vlastni frontu a
+          svoje vlastni pocitadlo odeslanych SMS.
+        </div>
+
+        <!-- ==================== ODKAZY ==================== -->
+        <h2 id="odkazy">Odkazy v SMS a sledovani kliknuti</h2>
+
+        <p>
+          Pokud vlozite do textu SMS odkaz (URL adresu), system ho automaticky
+          zkrati a prida sledovani.
+        </p>
+
+        <h3>Co se deje s odkazem</h3>
+        <table class="field-table">
+          <tr>
+            <th>Faze</th>
+            <th>Jak odkaz vypada</th>
+          </tr>
+          <tr>
+            <td>Jak ho napisete</td>
+            <td>https://www.vas-eshop.cz/akce-jaro-2026</td>
+          </tr>
+          <tr>
+            <td>Jak dojde prijemci</td>
+            <td>https://vas-admin.cz/r/Ab3x (kratky trackovaci odkaz)</td>
+          </tr>
+        </table>
+
+        <h3>Co se stane kdyz prijemce klikne</h3>
+        <ol class="steps">
+          <li>Prijemce klikne na kratky odkaz v SMS</li>
+          <li>Vas server zaznamena kliknuti &mdash; kdo klikl, kdy, odkud</li>
+          <li>
+            Prijemce je okamzite presmerovan na puvodni stranku
+            (vas-eshop.cz/akce-jaro-2026)
+          </li>
+        </ol>
+
+        <p>
+          Diky tomu
+          <strong>vidite v Varyshop kolik lidi kliklo na odkaz</strong> a kdo
+          presne to byl. Nemusite nic nastavovat &mdash; deje se to automaticky.
+        </p>
+
+        <h3>Kde najdu statistiky odkazu</h3>
+        <p>
+          Prejdete do
+          <span class="path">Email Marketing &rarr; Link Tracker</span> &mdash;
+          uvidite vsechny kratke odkazy, pocet kliknuti a dalsi detaily.
+        </p>
+
+        <div class="tip">
+          <strong>Google Analytics:</strong> Pokud pouzivate Google Analytics,
+          sledovaci odkazy automaticky pridavaji UTM parametry (kampan, zdroj,
+          medium). Navstevnost z SMS kampani tak uvidite primo v reportech
+          Google Analytics.
+        </div>
+
+        <!-- ==================== ODHLASENI ==================== -->
+        <h2 id="odhlaseni">Odhlaseni prijemcu a STOP zpravy</h2>
+
+        <p>
+          Podle zakona (GDPR) musi mit kazdy prijemce moznost se z
+          marketingovych SMS odhlasit. Nas system to resi automaticky.
+        </p>
+
+        <h3>Jak to funguje</h3>
+        <ol class="steps">
+          <li>
+            Na konci kazde SMS zpravy je automaticky text:
+            <strong>STOP pro odhlaseni</strong>
+          </li>
+          <li>
+            Pokud prijemce odpovi SMS zpravou obsahujici slovo
+            <strong>STOP</strong>...
+          </li>
+          <li>...aplikace na telefonu tuto odpoved zachyti</li>
+          <li>
+            Automaticky prida cislo prijemce na <strong>cernou listinu</strong>
+          </li>
+          <li>Vsechny budouci kampane toto cislo automaticky preskoci</li>
+        </ol>
+
+        <div class="danger">
+          <strong>GDPR povinnost:</strong> Text &bdquo;STOP pro odhlaseni&ldquo;
+          se pridava automaticky a <strong>nesmi byt odstranen</strong>.
+          Odesilani marketingovych SMS bez moznosti odhlaseni je poruseni
+          legislativy.
+        </div>
+
+        <h3>Kde najdu cernou listinu</h3>
+        <p>
+          <span class="path"
+            >SMS Marketing &rarr; Konfigurace &rarr; Phone Blacklist</span
+          >
+        </p>
+
+        <p>Zde muzete:</p>
+        <ul>
+          <li>Videt vsechna odhlasena cisla</li>
+          <li>
+            Pridat cislo rucne (pokud vas zakaznik pozada telefonicky ci
+            emailem)
+          </li>
+          <li>
+            Odebrat cislo z listiny (pokud zakaznik svuj souhlas obnovi &mdash;
+            napr. pisemne)
+          </li>
+        </ul>
+
+        <!-- ==================== STATISTIKY ==================== -->
+        <h2 id="statistiky">Statistiky kampane</h2>
+
+        <p>Po odeslani kampane najdete statistiky primo v zahlavi kampane:</p>
+
+        <table class="field-table">
+          <tr>
+            <th>Ukazatel</th>
+            <th>Co znamena</th>
+          </tr>
+          <tr>
+            <td><strong>Odeslano (Sent)</strong></td>
+            <td>Pocet uspesne odeslanych SMS</td>
+          </tr>
+          <tr>
+            <td><strong>Kliknuto (Clicked)</strong></td>
+            <td>Kolik prijemcu kliklo na odkaz ve zprave</td>
+          </tr>
+          <tr>
+            <td><strong>Chyby (Failed)</strong></td>
+            <td>Pocet SMS, ktere se nepodarilo odeslat</td>
+          </tr>
+          <tr>
+            <td><strong>Bounced</strong></td>
+            <td>Neplatna telefonni cisla</td>
+          </tr>
+        </table>
+
+        <p>
+          Kliknutim na kterykoliv ukazatel zobrazite detailni seznam &mdash;
+          vidite presne, kterym kontaktum byla SMS odeslana, kdo klikl atd.
+        </p>
+
+        <h3>Statistiky telefonu</h3>
+        <p>
+          Na kartě kazdeho telefonu v
+          <span class="path">Varyshop SMS &rarr; Gateway Phones</span> vidite:
+        </p>
+        <ul>
+          <li>
+            <strong>Odeslano dnes</strong> &mdash; kolik SMS telefon dnes
+            odeslal (z denního limitu)
+          </li>
+          <li>
+            <strong>Celkem odeslano</strong> &mdash; celkovy pocet SMS za celou
+            dobu
+          </li>
+          <li>
+            <strong>Cekajici</strong> &mdash; kolik SMS ceka ve fronte na
+            odeslani
+          </li>
+          <li>
+            <strong>Chyby</strong> &mdash; kolik SMS se nepodarilo odeslat
+          </li>
+        </ul>
+
+        <!-- ==================== OVERENI ==================== -->
+        <h2 id="overeni">Jak overit ze vse funguje</h2>
+
+        <p>
+          Predtim nez spustite prvni velkou kampan, doporucujeme vse otestovat:
+        </p>
+
+        <ol class="steps">
+          <li>
+            <strong>Zkontrolujte stav telefonu</strong><br />
+            V <span class="path">Varyshop SMS &rarr; Gateway Phones</span> by
+            mel byt alespon jeden telefon
+            <span class="status status-green">Online</span>
+          </li>
+          <li>
+            <strong>Poslete testovaci SMS</strong><br />
+            Vytvorte kampan s jedinym prijemcem (napr. sami sobe) a odeslat ji
+          </li>
+          <li>
+            <strong>Zkontrolujte doruceni</strong><br />
+            Zkontrolujte, ze vam SMS prisla na telefon prijemce
+          </li>
+          <li>
+            <strong>Overit sledovani</strong><br />
+            Kliknete na odkaz v SMS a zkontrolujte v Varyshop (Link Tracker), ze
+            se kliknuti zaznamenalo
+          </li>
+          <li>
+            <strong>Otestujte odhlaseni</strong><br />
+            Odpovezte na SMS zpravou &bdquo;STOP&ldquo; a overit, ze se vase
+            cislo objevi na cerne listine v Varyshop
+          </li>
+        </ol>
+
+        <div class="tip">
+          <strong>Vse funguje?</strong> Skvele! Muzete spustit plnohodnotnou
+          kampan. Pokud neco nefunguje, podivejte se do sekce
+          <a href="#casty-dotazy">Caste dotazy a reseni problemu</a> nize.
+        </div>
+
+        <!-- ==================== CASTE DOTAZY ==================== -->
+        <h2 id="casty-dotazy">Caste dotazy a reseni problemu</h2>
+
+        <p class="faq-q">
+          Telefon je v Varyshop stale Offline, i kdyz aplikace bezi
+        </p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Zkontrolujte, ze ma telefon pripojeni k internetu (otevrete
+              prohlizec a zkuste nacist stranku)
+            </li>
+            <li>
+              V aplikaci v zarazce <em>Nastaveni</em> overite, ze je zobrazena
+              URL adresa vaseho serveru
+            </li>
+            <li>Zkuste aplikaci zavrit a znovu otevrit</li>
+            <li>Pokud nic nepomuze, znovu naskenujte QR kod</li>
+          </ul>
+        </div>
+
+        <p class="faq-q">SMS se neodesilaji, zustavaji ve fronte</p>
+        <div class="faq-a">
+          <ul>
+            <li>Je telefon <span class="status status-green">Online</span>?</li>
+            <li>
+              Je v aplikaci zapnuto odesilani? (Dashboard &rarr; prepinac
+              <em>Start</em>)
+            </li>
+            <li>
+              Nedosahl telefon denniho limitu? (zkontrolujte
+              <em>Odeslano dnes</em> vs. <em>Denni limit</em>)
+            </li>
+            <li>
+              Ma aplikace opravneni k odesilani SMS? (Nastaveni Android &rarr;
+              Aplikace &rarr; Varyshop SMS &rarr; Opravneni)
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">Nektera SMS se oznacila jako chyba</p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Cislo prijemce muze byt neplatne (spatny format, neexistujici
+              cislo)
+            </li>
+            <li>Telefon mohl ztratit signal v prubehu odesilani</li>
+            <li>Android mohl zablokvat odesilani kvuli limitu (viz nize)</li>
+            <li>
+              Chybove SMS muzete zkusit odeslat znovu tlacitkem
+              <span class="btn">Force Create SMS Queue</span> v kampani
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">Android blokuje odesilani po 30 SMS</p>
+        <div class="faq-a">
+          Nektere Android telefony maji vestaveny limit na pocet SMS (typicky 30
+          za 30 minut). Reseni:<br />
+          <ul>
+            <li>
+              Snizit <em>SMS za minutu</em> na 1 (jedno SMS za minutu) &mdash;
+              pomalejsi, ale nenarazite na limit
+            </li>
+            <li>
+              Pozadat spravce o zmenu nastaveni telefonu (technicke reseni)
+            </li>
+            <li>
+              Pouzit vice telefonu &mdash; limit plati na kazdy telefon zvlast
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">
+          STOP zprava nefunguje &mdash; cislo se neprida na cernou listinu
+        </p>
+        <div class="faq-a">
+          <ul>
+            <li>Overit, ze aplikace ma opravneni <em>Prijimani SMS</em></li>
+            <li>
+              Prijemce musi odpovedet na <strong>stejne cislo</strong>, ze
+              ktereho SMS prisel
+            </li>
+            <li>
+              Zprava musi obsahovat slovo STOP (velka/mala pismena nehraji roli)
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">Odkazy v SMS nefunguji nebo vedou na chybu</p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Odkaz vyzaduje, aby byl vas Varyshop server verejne dostupny z
+              internetu
+            </li>
+            <li>
+              Pokud pouzivate HTTPS (doporuceno), certifikat musi byt platny
+            </li>
+            <li>
+              Kontaktujte spravce, at zkontroluje nastaveni
+              <em>web.base.url</em> v Varyshop
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">Jak odpojim telefon od systemu?</p>
+        <div class="faq-a">
+          V aplikaci na telefonu prejdete do <em>Nastaveni</em> a kliknete
+          <span
+            class="btn"
+            style="background: #fee2e2; color: #991b1b; border-color: #fca5a5"
+            >Odpojit</span
+          >. Telefon prestane odesilat a v Varyshop se oznaci jako Offline. V
+          Varyshop muzete zaznam telefonu take smazat nebo archivovat.
+        </div>
+
+        <p class="faq-q">Muzu menit text SMS potom co jsem kampan odeslal?</p>
+        <div class="faq-a">
+          Ne. SMS, ktere uz byly odeslany, nelze zmenit &mdash; prisly na
+          telefon prijemce. Muzete vsak kampan
+          <strong>pozastavit</strong> (prepinac Paused) a upravit text. SMS,
+          ktere jeste nebyly odeslany, budou mit puvodni text. Pro novy text je
+          treba vytvorit novou kampan.
+        </div>
+
+        <p class="faq-q">Kolik SMS muzu odeslat denne?</p>
+        <div class="faq-a">
+          Zalezi na poctu telefonu a jejich nastaveni. Kazdy telefon muze
+          typicky odeslat 200&ndash;1000 SMS denne (dle vaseho nastaveni denniho
+          limitu a tarifu operatora). S peti telefony tedy muzete odeslat az
+          5000 SMS denne.
+        </div>
+
+        <hr />
+
+        <p
+          style="
+            color: #9ca3af;
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.9em;
+          "
+        >
+          Varyshop SMS v18.0.1.0.0 &bull; VaryShop &bull; 2026
+        </p>
+      </main>
+    </div>
+
+    <script>
+      // ===== Sidebar toggle (mobile) =====
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("sidebarOverlay").classList.toggle("open");
+      }
+
+      (function () {
+        var sections = document.querySelectorAll("h2[id]");
+        var navLinks = document.querySelectorAll("#sidebarNav a[data-section]");
+        var clickLock = null;
+        var clickTimer = null;
+
+        if (!sections.length || !navLinks.length) return;
+
+        // Helper: activate a nav link by section id
+        function setActive(id) {
+          navLinks.forEach(function (l) { l.classList.remove("active"); });
+          var link = document.querySelector('#sidebarNav a[data-section="' + id + '"]');
+          if (link) {
+            link.classList.add("active");
+            // Keep sidebar nav link visible
+            var sidebar = document.getElementById("sidebar");
+            var linkRect = link.getBoundingClientRect();
+            var sidebarRect = sidebar.getBoundingClientRect();
+            if (linkRect.top < sidebarRect.top + 80 || linkRect.bottom > sidebarRect.bottom - 20) {
+              link.scrollIntoView({ block: "center", behavior: "smooth" });
+            }
+          }
+        }
+
+        // ===== Click: immediately activate + lock scroll updates for 1s =====
+        navLinks.forEach(function (link) {
+          link.addEventListener("click", function () {
+            var section = this.getAttribute("data-section");
+            setActive(section);
+            // Lock scroll-based updates while browser animates to the section
+            clickLock = section;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(function () { clickLock = null; }, 1000);
+            // Mobile: close sidebar
+            if (window.innerWidth <= 860) {
+              toggleSidebar();
+            }
+          });
+        });
+
+        // ===== Scroll: detect which section is currently in view =====
+        function getActiveSection() {
+          var offset = window.innerHeight * 0.2;
+          var active = null;
+          for (var i = sections.length - 1; i >= 0; i--) {
+            if (sections[i].getBoundingClientRect().top <= offset) {
+              active = sections[i].getAttribute("id");
+              break;
+            }
+          }
+          // At the very bottom of the page, activate last section
+          var scrollY = window.scrollY || window.pageYOffset;
+          if (window.innerHeight + scrollY >= document.body.scrollHeight - 50) {
+            active = sections[sections.length - 1].getAttribute("id");
+          }
+          return active || sections[0].getAttribute("id");
+        }
+
+        var ticking = false;
+        window.addEventListener("scroll", function () {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(function () {
+            ticking = false;
+            if (clickLock) return; // Don't override click selection during animation
+            setActive(getActiveSection());
+          });
+        }, { passive: true });
+
+        // ===== Hashchange (browser back/forward) =====
+        window.addEventListener("hashchange", function () {
+          var hash = window.location.hash.replace("#", "");
+          if (hash) {
+            setActive(hash);
+            clickLock = hash;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(function () { clickLock = null; }, 1000);
+          }
+        });
+
+        // Initial state
+        var initHash = window.location.hash.replace("#", "");
+        setActive(initHash || getActiveSection());
+      })();
+    </script>
+  </body>
+</html>

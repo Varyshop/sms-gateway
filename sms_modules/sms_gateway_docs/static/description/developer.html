@@ -1,0 +1,1107 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      h1 {
+        color: #1a1a2e;
+        border-bottom: 3px solid #3b82f6;
+        padding-bottom: 10px;
+      }
+      h2 {
+        color: #1a1a2e;
+        margin-top: 40px;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 8px;
+      }
+      h3 {
+        color: #374151;
+        margin-top: 24px;
+      }
+      code {
+        background: #f3f4f6;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.9em;
+      }
+      pre {
+        background: #1f2937;
+        color: #e5e7eb;
+        padding: 16px;
+        border-radius: 8px;
+        overflow-x: auto;
+      }
+      pre code {
+        background: none;
+        color: inherit;
+      }
+      .note {
+        background: #eff6ff;
+        border-left: 4px solid #3b82f6;
+        padding: 12px 16px;
+        margin: 16px 0;
+        border-radius: 0 8px 8px 0;
+      }
+      .warning {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 12px 16px;
+        margin: 16px 0;
+        border-radius: 0 8px 8px 0;
+      }
+      .danger {
+        background: #fef2f2;
+        border-left: 4px solid #ef4444;
+        padding: 12px 16px;
+        margin: 16px 0;
+        border-radius: 0 8px 8px 0;
+      }
+      .success {
+        background: #ecfdf5;
+        border-left: 4px solid #10b981;
+        padding: 12px 16px;
+        margin: 16px 0;
+        border-radius: 0 8px 8px 0;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 16px 0;
+      }
+      th,
+      td {
+        border: 1px solid #e5e7eb;
+        padding: 10px 14px;
+        text-align: left;
+      }
+      th {
+        background: #f9fafb;
+        font-weight: 600;
+      }
+      tr:nth-child(even) {
+        background: #f9fafb;
+      }
+      .toc {
+        background: #f9fafb;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      .toc ul {
+        list-style: none;
+        padding-left: 0;
+      }
+      .toc ul ul {
+        padding-left: 20px;
+      }
+      .toc a {
+        color: #3b82f6;
+        text-decoration: none;
+      }
+      .toc a:hover {
+        text-decoration: underline;
+      }
+      .step {
+        counter-increment: step;
+      }
+      .step::before {
+        content: counter(step) ". ";
+        font-weight: bold;
+        color: #3b82f6;
+      }
+      .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: 600;
+      }
+      .badge-blue {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+      .badge-green {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .badge-red {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .badge-yellow {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .flow-diagram {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        padding: 20px;
+        border-radius: 8px;
+        font-family: monospace;
+        white-space: pre;
+        font-size: 0.85em;
+        line-height: 1.4;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SMS Gateway - Kompletni dokumentace</h1>
+
+    <p>
+      Modul <strong>SMS Gateway</strong> nahrazuje Odoo IAP pro odesilani SMS.
+      Misto cloudove sluzby pouziva fyzicke Android telefony jako SMS brany.
+      Kazdy telefon se sparuje s Odoo pomoci QR kodu a automaticky odesilajici
+      SMS z fronty.
+    </p>
+
+    <div class="toc">
+      <strong>Obsah</strong>
+      <ul>
+        <li><a href="#1-architektura">1. Architektura systemu</a></li>
+        <li><a href="#2-instalace-modulu">2. Instalace Odoo modulu</a></li>
+        <li>
+          <a href="#3-instalace-aplikace">3. Instalace mobilni aplikace</a>
+        </li>
+        <li><a href="#4-nastaveni-modulu">4. Nastaveni modulu v Odoo</a></li>
+        <li><a href="#5-parovani">5. Parovani telefonu</a></li>
+        <li><a href="#6-kampane">6. Nastaveni SMS kampane</a></li>
+        <li><a href="#7-filtrovani">7. Filtrovani domeny pro telefony</a></li>
+        <li><a href="#8-odeslani">8. Spusteni odeslani</a></li>
+        <li><a href="#9-odkazy">9. Jak funguji odkazy a tracking</a></li>
+        <li><a href="#10-odhlaseni">10. Odhlaseni a blacklist (GDPR)</a></li>
+        <li><a href="#11-statistiky">11. Statistiky a vykon kampane</a></li>
+        <li><a href="#12-limity">12. Limity a rate limiting</a></li>
+        <li><a href="#13-dual-sim">13. Dual SIM podpora</a></li>
+        <li><a href="#14-api">14. API reference</a></li>
+        <li><a href="#15-troubleshooting">15. Reseni problemu</a></li>
+      </ul>
+    </div>
+
+    <!-- ==================== 1. ARCHITEKTURA ==================== -->
+    <h2 id="1-architektura">1. Architektura systemu</h2>
+
+    <div class="flow-diagram">
+      ┌─────────────────┐ ┌──────────────────────┐ ┌─────────────────┐ │ Odoo
+      Server │ │ SMS Gateway App │ │ Prijemce SMS │ │ │ │ (Android telefon) │ │
+      │ │ mailing.mailing │────▶│ │────▶│ +420 777... │ │ sms.sms │ │ DirectSms
+      (nativni) │ │ │ │ sms.gateway.phone│◀───│ Heartbeat │ │ Klikne na link │ │
+      │ │ SMS Queue Polling │ │ │ │ │ link.tracker │◀────│ Inbound SMS (STOP) │
+      │ ▼ │ │ phone.blacklist │ │ │ │ /r/ABC/s/42 │ └─────────────────┘
+      └──────────────────────┘ └─────────────────┘ │ │ │
+      ┌──────────────────────┐ │ └──────────────│ Link Tracker │◀──────────────┘
+      │ /r/{code}/s/{sms_id}│ │ UTM tracking │ │ Click counting │
+      └──────────────────────┘
+    </div>
+
+    <h3>Komponenty</h3>
+    <table>
+      <tr>
+        <th>Komponenta</th>
+        <th>Popis</th>
+      </tr>
+      <tr>
+        <td><code>sms_gateway</code></td>
+        <td>Odoo modul - spravuje telefony, frontu, API endpointy</td>
+      </tr>
+      <tr>
+        <td><code>sms-gateway-app</code></td>
+        <td>React Native (Expo) aplikace pro Android</td>
+      </tr>
+      <tr>
+        <td><code>sms.gateway.phone</code></td>
+        <td>Model reprezentujici jeden registrovany telefon</td>
+      </tr>
+      <tr>
+        <td><code>sms.sms</code></td>
+        <td>
+          Rozsireny o <code>gateway_phone_id</code> a <code>gateway_state</code>
+        </td>
+      </tr>
+    </table>
+
+    <!-- ==================== 2. INSTALACE MODULU ==================== -->
+    <h2 id="2-instalace-modulu">2. Instalace Odoo modulu</h2>
+
+    <h3>Predpoklady</h3>
+    <ul>
+      <li>
+        Odoo 18 s moduly: <code>sms</code>, <code>mass_mailing_sms</code>,
+        <code>phone_validation</code>
+      </li>
+      <li>Python knihovna <code>qrcode</code> (pro generovani QR kodu)</li>
+    </ul>
+
+    <h3>Postup</h3>
+    <ol>
+      <li class="step">
+        Nainstalujte Python zavislost:
+        <pre><code>pip install qrcode[pil]</code></pre>
+      </li>
+      <li class="step">
+        Zkopirujte modul <code>sms_gateway</code> do adresare Odoo addons:
+        <pre><code>cp -r extra/sms/sms_modules/sms_gateway /path/to/odoo/addons/</code></pre>
+      </li>
+      <li class="step">Restartujte Odoo server a aktualizujte seznam modulu</li>
+      <li class="step">
+        Nainstalujte modul <strong>SMS Gateway</strong> pres Aplikace
+      </li>
+    </ol>
+
+    <div class="warning">
+      <strong>Dulezite:</strong> Modul <code>sms_gateway</code> je vzajemne
+      exkluzivni s <code>sms_httpsms</code>. Pokud pouzivate sms_httpsms,
+      odinstalujte ho pred instalaci sms_gateway.
+    </div>
+
+    <!-- ==================== 3. INSTALACE APLIKACE ==================== -->
+    <h2 id="3-instalace-aplikace">3. Instalace mobilni aplikace</h2>
+
+    <h3>Predpoklady</h3>
+    <ul>
+      <li>Android telefon (verze 12+)</li>
+      <li>Node.js 18+ a npm/yarn</li>
+      <li>Expo CLI (<code>npx expo</code>)</li>
+      <li>Android Studio (pro build)</li>
+    </ul>
+
+    <h3>Build aplikace</h3>
+    <pre><code>cd extra/sms/app/sms-gateway-app
+
+# Instalace zavislosti
+npm install
+
+# Prebuild nativniho projektu (nutne pro nativni moduly)
+npx expo prebuild
+
+# Spusteni na pripojenem telefonu
+npx expo run:android --port 8085
+
+# NEBO build APK pres EAS
+npx eas build --platform android --profile preview</code></pre>
+
+    <h3>Pozadovana opravneni Android</h3>
+    <table>
+      <tr>
+        <th>Opravneni</th>
+        <th>Ucel</th>
+      </tr>
+      <tr>
+        <td><code>SEND_SMS</code></td>
+        <td>Odesilani SMS bez otevreni aplikace</td>
+      </tr>
+      <tr>
+        <td><code>RECEIVE_SMS</code></td>
+        <td>Cteni prichozich SMS (detekce STOP)</td>
+      </tr>
+      <tr>
+        <td><code>READ_PHONE_STATE</code></td>
+        <td>Cteni cisel SIM karet</td>
+      </tr>
+      <tr>
+        <td><code>READ_PHONE_NUMBERS</code></td>
+        <td>Cteni telefonniho cisla</td>
+      </tr>
+      <tr>
+        <td><code>CAMERA</code></td>
+        <td>Skenovani QR kodu</td>
+      </tr>
+    </table>
+
+    <!-- ==================== 4. NASTAVENI MODULU ==================== -->
+    <h2 id="4-nastaveni-modulu">4. Nastaveni modulu v Odoo</h2>
+
+    <h3>Vytvoreni gateway telefonu</h3>
+    <ol>
+      <li class="step">
+        Prejdete do
+        <strong>Email Marketing &gt; SMS Gateway &gt; Gateway Phones</strong>
+      </li>
+      <li class="step">Kliknete <strong>Novy</strong></li>
+      <li class="step">
+        Vyplnte:
+        <table>
+          <tr>
+            <th>Pole</th>
+            <th>Popis</th>
+            <th>Priklad</th>
+          </tr>
+          <tr>
+            <td>Name</td>
+            <td>Nazev telefonu</td>
+            <td>Telefon 1 - O2</td>
+          </tr>
+          <tr>
+            <td>Phone Number</td>
+            <td>Hlavni cislo (mezinarodni format)</td>
+            <td>+420777123456</td>
+          </tr>
+          <tr>
+            <td>Phone Number 2</td>
+            <td>Druhe cislo (dual SIM, volitelne)</td>
+            <td>+420608987654</td>
+          </tr>
+          <tr>
+            <td>Daily Limit</td>
+            <td>Max SMS za den</td>
+            <td>500</td>
+          </tr>
+          <tr>
+            <td>SMS per Minute</td>
+            <td>Max SMS za minutu (rate limit)</td>
+            <td>100</td>
+          </tr>
+          <tr>
+            <td>Heartbeat Timeout</td>
+            <td>Po kolika minutach bez heartbeatu = offline</td>
+            <td>5</td>
+          </tr>
+        </table>
+      </li>
+      <li class="step">
+        Kliknete <strong>Generate API Key</strong> - vygeneruje se API klic a QR
+        kod
+      </li>
+    </ol>
+
+    <div class="note">
+      <strong>Tip:</strong> Muzete registrovat vice telefonu. System automaticky
+      rozdeluje zatez (least-loaded algoritmus).
+    </div>
+
+    <!-- ==================== 5. PAROVANI ==================== -->
+    <h2 id="5-parovani">5. Parovani telefonu</h2>
+
+    <ol>
+      <li class="step">
+        V Odoo otevrete formular gateway telefonu a ujistete se, ze je
+        vygenerovany QR kod
+      </li>
+      <li class="step">
+        Na Android telefonu otevrete aplikaci <strong>SMS Gateway</strong>
+      </li>
+      <li class="step">Prejdete na tab <strong>Nastaveni</strong></li>
+      <li class="step">Kliknete <strong>Naskenovat QR kod</strong></li>
+      <li class="step">Nasmerujte kameru na QR kod zobrazeny v Odoo</li>
+      <li class="step">
+        Aplikace se automaticky spoji se serverem a zacne posilat heartbeaty
+      </li>
+    </ol>
+
+    <h3>QR kod obsahuje</h3>
+    <pre><code>{
+    "type": "sms_gateway",
+    "url": "https://vas-odoo-server.cz",
+    "api_key": "nahodny_bezpecnostni_token"
+}</code></pre>
+
+    <div class="success">
+      <strong>Overeni:</strong> Po sparovani by se mel stav telefonu v Odoo
+      zmenit na <span class="badge badge-green">Online</span>. Pokud ne,
+      zkontrolujte sitove pripojeni a cas heartbeat timeout.
+    </div>
+
+    <!-- ==================== 6. KAMPANE ==================== -->
+    <h2 id="6-kampane">6. Nastaveni SMS kampane</h2>
+
+    <h3>Vytvoreni kampane</h3>
+    <ol>
+      <li class="step">
+        Prejdete do <strong>Email Marketing &gt; SMS Marketing</strong>
+      </li>
+      <li class="step">Kliknete <strong>Novy</strong></li>
+      <li class="step">
+        Nastavte:
+        <ul>
+          <li><strong>Subject:</strong> Nazev kampane (interni)</li>
+          <li>
+            <strong>Recipients:</strong> Vyberte model (napr. Kontakty) a filtr
+          </li>
+          <li><strong>Body:</strong> Text SMS zpravy</li>
+        </ul>
+      </li>
+    </ol>
+
+    <h3>Priklad SMS textu</h3>
+    <pre><code>Ahoj {{ object.name }}! Mate 20% slevu na vse.
+Nakupte na https://www.example.cz/akce
+STOP pro odhlaseni</code></pre>
+
+    <div class="note">
+      <strong>Automaticka nahrada:</strong> Modul automaticky nahradi vsechny
+      URL v SMS za kratke trackovaci odkazy (napr.
+      <code>https://vas-server.cz/r/ABC123/s/42</code>). Puvodni odhlasovaci
+      odkazy se nahradi textem <strong>STOP pro odhlaseni</strong>.
+    </div>
+
+    <h3>Filtrovani prijemcu</h3>
+    <p>Pouzijte Odoo domain filtr pro vyber prijemcu:</p>
+    <table>
+      <tr>
+        <th>Priklad filtru</th>
+        <th>Popis</th>
+      </tr>
+      <tr>
+        <td><code>[("category_id", "in", [10])]</code></td>
+        <td>Kontakty s kategorii ID 10</td>
+      </tr>
+      <tr>
+        <td><code>[("country_id.code", "=", "CZ")]</code></td>
+        <td>Ceske kontakty</td>
+      </tr>
+      <tr>
+        <td><code>[("customer_rank", ">", 0)]</code></td>
+        <td>Pouze zakazniky</td>
+      </tr>
+      <tr>
+        <td><code>[("opt_out", "=", False)]</code></td>
+        <td>Pouze ti, co se neodhlasili</td>
+      </tr>
+    </table>
+
+    <!-- ==================== 7. FILTROVANI DOMENY ==================== -->
+    <h2 id="7-filtrovani">7. Filtrovani domeny pro telefony</h2>
+
+    <p>
+      Kazdy gateway telefon muze mit nastaven
+      <strong>Partner Domain Filter</strong>. Tento filtr urcuje, ktere SMS se
+      budou prirazovat danemu telefonu na zaklade partnera prijemce.
+    </p>
+
+    <h3>Jak to funguje</h3>
+    <ol>
+      <li>
+        Kdyz <code>sms.sms._send()</code> prirazuje SMS do fronty, hleda
+        dostupne telefony
+      </li>
+      <li>
+        Pro kazdy telefon s nastavenym <code>domain_filter</code> se overi, zda
+        partner prijemce odpovida filtru
+      </li>
+      <li>
+        Telefon <strong>bez filtru</strong> prijima SMS pro
+        <strong>vsechny</strong> partnery
+      </li>
+      <li>
+        Telefon <strong>s filtrem</strong> prijima pouze SMS kde partner
+        odpovida domene
+      </li>
+    </ol>
+
+    <h3>Priklady pouziti</h3>
+    <table>
+      <tr>
+        <th>Scenar</th>
+        <th>Domain Filter</th>
+        <th>Vysvetleni</th>
+      </tr>
+      <tr>
+        <td>Telefon pro VIP zakazniky</td>
+        <td><code>[("category_id", "in", [10])]</code></td>
+        <td>Pouze zakaznici s kategorii "VIP" (ID 10)</td>
+      </tr>
+      <tr>
+        <td>Telefon pro Prahu</td>
+        <td><code>[("state_id.name", "=", "Praha")]</code></td>
+        <td>Pouze zakaznici z Prahy</td>
+      </tr>
+      <tr>
+        <td>Telefon pro vsechny</td>
+        <td><em>(prazdne)</em></td>
+        <td>Prijima SMS pro vsechny partnery</td>
+      </tr>
+      <tr>
+        <td>Telefon pro firmy</td>
+        <td><code>[("is_company", "=", True)]</code></td>
+        <td>Pouze firmy, ne fyzicke osoby</td>
+      </tr>
+    </table>
+
+    <div class="warning">
+      <strong>Pozor:</strong> Pokud zadny telefon neodpovida filtru pro daneho
+      partnera, SMS se oznaci jako chyba
+      (<code>failure_type='sms_server'</code>). Doporucujeme mit alespon jeden
+      telefon bez filtru jako fallback.
+    </div>
+
+    <!-- ==================== 8. ODESLANI ==================== -->
+    <h2 id="8-odeslani">8. Spusteni odeslani</h2>
+
+    <h3>Automaticke odeslani (kampan)</h3>
+    <ol>
+      <li class="step">Vytvorte a nastavte kampan (viz sekce 6)</li>
+      <li class="step">
+        Kliknete <strong>Send</strong> nebo <strong>Schedule</strong>
+      </li>
+      <li class="step">
+        Odoo vytvori <code>sms.sms</code> zaznamy ve stavu <code>outgoing</code>
+      </li>
+      <li class="step">
+        Cron job (<em>SMS: SMS Queue Manager</em>) pickuje outgoing SMS
+      </li>
+      <li class="step">
+        <code>_send()</code> priradi kazde SMS gateway telefonu a zmeni stav na
+        <code>pending</code>
+      </li>
+      <li class="step">Mobilni aplikace si vyzvedne pending SMS pres API</li>
+      <li class="step">Aplikace odesle SMS a potvrdi stav (sent/error)</li>
+    </ol>
+
+    <h3>Manualni odeslani (Force Create SMS Queue)</h3>
+    <p>Pokud se SMS nevytvorily automaticky:</p>
+    <ol>
+      <li class="step">Otevrete kampan</li>
+      <li class="step">Kliknete <strong>Force Create SMS Queue</strong></li>
+      <li class="step">
+        System vytvori SMS zaznamy pro vsechny zbyvajici prijemce
+      </li>
+    </ol>
+
+    <h3>Pauzovani kampane</h3>
+    <p>Kampan lze pozastavit bez zruseni:</p>
+    <ol>
+      <li class="step">Otevrete kampan v rezimu <em>Sending</em></li>
+      <li class="step">Prepnete prepinac <strong>Paused</strong> na aktivni</li>
+      <li class="step">
+        SMS ve fronte se nebudou odesilat, ale zustanou prirazeny
+      </li>
+      <li class="step">Pro obnoveni vypnete prepinac Paused</li>
+    </ol>
+
+    <div class="flow-diagram">
+      Stavy SMS: outgoing ──▶ pending (prirazeno telefonu) ──▶ processing
+      (telefon vyzvedl) │ ├──▶ sending (telefon odesila) │ │ │ ├──▶ sent
+      (uspesne odeslano) ✓ │ └──▶ error (chyba odeslani) ✗ │ └──▶ error (chyba
+      odeslani) ✗ Pokud je kampan pauzovana: outgoing ──▶ (preskoceno, zustava
+      outgoing)
+    </div>
+
+    <!-- ==================== 9. ODKAZY ==================== -->
+    <h2 id="9-odkazy">9. Jak funguji odkazy a tracking</h2>
+
+    <h3>Automaticka konverze odkazu</h3>
+    <p>
+      Vsechny URL v SMS tele jsou automaticky prevadeny na kratke trackovaci
+      odkazy:
+    </p>
+
+    <table>
+      <tr>
+        <th>Faze</th>
+        <th>Priklad</th>
+      </tr>
+      <tr>
+        <td>Puvodni text</td>
+        <td><code>Nakupte na https://www.example.cz/akce</code></td>
+      </tr>
+      <tr>
+        <td>Po konverzi</td>
+        <td><code>Nakupte na https://vas-server.cz/r/ABC123</code></td>
+      </tr>
+      <tr>
+        <td>Po prirazeni SMS ID</td>
+        <td><code>Nakupte na https://vas-server.cz/r/ABC123/s/42</code></td>
+      </tr>
+    </table>
+
+    <h3>Jak tracking funguje</h3>
+    <ol>
+      <li class="step">
+        <strong>Vytvoreni odkazu:</strong> Odoo vytvori
+        <code>link.tracker</code> zaznam s kratky kodem a UTM parametry
+      </li>
+      <li class="step">
+        <strong>Pridani SMS ID:</strong> Ke kazdemu odkazu se prida
+        <code>/s/{sms_id}</code> pro identifikaci konkretniho prijemce
+      </li>
+      <li class="step">
+        <strong>Kliknuti prijemce:</strong> Prijemce klikne na link ve SMS
+        zprave
+      </li>
+      <li class="step">
+        <strong>Server zaznamenava:</strong>
+        <ul>
+          <li>IP adresa a zeme klikajiciho</li>
+          <li>Cas kliknuti</li>
+          <li>Propojeni s <code>mailing.trace</code> (ktery prijemce klikl)</li>
+        </ul>
+      </li>
+      <li class="step">
+        <strong>Presmerovani:</strong> Server presmeruje na puvodni URL s UTM
+        parametry:
+        <pre><code>https://www.example.cz/akce?utm_campaign=Q1_2025&amp;utm_medium=sms&amp;utm_source=kampan</code></pre>
+      </li>
+    </ol>
+
+    <h3>UTM parametry</h3>
+    <p>Automaticky pridavane pri presmerovani:</p>
+    <table>
+      <tr>
+        <th>Parametr</th>
+        <th>Hodnota</th>
+        <th>Zdroj</th>
+      </tr>
+      <tr>
+        <td><code>utm_campaign</code></td>
+        <td>Nazev kampane</td>
+        <td>mailing.mailing.campaign_id</td>
+      </tr>
+      <tr>
+        <td><code>utm_medium</code></td>
+        <td>"sms"</td>
+        <td>mailing.mailing.medium_id</td>
+      </tr>
+      <tr>
+        <td><code>utm_source</code></td>
+        <td>Nazev zdroje</td>
+        <td>mailing.mailing.source_id</td>
+      </tr>
+    </table>
+
+    <div class="note">
+      <strong>Google Analytics:</strong> Diky UTM parametrum muzete sledovat
+      navstevnost z SMS kampani primo v Google Analytics (Acquisition &gt;
+      Campaigns).
+    </div>
+
+    <!-- ==================== 10. ODHLASENI ==================== -->
+    <h2 id="10-odhlaseni">10. Odhlaseni a blacklist (GDPR)</h2>
+
+    <h3>Jak funguje odhlaseni</h3>
+    <p>System podporuje dva zpusoby odhlaseni z SMS kampani:</p>
+
+    <h4>Zpusob 1: STOP zprava (doporuceny)</h4>
+    <ol>
+      <li>Na konci kazde SMS je text: <strong>STOP pro odhlaseni</strong></li>
+      <li>
+        Prijemce odpovi SMS zpravou obsahujici slovo <strong>STOP</strong>
+      </li>
+      <li>Mobilni aplikace detekuje prihozeni SMS se slovem STOP</li>
+      <li>
+        Aplikace posle informaci na Odoo endpoint
+        <code>/sms-gateway/inbound</code>
+      </li>
+      <li>Odoo prida cislo prijemce na <code>phone.blacklist</code></li>
+      <li>Vsechny budouci kampane automaticky preskoci blacklistovana cisla</li>
+    </ol>
+
+    <h4>Zpusob 2: Webovy odkaz (standardni Odoo)</h4>
+    <p>
+      Odoo standardne generuje odhlasovaci URL ve formatu
+      <code>/sms/{mailing_id}/{trace_code}</code>. Nas modul tyto URL
+      <strong>nahrazuje</strong> textem "STOP pro odhlaseni", protoze:
+    </p>
+    <ul>
+      <li>URL zabira prilis mista v SMS (160 znaku limit)</li>
+      <li>Textove "STOP" je jednodussi pro uzivatele</li>
+      <li>Odpovida standardni praxi SMS marketingu</li>
+    </ul>
+
+    <div class="danger">
+      <strong>GDPR povinnost:</strong> Podle GDPR musi byt kazda marketingova
+      SMS zprava opatrena moznosti odhlaseni. Modul automaticky pridava "STOP
+      pro odhlaseni" na konec zpravy.
+      <strong>Neodstranujte tuto informaci!</strong>
+    </div>
+
+    <h3>Blacklist model</h3>
+    <p>
+      Odoo pouziva model <code>phone.blacklist</code> z modulu
+      <code>phone_validation</code>:
+    </p>
+    <ul>
+      <li>
+        Cisla jsou ukladana v E.164 formatu (napr. <code>+420777123456</code>)
+      </li>
+      <li>Duplicity jsou automaticky detekovany</li>
+      <li>Blacklistovana cisla jsou preskocena pri vytvareni SMS zaznamu</li>
+      <li>
+        Spravce muze cislo z blacklistu odebrat (napr. pokud zakaznik znovu
+        souhlasi)
+      </li>
+    </ul>
+
+    <h3>Kde najit blacklist</h3>
+    <p>
+      <strong>SMS Marketing &gt; Configuration &gt; Phone Blacklist</strong>
+    </p>
+
+    <!-- ==================== 11. STATISTIKY ==================== -->
+    <h2 id="11-statistiky">11. Statistiky a vykon kampane</h2>
+
+    <h3>Sledovane metriky</h3>
+    <table>
+      <tr>
+        <th>Metrika</th>
+        <th>Popis</th>
+        <th>Jak se meri</th>
+      </tr>
+      <tr>
+        <td><strong>Sent</strong></td>
+        <td>Pocet uspesne odeslanych SMS</td>
+        <td>sms.sms ve stavu <code>sent</code></td>
+      </tr>
+      <tr>
+        <td><strong>Delivered</strong></td>
+        <td>Dorucene SMS</td>
+        <td>= sent + opened + replied</td>
+      </tr>
+      <tr>
+        <td><strong>Clicked</strong></td>
+        <td>Prijemci co klikli na odkaz</td>
+        <td>mailing.trace s <code>links_click_datetime</code></td>
+      </tr>
+      <tr>
+        <td><strong>Click Rate</strong></td>
+        <td>Procento kliknuti</td>
+        <td>(unikatni kliknuti / celkem odeslano) × 100</td>
+      </tr>
+      <tr>
+        <td><strong>Bounced</strong></td>
+        <td>Neplatna cisla</td>
+        <td>mailing.trace ve stavu <code>bounce</code></td>
+      </tr>
+      <tr>
+        <td><strong>Failed</strong></td>
+        <td>Chyba odeslani</td>
+        <td>mailing.trace ve stavu <code>error</code></td>
+      </tr>
+    </table>
+
+    <h3>Kde najit statistiky</h3>
+    <ol>
+      <li>
+        <strong>Prehled kampane:</strong> Otevrete kampan - v zahlavi jsou
+        pocitadla Sent/Clicked/Bounced
+      </li>
+      <li>
+        <strong>Detailni statistiky:</strong> Kliknete na pocitadlo pro
+        zobrazeni seznamu zaznamu
+      </li>
+      <li>
+        <strong>Link Tracker:</strong>
+        <em>Email Marketing &gt; Link Tracker</em> - prehled vsech trackovanych
+        odkazu s poctem kliknuti
+      </li>
+      <li>
+        <strong>Gateway telefony:</strong>
+        <em>SMS Gateway &gt; Gateway Phones</em> - sent_today, sent_total,
+        pending, error pocitadla
+      </li>
+    </ol>
+
+    <h3>Link Tracker - detailni analyza</h3>
+    <p>Kazdy odkaz v SMS ma vlastni <code>link.tracker</code> zaznam:</p>
+    <ul>
+      <li>
+        <strong>Celkovy pocet kliknuti</strong> - kolikrat byl odkaz kliknut
+        (vcetne opakovanych)
+      </li>
+      <li>
+        <strong>Unikatni kliknuti</strong> - kolik ruznych prijemcu kliklo
+      </li>
+      <li><strong>Zeme</strong> - geolokovane podle IP adresy</li>
+      <li><strong>Casova osa</strong> - kdyz se klikalo (peak hours)</li>
+    </ul>
+
+    <!-- ==================== 12. LIMITY ==================== -->
+    <h2 id="12-limity">12. Limity a rate limiting</h2>
+
+    <h3>Typy limitu</h3>
+    <table>
+      <tr>
+        <th>Limit</th>
+        <th>Kde se nastavuje</th>
+        <th>Popis</th>
+      </tr>
+      <tr>
+        <td><strong>Daily Limit</strong></td>
+        <td>sms.gateway.phone</td>
+        <td>
+          Max SMS za den na telefon. Pocitadlo <code>sent_today</code> se
+          resetuje o pulnoci.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>SMS per Minute</strong></td>
+        <td>sms.gateway.phone</td>
+        <td>
+          Max SMS za minutu. Aplikace pocita delay mezi SMS:
+          <code>60000 / rate_limit</code> ms.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Android SMS limit</strong></td>
+        <td>OS Android</td>
+        <td>
+          Android standardne omezuje na ~30 SMS za 30 minut. Muze byt zmenen v
+          nastaveni.
+        </td>
+      </tr>
+    </table>
+
+    <h3>Jak funguje rate limiting</h3>
+    <ol>
+      <li>
+        Server nastavuje <code>rate_limit</code> na kazdem gateway telefonu
+        (napr. 100 SMS/min)
+      </li>
+      <li>Mobilni aplikace ziska rate_limit z heartbeat odpovedi</li>
+      <li>
+        Mezi kazdou SMS aplikace pocka
+        <code>60000 / rate_limit</code> milisekund
+      </li>
+      <li>
+        Pokud telefon dosahne <code>daily_limit</code>, neni mu prirazena zadna
+        dalsi SMS
+      </li>
+    </ol>
+
+    <div class="warning">
+      <strong>Android omezeni:</strong> Na nekterych Android zarizeni je
+      hardwarovy limit ~30 SMS za 30 minut. Pro vetsi objemy doporucujeme pouzit
+      vice telefonu nebo zmenit nastaveni ADB:
+      <pre><code>adb shell settings put global sms_outgoing_check_max_count 10000</code></pre>
+    </div>
+
+    <!-- ==================== 13. DUAL SIM ==================== -->
+    <h2 id="13-dual-sim">13. Dual SIM podpora</h2>
+
+    <p>System podporuje telefony s dvema SIM kartami:</p>
+    <ul>
+      <li>
+        Kazdy gateway telefon muze mit dve cisla: <code>phone_number</code> a
+        <code>phone_number_2</code>
+      </li>
+      <li>
+        Aplikace automaticky detekuje obe SIM karty pomoci nativniho
+        <code>SimManager</code> modulu
+      </li>
+      <li>
+        Heartbeat posila obe cisla, server pocita pending SMS pro kazde cislo
+        zvlast
+      </li>
+      <li>
+        Pri odeslani se SMS posila pres SIM slot odpovidajici prirazemu cislu
+      </li>
+    </ul>
+
+    <div class="note">
+      <strong>Poznamka:</strong> Ne vsechny Android telefony umoznuji vyber SIM
+      slotu pro odchozi SMS programove. Na nekterych zarizeni se pouzije vychozi
+      SIM karta.
+    </div>
+
+    <!-- ==================== 14. API ==================== -->
+    <h2 id="14-api">14. API reference</h2>
+
+    <p>
+      Vsechny endpointy vyzaduji hlavicku <code>X-API-Key</code> s platnym API
+      klicem gateway telefonu.
+    </p>
+
+    <h3>POST /sms-gateway/heartbeat</h3>
+    <p>Odeslani heartbeatu a ziskani stavu fronty.</p>
+    <pre><code>// Request
+{
+    "phone_numbers": ["+420777123456", "+420608987654"],
+    "battery_level": 85,
+    "signal_strength": -70
+}
+
+// Response
+{
+    "success": true,
+    "pending_count": {"+420777123456": 12, "+420608987654": 5},
+    "rate_limit": 100
+}</code></pre>
+
+    <h3>POST /sms-gateway/pending</h3>
+    <p>Ziskani SMS cekajicich na odeslani.</p>
+    <pre><code>// Request
+{"phone_numbers": ["+420777123456"], "limit": 20}
+
+// Response
+{
+    "success": true,
+    "sms_list": [
+        {
+            "id": 123,
+            "phone_number": "+420999888777",
+            "message": "Text SMS zpravy...",
+            "uuid": "abc-123-def",
+            "gateway_phone_number": "+420777123456"
+        }
+    ]
+}</code></pre>
+
+    <h3>POST /sms-gateway/confirm/{sms_id}</h3>
+    <p>Potvrzeni stavu odeslani SMS.</p>
+    <pre><code>// Request - uspech
+{"status": "sent"}
+
+// Request - chyba
+{"status": "error", "error_message": "Permission denied"}
+
+// Request - probihajici
+{"status": "sending"}
+
+// Response
+{"success": true}</code></pre>
+
+    <h3>POST /sms-gateway/inbound</h3>
+    <p>Nahlaseni prichozi SMS (pro STOP detekci).</p>
+    <pre><code>// Request
+{
+    "from_number": "+420999888777",
+    "message": "STOP",
+    "to_number": "+420777123456"
+}
+
+// Response
+{
+    "success": true,
+    "blacklisted": true,
+    "partner_found": true
+}</code></pre>
+
+    <h3>POST /sms-gateway/stats</h3>
+    <p>Statistiky gateway telefonu.</p>
+    <pre><code>// Response
+{
+    "success": true,
+    "phones": [
+        {
+            "id": 1,
+            "name": "Telefon 1 - O2",
+            "phone_number": "+420777123456",
+            "phone_number_2": null,
+            "state": "online",
+            "sent_today": 142,
+            "daily_limit": 500,
+            "sent_total": 4582,
+            "pending_count": 23,
+            "rate_limit": 100
+        }
+    ]
+}</code></pre>
+
+    <!-- ==================== 15. TROUBLESHOOTING ==================== -->
+    <h2 id="15-troubleshooting">15. Reseni problemu</h2>
+
+    <table>
+      <tr>
+        <th>Problem</th>
+        <th>Pricina</th>
+        <th>Reseni</th>
+      </tr>
+      <tr>
+        <td>Telefon je stale Offline</td>
+        <td>Heartbeat nedochazi na server</td>
+        <td>
+          <ul>
+            <li>Zkontrolujte sitove pripojeni telefonu</li>
+            <li>Overte spravnost API klice (znovu naskenujte QR)</li>
+            <li>Zkontrolujte URL serveru (musi byt HTTPS)</li>
+            <li>Zvyste heartbeat_timeout na gateway telefonu</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td>SMS se neodesilaji</td>
+        <td>Aplikace nema opravneni SEND_SMS</td>
+        <td>
+          Otevre nastaveni Android &gt; Aplikace &gt; SMS Gateway &gt; Opravneni
+          &gt; povolit SMS
+        </td>
+      </tr>
+      <tr>
+        <td>SMS ve fronte ale zadny telefon neprijima</td>
+        <td>Zadny telefon neodpovida domain_filter</td>
+        <td>
+          Zkontrolujte domain_filter na gateway telefonech. Alespon jeden by mel
+          byt bez filtru.
+        </td>
+      </tr>
+      <tr>
+        <td>Vsechny SMS maji stav error</td>
+        <td>Zadny gateway telefon neni online</td>
+        <td>Ujistete se ze aplikace bezi, je sparovana a posila heartbeaty</td>
+      </tr>
+      <tr>
+        <td>Daily limit dosazeny prilis brzo</td>
+        <td>Pocitadlo sent_today</td>
+        <td>
+          Zvyste daily_limit nebo pridejte dalsi telefony. Reset je o pulnoci
+          (cron).
+        </td>
+      </tr>
+      <tr>
+        <td>Android blokuje SMS po 30 zpravach</td>
+        <td>Hardwarovy limit Androidu</td>
+        <td>
+          Pouzijte ADB prikaz:
+          <code
+            >adb shell settings put global sms_outgoing_check_max_count
+            10000</code
+          >
+        </td>
+      </tr>
+      <tr>
+        <td>STOP neprida cislo na blacklist</td>
+        <td>Aplikace nema opravneni RECEIVE_SMS</td>
+        <td>Povolte opravneni RECEIVE_SMS v nastaveni Android</td>
+      </tr>
+      <tr>
+        <td>Odkazy v SMS nefunguji</td>
+        <td>Spatna konfigurace web.base.url</td>
+        <td>
+          V Odoo nastavte spravne System Parameters &gt; web.base.url (musi byt
+          verejne dostupne)
+        </td>
+      </tr>
+      <tr>
+        <td>Kampan se neoznaci jako Done</td>
+        <td>Nektera SMS stale pending</td>
+        <td>
+          Zkontrolujte, ze vsechny SMS jsou ve stavu sent nebo error. Mozna je
+          kampan pauzovana.
+        </td>
+      </tr>
+    </table>
+
+    <h3>Diagnosticke prikazy (curl)</h3>
+    <pre><code># Test heartbeat
+curl -X POST https://vas-server.cz/sms-gateway/heartbeat \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: VAS_API_KLIC" \
+  -d '{"phone_numbers": ["+420777123456"]}'
+
+# Overeni pending SMS
+curl -X POST https://vas-server.cz/sms-gateway/pending \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: VAS_API_KLIC" \
+  -d '{"phone_numbers": ["+420777123456"], "limit": 5}'
+
+# Test inbound STOP
+curl -X POST https://vas-server.cz/sms-gateway/inbound \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: VAS_API_KLIC" \
+  -d '{"from_number": "+420999888777", "message": "STOP", "to_number": "+420777123456"}'</code></pre>
+
+    <hr />
+
+    <p style="color: #6b7280; text-align: center; margin-top: 40px">
+      SMS Gateway v18.0.1.0.0 &bull; VaryShop &bull; 2026
+    </p>
+  </body>
+</html>

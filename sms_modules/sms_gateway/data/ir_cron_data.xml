@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Check heartbeat timeout every minute -->
+        <record id="ir_cron_sms_gateway_heartbeat" model="ir.cron">
+            <field name="name">SMS Gateway: Check Heartbeat</field>
+            <field name="model_id" ref="model_sms_gateway_phone"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_check_heartbeat()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- Reset daily counters at midnight -->
+        <record id="ir_cron_sms_gateway_daily_reset" model="ir.cron">
+            <field name="name">SMS Gateway: Reset Daily Counters</field>
+            <field name="model_id" ref="model_sms_gateway_phone"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_reset_daily_counters()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="nextcall" eval="'2026-03-02 00:00:00'"/>
+            <field name="active">True</field>
+        </record>
+
+        <!-- Reset monthly counters (checks daily, resets when billing period starts) -->
+        <record id="ir_cron_sms_gateway_monthly_reset" model="ir.cron">
+            <field name="name">SMS Gateway: Reset Monthly Counters</field>
+            <field name="model_id" ref="model_sms_gateway_phone"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_reset_monthly_counters()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="nextcall" eval="'2026-03-02 00:05:00'"/>
+            <field name="active">True</field>
+        </record>
+
+    </data>
+</odoo>

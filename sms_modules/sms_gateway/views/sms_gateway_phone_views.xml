@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List View -->
+    <record id="sms_gateway_phone_view_tree" model="ir.ui.view">
+        <field name="name">sms.gateway.phone.list</field>
+        <field name="model">sms.gateway.phone</field>
+        <field name="arch" type="xml">
+            <list string="SMS Gateway Phones"
+                  decoration-success="state == 'online'"
+                  decoration-muted="state == 'offline'">
+                <field name="name"/>
+                <field name="phone_number"/>
+                <field name="phone_number_2"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'online'"
+                       decoration-danger="state == 'offline'"/>
+                <field name="sent_today"/>
+                <field name="daily_limit"/>
+                <field name="sent_month"/>
+                <field name="monthly_limit"/>
+                <field name="pending_count"/>
+                <field name="error_count"/>
+                <field name="last_heartbeat"/>
+                <field name="battery_level"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="sms_gateway_phone_view_form" model="ir.ui.view">
+        <field name="name">sms.gateway.phone.form</field>
+        <field name="model">sms.gateway.phone</field>
+        <field name="arch" type="xml">
+            <form string="SMS Gateway Phone">
+                <header>
+                    <button name="action_generate_api_key" type="object"
+                            string="Generate API Key" class="btn-primary"
+                            confirm="This will regenerate the API key. The mobile app will need to re-pair via QR code. Continue?"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_pending_sms"
+                                icon="fa-envelope-o">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="pending_count"/>
+                                </span>
+                                <span class="o_stat_text">Pending</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_view_error_sms"
+                                icon="fa-exclamation-triangle">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="error_count"/>
+                                </span>
+                                <span class="o_stat_text">Errors</span>
+                            </div>
+                        </button>
+                    </div>
+                    <group>
+                        <group string="Phone Info">
+                            <field name="name"/>
+                            <field name="phone_number"/>
+                            <field name="phone_number_2"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Limits">
+                            <field name="daily_limit"/>
+                            <field name="monthly_limit"/>
+                            <field name="month_start_day"/>
+                            <field name="rate_limit"/>
+                            <field name="heartbeat_timeout"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Statistics">
+                            <field name="sent_today"/>
+                            <field name="sent_month"/>
+                            <field name="next_month_reset"/>
+                            <field name="sent_total"/>
+                            <field name="last_heartbeat"/>
+                            <field name="battery_level"/>
+                            <field name="signal_strength"/>
+                        </group>
+                        <group string="Domain Filter">
+                            <field name="domain_filter"
+                                   placeholder='[("category_id", "in", [10])]'/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="QR Code &amp; API Key" name="qr_code">
+                            <group>
+                                <field name="api_key" password="True"/>
+                            </group>
+                            <div style="text-align: center; padding: 16px 0;">
+                                <field name="qr_code" widget="image" style="max-width: 300px; width: 300px;"/>
+                            </div>
+                            <div class="alert alert-info" role="alert">
+                                <strong>Pairing Instructions:</strong>
+                                <ol>
+                                    <li>Click "Generate API Key" to create a new API key</li>
+                                    <li>Open the SMS Gateway app on your Android phone</li>
+                                    <li>Go to Settings and tap "Scan QR Code"</li>
+                                    <li>Scan the QR code shown above</li>
+                                    <li>The app will automatically connect and start sending heartbeats</li>
+                                </ol>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="sms_gateway_phone_action" model="ir.actions.act_window">
+        <field name="name">SMS Gateway Phones</field>
+        <field name="res_model">sms.gateway.phone</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Register your first SMS Gateway Phone
+            </p>
+            <p>
+                Add Android phones as SMS gateways. Each phone can send SMS
+                messages using its native messaging capabilities.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu under SMS Marketing -->
+    <menuitem id="sms_gateway_menu_root"
+              name="SMS Gateway"
+              parent="mass_mailing_sms.mass_mailing_sms_menu_root"
+              sequence="30"/>
+
+    <menuitem id="sms_gateway_phone_menu"
+              name="Gateway Phones"
+              parent="sms_gateway_menu_root"
+              action="sms_gateway_phone_action"
+              sequence="10"/>
+
+    <!-- SMS list view accessible from SMS Marketing menu -->
+    <menuitem id="sms_sms_menu_marketing"
+              name="SMS Messages"
+              parent="mass_mailing_sms.mass_mailing_sms_menu_root"
+              action="sms.sms_sms_action"
+              sequence="25"/>
+
+</odoo>

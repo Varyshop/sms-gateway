@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="mailing_mailing_view_form_sms_gateway" model="ir.ui.view">
+        <field name="name">mailing.mailing.form.sms_gateway</field>
+        <field name="model">mailing.mailing</field>
+        <field name="inherit_id" ref="mass_mailing_sms.mailing_mailing_view_form_sms"/>
+        <field name="arch" type="xml">
+            <!-- Add Force Create SMS Queue button -->
+            <xpath expr="//button[@name='action_test']" position="after">
+                <button name="action_force_create_sms_queue" type="object"
+                        string="Force Create SMS Queue"
+                        class="btn-secondary"
+                        invisible="mailing_type != 'sms' or state not in ('draft', 'in_queue', 'sending')"
+                        confirm="This will create SMS records for all remaining recipients. Continue?"/>
+            </xpath>
+            <!-- Add SMS Provider selector -->
+            <xpath expr="//field[@name='body_plaintext']" position="before">
+                <field name="sms_provider" widget="radio"
+                       invisible="mailing_type != 'sms'"
+                       placeholder="Default (IAP)"/>
+            </xpath>
+            <!-- Add Paused toggle -->
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="paused" widget="boolean_toggle"
+                       invisible="mailing_type != 'sms' or state not in ('in_queue', 'sending')"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

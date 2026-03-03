@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ─── Form: add gateway fields ─── -->
+    <record id="sms_sms_view_form_gateway" model="ir.ui.view">
+        <field name="name">sms.sms.form.sms_gateway</field>
+        <field name="model">sms.sms</field>
+        <field name="inherit_id" ref="sms.sms_tsms_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='failure_type']" position="before">
+                <field name="sms_provider" readonly="state != 'outgoing'"/>
+                <field name="gateway_phone_id"
+                       readonly="state != 'outgoing'"
+                       domain="[('active', '=', True)]"
+                       invisible="sms_provider != 'gateway'"/>
+                <field name="gateway_sim_number"
+                       readonly="state != 'outgoing'"
+                       invisible="sms_provider != 'gateway'"/>
+                <field name="gateway_state" readonly="1"
+                       invisible="sms_provider != 'gateway'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ─── List: add gateway columns ─── -->
+    <record id="sms_sms_view_list_gateway" model="ir.ui.view">
+        <field name="name">sms.sms.list.sms_gateway</field>
+        <field name="model">sms.sms</field>
+        <field name="inherit_id" ref="sms.sms_sms_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="sms_provider" optional="show"/>
+                <field name="gateway_phone_id" optional="show"/>
+                <field name="gateway_sim_number" optional="hide"/>
+                <field name="gateway_state" optional="show"
+                       widget="badge"
+                       decoration-info="gateway_state == 'pending'"
+                       decoration-warning="gateway_state in ('processing', 'sending')"
+                       decoration-success="gateway_state == 'sent'"
+                       decoration-danger="gateway_state == 'error'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ─── Search: add gateway filters ─── -->
+    <record id="sms_sms_view_search_gateway" model="ir.ui.view">
+        <field name="name">sms.sms.search.sms_gateway</field>
+        <field name="model">sms.sms</field>
+        <field name="inherit_id" ref="sms.sms_sms_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="gateway_phone_id"/>
+                <field name="gateway_sim_number"/>
+                <separator/>
+                <filter name="filter_gateway" string="SMS Gateway"
+                        domain="[('sms_provider', '=', 'gateway')]"/>
+                <filter name="filter_gateway_pending" string="Gateway Pending"
+                        domain="[('gateway_state', 'in', ['pending', 'processing', 'sending'])]"/>
+                <filter name="filter_gateway_sent" string="Gateway Sent"
+                        domain="[('gateway_state', '=', 'sent')]"/>
+                <filter name="filter_gateway_error" string="Gateway Error"
+                        domain="[('gateway_state', '=', 'error')]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_gateway_phone" string="Gateway Phone"
+                            context="{'group_by': 'gateway_phone_id'}"/>
+                    <filter name="group_gateway_state" string="Gateway State"
+                            context="{'group_by': 'gateway_state'}"/>
+                    <filter name="group_sms_provider" string="SMS Provider"
+                            context="{'group_by': 'sms_provider'}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

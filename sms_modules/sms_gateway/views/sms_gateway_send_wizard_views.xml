@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Wizard Form -->
+    <record id="sms_gateway_send_wizard_view_form" model="ir.ui.view">
+        <field name="name">sms.gateway.send.wizard.form</field>
+        <field name="model">sms.gateway.send.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Send via Gateway Phone">
+                <sheet>
+
+                    <group>
+                        <group string="SMS Summary">
+                            <field name="sms_count" readonly="1"/>
+                            <field name="total_segments" readonly="1"/>
+                        </group>
+                        <group string="Capacity"
+                               invisible="not line_ids">
+                            <field name="total_capacity" readonly="1"/>
+                            <field name="can_fit_all" readonly="1" widget="boolean"/>
+                        </group>
+                    </group>
+
+                    <div class="alert alert-warning" role="alert"
+                         invisible="can_fit_all or not line_ids">
+                        Selected phones do not have sufficient capacity for all SMS segments.
+                        Some messages will not be assigned.
+                    </div>
+
+                    <group string="Select SIM Numbers">
+                        <field name="line_ids" nolabel="1">
+                            <list editable="bottom" create="0" delete="0"
+                                  decoration-success="state == 'online' and selected"
+                                  decoration-muted="state == 'offline' or not selected">
+                                <field name="phone_id" column_invisible="1" force_save="1"/>
+                                <field name="selected" widget="boolean"/>
+                                <field name="sim_number" readonly="1" force_save="1"/>
+                                <field name="sim_slot" readonly="1" force_save="1"/>
+                                <field name="phone_name" readonly="1" force_save="1"/>
+                                <field name="state" widget="badge" readonly="1" force_save="1"
+                                       decoration-success="state == 'online'"
+                                       decoration-danger="state == 'offline'"/>
+                                <field name="sent_today" readonly="1" force_save="1"/>
+                                <field name="daily_limit" readonly="1" force_save="1"/>
+                                <field name="sent_month" readonly="1" force_save="1"/>
+                                <field name="monthly_limit" readonly="1" force_save="1"/>
+                                <field name="remaining_capacity" readonly="1" force_save="1"/>
+                            </list>
+                        </field>
+                    </group>
+
+                    <field name="sms_ids" invisible="1"/>
+                </sheet>
+                <footer>
+                    <button name="action_send" type="object"
+                            string="Assign to Phones" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Server Action: bulk action binding on sms.sms list -->
+    <record id="ir_actions_server_sms_gateway_send_wizard" model="ir.actions.server">
+        <field name="name">Send Now with Gateway</field>
+        <field name="model_id" ref="sms.model_sms_sms"/>
+        <field name="binding_model_id" ref="sms.model_sms_sms"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    action = {
+        'type': 'ir.actions.act_window',
+        'name': 'Send via Gateway',
+        'res_model': 'sms.gateway.send.wizard',
+        'view_mode': 'form',
+        'target': 'new',
+        'context': {
+            'active_ids': records.ids,
+            'active_model': 'sms.sms',
+        },
+    }
+        </field>
+    </record>
+
+    <!-- Server Action: Send Now on mailing.trace list -->
+    <record id="ir_actions_server_mailing_trace_send_now" model="ir.actions.server">
+        <field name="name">Send Now</field>
+        <field name="model_id" ref="mass_mailing.model_mailing_trace"/>
+        <field name="binding_model_id" ref="mass_mailing.model_mailing_trace"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    action = records.action_send_now()
+        </field>
+    </record>
+
+    <!-- Server Action: Send Now with Gateway on mailing.trace list -->
+    <record id="ir_actions_server_mailing_trace_send_now_gateway" model="ir.actions.server">
+        <field name="name">Send Now with Gateway</field>
+        <field name="model_id" ref="mass_mailing.model_mailing_trace"/>
+        <field name="binding_model_id" ref="mass_mailing.model_mailing_trace"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    action = records.action_send_now_gateway()
+        </field>
+    </record>
+
+</odoo>

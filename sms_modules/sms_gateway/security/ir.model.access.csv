@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sms_gateway_phone_user,sms.gateway.phone.user,model_sms_gateway_phone,base.group_user,1,0,0,0
+access_sms_gateway_phone_manager,sms.gateway.phone.manager,model_sms_gateway_phone,mass_mailing.group_mass_mailing_user,1,1,1,1
+access_sms_gateway_send_wizard,sms.gateway.send.wizard,model_sms_gateway_send_wizard,base.group_user,1,1,1,1
+access_sms_gateway_send_wizard_line,sms.gateway.send.wizard.line,model_sms_gateway_send_wizard_line,base.group_user,1,1,1,1
