@@ -7,4 +7,5 @@ _build/
 !.gitignore
 !.github
 !.mailmap
+!.nojekyll
 __pycache__/
