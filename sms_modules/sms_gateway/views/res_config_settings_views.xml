@@ -8,6 +8,12 @@
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
                 <app data-string="SMS Gateway" string="SMS Gateway" name="sms_gateway" groups="mass_mailing.group_mass_mailing_user">
+                    <block title="SMS Gateway Settings">
+                        <setting string="Force SMS Gateway"
+                                 help="Route all SMS through gateway phones instead of the default SMS provider.">
+                            <field name="sms_gateway_force"/>
+                        </setting>
+                    </block>
                     <block title="SMS Gateway Status">
                         <setting string="Gateway Phones" help="Manage your registered SMS gateway phones">
                             <div class="content-group">

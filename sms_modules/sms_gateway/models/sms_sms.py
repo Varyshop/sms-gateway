@@ -37,11 +37,22 @@ class SmsSms(models.Model):
         ('error', 'Error'),
     ], string='Gateway State', readonly=True)
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Auto-set sms_provider to 'gateway' when Force SMS Gateway is enabled."""
+        force = self.env['ir.config_parameter'].sudo().get_param(
+            'sms_gateway.force_gateway',
+        )
+        if force and force not in ('False', '0', 'false'):
+            for vals in vals_list:
+                if not vals.get('sms_provider'):
+                    vals['sms_provider'] = 'gateway'
+        return super().create(vals_list)
+
     @api.onchange('gateway_phone_id')
     def _onchange_gateway_phone_id(self):
         if self.gateway_phone_id:
             self.sms_provider = 'gateway'
-            # Don't auto-fill gateway_sim_number — empty means app picks SIM
         else:
             self.gateway_sim_number = False
 

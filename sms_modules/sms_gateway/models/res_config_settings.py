@@ -6,6 +6,12 @@ from odoo import api, fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    sms_gateway_force = fields.Boolean(
+        string='Force SMS Gateway',
+        config_parameter='sms_gateway.force_gateway',
+        help='When enabled, all SMS will be routed through the Gateway phones '
+             'instead of the default SMS provider.',
+    )
     sms_gateway_enabled = fields.Boolean(
         string='SMS Gateway Enabled',
         compute='_compute_sms_gateway_enabled',
