@@ -224,6 +224,83 @@ class SmsGatewayController(http.Controller):
             request.env.cr.rollback()
             return self._error_response(str(e), 500)
 
+    # ---- Batch Confirm SMS Status ----
+
+    @http.route('/sms-gateway/confirm-batch', type='http', auth='public',
+                methods=['POST'], csrf=False, cors='*')
+    def confirm_batch(self, **kwargs):
+        """Batch-confirm SMS statuses from mobile app.
+
+        Expects JSON body:
+        {
+            "results": [
+                {"id": 123, "status": "sent"},
+                {"id": 124, "status": "error", "error_message": "No signal"}
+            ]
+        }
+
+        Returns updated counters once for the whole batch.
+        """
+        try:
+            api_key = self._get_api_key()
+            phones = self._validate_api_key(api_key)
+            if not phones:
+                return self._error_response('Invalid API key', 401)
+
+            data = self._get_json_data()
+            results = data.get('results')
+            if not results or not isinstance(results, list):
+                return self._error_response('results list is required')
+
+            phone_ids = set(phones.ids)
+            processed = 0
+            errors = []
+
+            for item in results:
+                sms_id = item.get('id')
+                status = item.get('status')
+                error_message = item.get('error_message')
+
+                if not sms_id or status not in ('sent', 'error'):
+                    errors.append({'id': sms_id, 'error': 'Invalid id or status'})
+                    continue
+
+                sms = request.env['sms.sms'].sudo().browse(sms_id)
+                if not sms.exists() or sms.gateway_phone_id.id not in phone_ids:
+                    errors.append({'id': sms_id, 'error': 'Not found or unauthorized'})
+                    continue
+
+                ok = request.env['sms.sms']._update_gateway_status(sms_id, status, error_message)
+                if ok:
+                    processed += 1
+                else:
+                    errors.append({'id': sms_id, 'error': 'Update failed'})
+
+            if processed > 0:
+                request.env.cr.commit()
+
+            # Return fresh counters
+            response_data = {
+                'success': True,
+                'processed': processed,
+            }
+            if errors:
+                response_data['errors'] = errors
+
+            phone = phones[0]
+            phone.invalidate_recordset(['sent_today', 'sent_month', 'sent_total'])
+            response_data['sent_today'] = phone.sent_today
+            response_data['sent_month'] = phone.sent_month
+            response_data['sent_total'] = phone.sent_total
+            response_data['daily_limit'] = phone.daily_limit
+            response_data['monthly_limit'] = phone.monthly_limit
+
+            return self._json_response(response_data)
+        except Exception as e:
+            _logger.exception('SMS Gateway confirm-batch error')
+            request.env.cr.rollback()
+            return self._error_response(str(e), 500)
+
     # ---- Inbound SMS (STOP detection) ----
 
     @http.route('/sms-gateway/inbound', type='http', auth='public',
@@ -291,6 +368,108 @@ class SmsGatewayController(http.Controller):
             })
         except Exception as e:
             _logger.exception('SMS Gateway inbound error')
+            return self._error_response(str(e), 500)
+
+    # ---- Batch Inbound (retroactive STOP check) ----
+
+    @http.route('/sms-gateway/inbound-batch', type='http', auth='public',
+                methods=['POST'], csrf=False, cors='*')
+    def inbound_batch(self, **kwargs):
+        """Batch-process inbound SMS (used for retroactive STOP blacklist check).
+
+        Expects JSON body:
+        {
+            "messages": [
+                {"from_number": "+420...", "message": "STOP", "to_number": "+420..."},
+                ...
+            ]
+        }
+
+        Only processes messages containing STOP keyword.
+        Skips numbers that are already blacklisted.
+        """
+        try:
+            api_key = self._get_api_key()
+            phones = self._validate_api_key(api_key)
+            if not phones:
+                return self._error_response('Invalid API key', 401)
+
+            data = self._get_json_data()
+            messages = data.get('messages')
+            if not messages or not isinstance(messages, list):
+                return self._error_response('messages list is required')
+
+            blacklisted_count = 0
+            already_blacklisted = 0
+            skipped = 0
+
+            for msg in messages:
+                from_number = msg.get('from_number', '')
+                message = msg.get('message', '')
+
+                if not from_number or not message:
+                    skipped += 1
+                    continue
+
+                if 'STOP' not in message.upper():
+                    skipped += 1
+                    continue
+
+                # Check if already blacklisted
+                existing = request.env['phone.blacklist'].sudo().search([
+                    ('number', '=', self._normalize_phone(from_number)),
+                ], limit=1)
+                if not existing:
+                    # Also try with full number
+                    existing = request.env['phone.blacklist'].sudo().search([
+                        ('number', '=', from_number),
+                    ], limit=1)
+
+                if existing:
+                    already_blacklisted += 1
+                    continue
+
+                try:
+                    request.env['phone.blacklist'].sudo().add(from_number)
+                    blacklisted_count += 1
+                    _logger.info('SMS Gateway: Retroactive blacklist %s (STOP)', from_number)
+
+                    # Post to partner chatter
+                    partner = request.env['res.partner'].sudo().search([
+                        '|',
+                        ('mobile', '=', from_number),
+                        ('phone', '=', from_number),
+                    ], limit=1)
+                    if not partner:
+                        sanitized = from_number.replace(' ', '').replace('-', '')
+                        partner = request.env['res.partner'].sudo().search([
+                            '|',
+                            ('mobile', 'ilike', sanitized),
+                            ('phone', 'ilike', sanitized),
+                        ], limit=1)
+                    if partner:
+                        partner.message_post(
+                            body=f"Prichozi SMS: {message}\n"
+                                 f"[Cislo pridano na blacklist - STOP (retroaktivni)]",
+                            subject=f"SMS od {from_number}",
+                            message_type='comment',
+                            subtype_xmlid='mail.mt_note',
+                        )
+                except Exception as e:
+                    _logger.error('SMS Gateway: Failed to retroactively blacklist %s: %s',
+                                  from_number, e)
+
+            if blacklisted_count > 0:
+                request.env.cr.commit()
+
+            return self._json_response({
+                'success': True,
+                'blacklisted': blacklisted_count,
+                'already_blacklisted': already_blacklisted,
+                'skipped': skipped,
+            })
+        except Exception as e:
+            _logger.exception('SMS Gateway inbound-batch error')
             return self._error_response(str(e), 500)
 
     # ---- Stats ----
