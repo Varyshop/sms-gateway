@@ -54,8 +54,7 @@ class SmsGatewayPhone(models.Model):
     sent_month = fields.Integer(string='Sent This Period', readonly=True)
     month_start_day = fields.Integer(string='Billing Period Start Day', default=1,
                                      help='Day of month when the billing period resets (1-28).')
-    next_month_reset = fields.Date(string='Next Period Reset',
-                                   compute='_compute_next_month_reset', store=True)
+    next_month_reset = fields.Date(string='Next Period Reset')
     sent_total = fields.Integer(string='Total Sent', readonly=True)
     rate_limit = fields.Integer(string='SMS per Minute', default=100,
                                 help='Maximum SMS per minute (controls queue timing)')
@@ -77,22 +76,41 @@ class SmsGatewayPhone(models.Model):
     pending_count = fields.Integer(string='Pending SMS', compute='_compute_counts')
     error_count = fields.Integer(string='Error SMS', compute='_compute_counts')
 
-    @api.depends('month_start_day')
-    def _compute_next_month_reset(self):
-        today = date.today()
-        for phone in self:
-            day = min(phone.month_start_day or 1, 28)
-            if today.day < day:
-                # Reset is this month
-                phone.next_month_reset = today.replace(day=day)
-            else:
-                # Reset is next month
-                if today.month == 12:
-                    next_month = today.replace(year=today.year + 1, month=1, day=day)
-                else:
-                    max_day = calendar.monthrange(today.year, today.month + 1)[1]
-                    next_month = today.replace(month=today.month + 1, day=min(day, max_day))
-                phone.next_month_reset = next_month
+    @api.model
+    def _get_next_reset_date(self, month_start_day, after_date=None):
+        """Calculate the next monthly reset date after the given date.
+
+        Args:
+            month_start_day: day of month (1-28) when billing period starts
+            after_date: calculate next reset after this date (default: today)
+        Returns:
+            date object for the next reset
+        """
+        ref = after_date or date.today()
+        day = min(month_start_day or 1, 28)
+        if ref.day < day:
+            # Reset is still this month
+            return ref.replace(day=day)
+        # Reset is next month
+        if ref.month == 12:
+            return ref.replace(year=ref.year + 1, month=1, day=day)
+        max_day = calendar.monthrange(ref.year, ref.month + 1)[1]
+        return ref.replace(month=ref.month + 1, day=min(day, max_day))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for rec in records:
+            if not rec.next_month_reset:
+                rec.next_month_reset = self._get_next_reset_date(rec.month_start_day)
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'month_start_day' in vals:
+            for rec in self:
+                rec.next_month_reset = self._get_next_reset_date(rec.month_start_day)
+        return res
 
     @api.depends('sms_ids.state', 'sms_ids.gateway_state')
     def _compute_counts(self):
@@ -178,11 +196,28 @@ class SmsGatewayPhone(models.Model):
     def _cron_reset_monthly_counters(self):
         """Reset monthly SMS counters when billing period starts."""
         today = date.today()
+
+        # Initialize next_month_reset for phones that don't have it yet
+        unset_phones = self.sudo().search([('next_month_reset', '=', False)])
+        for phone in unset_phones:
+            phone.next_month_reset = self._get_next_reset_date(phone.month_start_day)
+
         phones_to_reset = self.sudo().search([
             ('next_month_reset', '<=', today),
         ])
+        for phone in phones_to_reset:
+            # Advance next_month_reset BEFORE writing sent_month,
+            # so the cron doesn't reset again tomorrow.
+            next_reset = self._get_next_reset_date(phone.month_start_day, after_date=today)
+            phone.write({
+                'sent_month': 0,
+                'next_month_reset': next_reset,
+            })
+            _logger.info(
+                'Reset monthly SMS counter for phone %s (%s), next reset: %s',
+                phone.name, phone.phone_number, next_reset,
+            )
         if phones_to_reset:
-            phones_to_reset.write({'sent_month': 0})
             _logger.info('Reset monthly SMS counters for %d gateway phones', len(phones_to_reset))
 
     @api.model

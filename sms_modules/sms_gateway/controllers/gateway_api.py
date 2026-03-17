@@ -95,10 +95,24 @@ class SmsGatewayController(http.Controller):
                         ])
                         pending_count[num] = count
 
+            # Include counter stats so the app always has fresh data
+            phone_stats = {}
+            for phone in phones:
+                phone_stats[phone.phone_number] = {
+                    'sent_today': phone.sent_today,
+                    'daily_limit': phone.daily_limit,
+                    'sent_month': phone.sent_month,
+                    'monthly_limit': phone.monthly_limit,
+                    'sent_total': phone.sent_total,
+                }
+                if phone.phone_number_2:
+                    phone_stats[phone.phone_number_2] = phone_stats[phone.phone_number]
+
             return self._json_response({
                 'success': True,
                 'pending_count': pending_count,
                 'rate_limit': phones[0].rate_limit if phones else 100,
+                'phone_stats': phone_stats,
             })
         except Exception as e:
             _logger.exception('SMS Gateway heartbeat error')
@@ -194,7 +208,17 @@ class SmsGatewayController(http.Controller):
             else:
                 _logger.warning('SMS Gateway confirm: _update_gateway_status returned False for SMS %s', sms_id)
 
-            return self._json_response({'success': bool(result)})
+            # Return updated counters after confirmation
+            response_data = {'success': bool(result)}
+            if result and status == 'sent' and sms.gateway_phone_id:
+                phone = sms.gateway_phone_id
+                # Re-read from DB to get the incremented values
+                phone.invalidate_recordset(['sent_today', 'sent_month', 'sent_total'])
+                response_data['sent_today'] = phone.sent_today
+                response_data['sent_month'] = phone.sent_month
+                response_data['sent_total'] = phone.sent_total
+
+            return self._json_response(response_data)
         except Exception as e:
             _logger.exception('SMS Gateway confirm error for SMS %s', sms_id)
             request.env.cr.rollback()
