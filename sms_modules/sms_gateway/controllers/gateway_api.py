@@ -472,6 +472,41 @@ class SmsGatewayController(http.Controller):
             _logger.exception('SMS Gateway inbound-batch error')
             return self._error_response(str(e), 500)
 
+    # ---- Register FCM Token ----
+
+    @http.route('/sms-gateway/register-fcm', type='http', auth='public',
+                methods=['POST'], csrf=False, cors='*')
+    def register_fcm_token(self, **kwargs):
+        """Register or update the FCM token for a gateway phone.
+
+        Called by the mobile app after pairing and on every FCM token refresh.
+        Old app versions that don't support FCM will never call this endpoint,
+        preserving full backward compatibility.
+        """
+        try:
+            api_key = self._get_api_key()
+            phones = self._validate_api_key(api_key)
+            if not phones:
+                return self._error_response('Invalid API key', 401)
+
+            data = self._get_json_data()
+            fcm_token = data.get('fcm_token')
+            if not fcm_token:
+                return self._error_response('fcm_token is required')
+
+            phones.sudo().write({
+                'fcm_token': fcm_token,
+                'fcm_token_updated': fields.Datetime.now(),
+            })
+
+            _logger.info('SMS Gateway: FCM token registered for phone(s) %s',
+                         ', '.join(phones.mapped('name')))
+
+            return self._json_response({'success': True})
+        except Exception as e:
+            _logger.exception('SMS Gateway register-fcm error')
+            return self._error_response(str(e), 500)
+
     # ---- Stats ----
 
     @http.route('/sms-gateway/stats', type='http', auth='public',

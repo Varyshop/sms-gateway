@@ -148,6 +148,7 @@ class SmsSms(models.Model):
 
         # Track in-memory capacity deltas per phone (for loop-internal limit checks)
         capacity_used = {}  # phone_id → segments already assigned in this batch
+        phones_to_wake = set()  # phone IDs that need FCM wake after commit
 
         for sms in gateway_sms:
             # Check if mailing is paused
@@ -247,6 +248,9 @@ class SmsSms(models.Model):
             # Commit after each SMS to prevent rollback issues
             self.env.cr.commit()
 
+            # Mark phone for FCM wake (sent after the loop, deduplicated)
+            phones_to_wake.add(phone.id)
+
         # Check mailing completion
         for mailing in related_mailings:
             if hasattr(mailing, 'paused') and mailing.paused:
@@ -260,6 +264,15 @@ class SmsSms(models.Model):
                 mailing.sudo().write({'state': 'done', 'sent_date': fields.Datetime.now()})
                 self.env.cr.commit()
 
+        # Send FCM wake to assigned phones (one push per phone, deduplicated).
+        # Phones without an FCM token (old app versions) are silently skipped.
+        if phones_to_wake:
+            from ..tools.fcm_service import send_fcm_wake
+            for phone_id in phones_to_wake:
+                phone_rec = self.env['sms.gateway.phone'].sudo().browse(phone_id)
+                if phone_rec.exists():
+                    send_fcm_wake(self.env, phone_rec)
+
     def _update_gateway_status(self, sms_id, status, error_message=None):
         """Update SMS status from gateway phone confirmation."""
         sms = self.sudo().browse(sms_id)
@@ -271,16 +284,21 @@ class SmsSms(models.Model):
             if status == 'sending':
                 sms.write({'gateway_state': 'sending'})
             elif status == 'sent':
-                if sms.sms_tracker_id:
-                    sms.sms_tracker_id._action_update_from_sms_state('sent')
+                # Guard: only increment counters on first transition to 'sent'
+                already_sent = sms.gateway_state == 'sent'
                 sms.write({
                     'state': 'sent',
                     'gateway_state': 'sent',
                     'failure_type': False,
                 })
-                # Increment counters only on confirmed delivery
-                if sms.gateway_phone_id:
+                # Increment counters only on first confirmed delivery
+                if sms.gateway_phone_id and not already_sent:
                     segments = sms_segment_count(sms.body)
+                    _logger.info(
+                        'SMS Gateway: Incrementing counters for phone %s '
+                        '(+%d segments) on SMS %s',
+                        sms.gateway_phone_id.name, segments, sms_id,
+                    )
                     self.env.cr.execute(
                         "UPDATE sms_gateway_phone "
                         "SET sent_today = sent_today + %s, "
@@ -291,10 +309,35 @@ class SmsSms(models.Model):
                     )
                     sms.gateway_phone_id.invalidate_recordset(
                         ['sent_today', 'sent_month', 'sent_total'])
+                elif not sms.gateway_phone_id:
+                    _logger.warning(
+                        'SMS Gateway: SMS %s has no gateway_phone_id, '
+                        'counters NOT incremented', sms_id,
+                    )
+                elif already_sent:
+                    _logger.info(
+                        'SMS Gateway: SMS %s already sent, skipping counter increment',
+                        sms_id,
+                    )
+                # Update tracker (non-critical — do not let it block counters)
+                try:
+                    if sms.sms_tracker_id:
+                        sms.sms_tracker_id._action_update_from_sms_state('sent')
+                except Exception:
+                    _logger.exception(
+                        'SMS Gateway: Tracker update failed for SMS %s '
+                        '(counters already incremented)', sms_id,
+                    )
             elif status == 'error':
-                if sms.sms_tracker_id:
-                    sms.sms_tracker_id._action_update_from_sms_state(
-                        'error', failure_type='sms_server')
+                # Update tracker (non-critical)
+                try:
+                    if sms.sms_tracker_id:
+                        sms.sms_tracker_id._action_update_from_sms_state(
+                            'error', failure_type='sms_server')
+                except Exception:
+                    _logger.exception(
+                        'SMS Gateway: Tracker update failed for SMS %s', sms_id,
+                    )
                 sms.write({
                     'state': 'error',
                     'gateway_state': 'error',

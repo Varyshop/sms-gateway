@@ -37,6 +37,9 @@
                     <button name="action_generate_api_key" type="object"
                             string="Generate API Key" class="btn-primary"
                             confirm="This will regenerate the API key. The mobile app will need to re-pair via QR code. Continue?"/>
+                    <button name="action_recalculate_counters" type="object"
+                            string="Recalculate Counters" class="btn-secondary"
+                            confirm="Recalculate sent_today, sent_month, and sent_total from SMS records?"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -84,6 +87,9 @@
                             <field name="last_heartbeat"/>
                             <field name="battery_level"/>
                             <field name="signal_strength"/>
+                            <field name="fcm_token" readonly="1" string="FCM"
+                                   widget="char" placeholder="Not registered"/>
+                            <field name="fcm_token_updated" readonly="1"/>
                         </group>
                         <group string="Domain Filter">
                             <field name="domain_filter"

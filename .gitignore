@@ -9,3 +9,5 @@ _build/
 !.mailmap
 !.nojekyll
 __pycache__/
+
+*-firebase-adminsdk-*.json

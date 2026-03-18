@@ -14,6 +14,23 @@
                             <field name="sms_gateway_force"/>
                         </setting>
                     </block>
+                    <block title="FCM Push Notifications">
+                        <setting string="Enable FCM Push"
+                                 help="Send instant push notifications to gateway phones when new SMS are queued. Reduces latency from 10s to under 2s. Phones without FCM continue using polling.">
+                            <field name="sms_gateway_fcm_enabled"/>
+                            <div invisible="not sms_gateway_fcm_enabled" class="mt8">
+                                <label for="sms_gateway_fcm_credentials_json"/>
+                                <field name="sms_gateway_fcm_credentials_json"
+                                       placeholder='{"type": "service_account", "project_id": "...", ...}'/>
+                                <div class="text-muted mt4 mb8">
+                                    Paste the full Firebase service account JSON. Alternative: file path below.
+                                </div>
+                                <label for="sms_gateway_fcm_credentials_path"/>
+                                <field name="sms_gateway_fcm_credentials_path"
+                                       placeholder="/path/to/firebase-service-account.json"/>
+                            </div>
+                        </setting>
+                    </block>
                     <block title="SMS Gateway Status">
                         <setting string="Gateway Phones" help="Manage your registered SMS gateway phones">
                             <div class="content-group">

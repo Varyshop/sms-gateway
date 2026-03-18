@@ -67,6 +67,12 @@ class SmsGatewayPhone(models.Model):
              'Leave empty to accept all SMS.'
     )
 
+    # FCM push notifications
+    fcm_token = fields.Char(string='FCM Token', copy=False,
+                             help='Firebase Cloud Messaging token for push notifications. '
+                                  'Set automatically by the mobile app.')
+    fcm_token_updated = fields.Datetime(string='FCM Token Updated', readonly=True)
+
     # Device info (updated via heartbeat)
     battery_level = fields.Integer(string='Battery Level', readonly=True)
     signal_strength = fields.Integer(string='Signal Strength (dBm)', readonly=True)
@@ -219,6 +225,75 @@ class SmsGatewayPhone(models.Model):
             )
         if phones_to_reset:
             _logger.info('Reset monthly SMS counters for %d gateway phones', len(phones_to_reset))
+
+    def action_recalculate_counters(self):
+        """Recalculate sent_today, sent_month, sent_total from sms.sms records.
+
+        Useful when counters got out of sync (e.g. due to tracker errors
+        preventing counter increment).
+        """
+        from ..tools.sms_utils import sms_segment_count
+        today = date.today()
+        for phone in self:
+            # sent_today: SMS sent today
+            today_sms = self.env['sms.sms'].sudo().search([
+                ('gateway_phone_id', '=', phone.id),
+                ('state', '=', 'sent'),
+                ('gateway_state', '=', 'sent'),
+                ('write_date', '>=', fields.Datetime.to_string(
+                    fields.Datetime.from_string(today.isoformat() + ' 00:00:00'))),
+            ])
+            today_segments = sum(sms_segment_count(s.body) for s in today_sms)
+
+            # sent_month: SMS sent since last reset date
+            if phone.next_month_reset:
+                # Current period started one billing cycle before next_month_reset
+                period_start_day = phone.month_start_day or 1
+                # Work backwards from next_month_reset to find period start
+                nr = phone.next_month_reset
+                if nr.month == 1:
+                    period_start = nr.replace(year=nr.year - 1, month=12, day=min(period_start_day, 31))
+                else:
+                    max_day = calendar.monthrange(nr.year, nr.month - 1)[1]
+                    period_start = nr.replace(month=nr.month - 1, day=min(period_start_day, max_day))
+            else:
+                # Fallback: assume period started on month_start_day of current month
+                period_start_day = phone.month_start_day or 1
+                if today.day >= period_start_day:
+                    period_start = today.replace(day=period_start_day)
+                else:
+                    if today.month == 1:
+                        period_start = today.replace(year=today.year - 1, month=12, day=period_start_day)
+                    else:
+                        max_day = calendar.monthrange(today.year, today.month - 1)[1]
+                        period_start = today.replace(month=today.month - 1, day=min(period_start_day, max_day))
+
+            month_sms = self.env['sms.sms'].sudo().search([
+                ('gateway_phone_id', '=', phone.id),
+                ('state', '=', 'sent'),
+                ('gateway_state', '=', 'sent'),
+                ('write_date', '>=', fields.Datetime.to_string(
+                    fields.Datetime.from_string(period_start.isoformat() + ' 00:00:00'))),
+            ])
+            month_segments = sum(sms_segment_count(s.body) for s in month_sms)
+
+            # sent_total: all sent SMS ever
+            all_sms = self.env['sms.sms'].sudo().search([
+                ('gateway_phone_id', '=', phone.id),
+                ('state', '=', 'sent'),
+                ('gateway_state', '=', 'sent'),
+            ])
+            total_segments = sum(sms_segment_count(s.body) for s in all_sms)
+
+            phone.write({
+                'sent_today': today_segments,
+                'sent_month': month_segments,
+                'sent_total': total_segments,
+            })
+            _logger.info(
+                'Recalculated counters for phone %s: today=%d, month=%d, total=%d',
+                phone.name, today_segments, month_segments, total_segments,
+            )
 
     @api.model
     def _get_available_phones(self, partner=None):
