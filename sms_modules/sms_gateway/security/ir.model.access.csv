@@ -3,3 +3,5 @@ access_sms_gateway_phone_user,sms.gateway.phone.user,model_sms_gateway_phone,bas
 access_sms_gateway_phone_manager,sms.gateway.phone.manager,model_sms_gateway_phone,mass_mailing.group_mass_mailing_user,1,1,1,1
 access_sms_gateway_send_wizard,sms.gateway.send.wizard,model_sms_gateway_send_wizard,base.group_user,1,1,1,1
 access_sms_gateway_send_wizard_line,sms.gateway.send.wizard.line,model_sms_gateway_send_wizard_line,base.group_user,1,1,1,1
+access_sms_gateway_inbound_user,sms.gateway.inbound.user,model_sms_gateway_inbound,base.group_user,1,0,0,0
+access_sms_gateway_inbound_manager,sms.gateway.inbound.manager,model_sms_gateway_inbound,mass_mailing.group_mass_mailing_user,1,1,1,1

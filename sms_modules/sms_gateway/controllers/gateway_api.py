@@ -346,18 +346,39 @@ class SmsGatewayController(http.Controller):
                 ], limit=1)
 
             if partner:
-                body = f"Prichozi SMS: {message}"
-                if blacklisted:
-                    body += "\n[Cislo pridano na blacklist - STOP]"
+                stop_html = (
+                    '<br/><span style="color: #dc2626; font-weight: bold;">'
+                    '&#9940; Cislo pridano na blacklist (STOP)</span>'
+                ) if blacklisted else ''
+                body = (
+                    f'<b>&#128233; Prichozi SMS od {from_number}</b>'
+                    f'<br/><blockquote style="border-left: 3px solid #3B82F6; '
+                    f'padding-left: 8px; margin: 4px 0; color: #374151;">'
+                    f'{message}</blockquote>{stop_html}'
+                )
                 try:
                     partner.message_post(
                         body=body,
-                        subject=f"SMS od {from_number}",
                         message_type='comment',
                         subtype_xmlid='mail.mt_note',
                     )
                 except Exception as e:
                     _logger.error('SMS Gateway: Failed to post chatter message: %s', e)
+
+            # Persist inbound SMS
+            is_stop = 'STOP' in message.upper()
+            try:
+                request.env['sms.gateway.inbound'].sudo().create({
+                    'from_number': from_number,
+                    'to_number': to_number,
+                    'message': message,
+                    'phone_id': phones[0].id if phones else False,
+                    'partner_id': partner.id if partner else False,
+                    'is_stop': is_stop,
+                    'blacklisted': blacklisted,
+                })
+            except Exception as e:
+                _logger.error('SMS Gateway: Failed to save inbound SMS: %s', e)
 
             request.env.cr.commit()
 
@@ -470,6 +491,56 @@ class SmsGatewayController(http.Controller):
             })
         except Exception as e:
             _logger.exception('SMS Gateway inbound-batch error')
+            return self._error_response(str(e), 500)
+
+    # ---- Inbound SMS History ----
+
+    @http.route('/sms-gateway/inbound-history', type='http', auth='public',
+                methods=['POST'], csrf=False, cors='*')
+    def inbound_history(self, **kwargs):
+        """Return paginated inbound SMS history for the gateway phone."""
+        try:
+            api_key = self._get_api_key()
+            phones = self._validate_api_key(api_key)
+            if not phones:
+                return self._error_response('Invalid API key', 401)
+
+            data = self._get_json_data()
+            limit = min(int(data.get('limit', 50)), 200)
+            offset = int(data.get('offset', 0))
+            stop_only = data.get('stop_only', False)
+
+            domain = [('phone_id', 'in', phones.ids)]
+            if stop_only:
+                domain.append(('is_stop', '=', True))
+
+            records = request.env['sms.gateway.inbound'].sudo().search(
+                domain, limit=limit, offset=offset, order='received_at desc',
+            )
+            total = request.env['sms.gateway.inbound'].sudo().search_count(domain)
+
+            messages = []
+            for rec in records:
+                messages.append({
+                    'id': rec.id,
+                    'from_number': rec.from_number,
+                    'to_number': rec.to_number or '',
+                    'message': rec.message or '',
+                    'received_at': fields.Datetime.to_string(rec.received_at),
+                    'is_stop': rec.is_stop,
+                    'blacklisted': rec.blacklisted,
+                    'partner_name': rec.partner_id.name if rec.partner_id else '',
+                })
+
+            return self._json_response({
+                'success': True,
+                'messages': messages,
+                'total': total,
+                'limit': limit,
+                'offset': offset,
+            })
+        except Exception as e:
+            _logger.exception('SMS Gateway inbound-history error')
             return self._error_response(str(e), 500)
 
     # ---- Register FCM Token ----
