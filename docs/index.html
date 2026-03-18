@@ -450,6 +450,10 @@
           <a href="#odhlaseni" data-section="odhlaseni">Odhlaseni a STOP</a>
           <a href="#statistiky" data-section="statistiky">Statistiky</a>
 
+          <div class="nav-group">Pokrocile nastaveni</div>
+          <a href="#fcm" data-section="fcm">FCM Push notifikace</a>
+          <a href="#background" data-section="background">Pozadi a spolehlivost</a>
+
           <div class="nav-group">Pomoc</div>
           <a href="#overeni" data-section="overeni">Overeni funkce</a>
           <a href="#casty-dotazy" data-section="casty-dotazy">Caste dotazy</a>
@@ -693,12 +697,25 @@
             <td><strong>Informace o telefonu</strong></td>
             <td>Pro zjisteni cisel vasich SIM karet</td>
           </tr>
+          <tr>
+            <td><strong>Notifikace</strong></td>
+            <td>Pro zobrazeni stavu odesilani a sluzby na pozadi (Android 13+ se pta v dialogu)</td>
+          </tr>
         </table>
+
+        <p>
+          Krome techto opravneni aplikace zobrazi take dialog pro
+          <strong>vyjimku z optimalizace baterie</strong>. Tato vyjimka je
+          nezbytna, aby Android neuspaval aplikaci na pozadi a SMS se
+          spolehlivě odesilaly i pri zamknute obrazovce. Vice viz sekce
+          <a href="#background">Pozadi a spolehlivost</a>.
+        </p>
 
         <div class="warning">
           <strong>Dulezite:</strong> Vsechna opravneni je treba povolit, jinak
-          nebude aplikace spravne fungovat. Pokud jste omylem opravneni
-          zamitnuli, muzete ho dodatecne povolit v
+          nebude aplikace spravne fungovat. Povolte take vyjimku z optimalizace
+          baterie &mdash; bez ni muze Android odesilani SMS na pozadi zastavit.
+          Pokud jste omylem opravneni zamitnuli, muzete ho dodatecne povolit v
           <em
             >Nastaveni telefonu &rarr; Aplikace &rarr; Varyshop SMS &rarr;
             Opravneni</em
@@ -1242,6 +1259,110 @@
           </li>
         </ul>
 
+        <!-- ==================== FCM PUSH NOTIFIKACE ==================== -->
+        <h2 id="fcm">FCM Push notifikace</h2>
+
+        <p>
+          Standardne si aplikace na telefonu <strong>kazdy par sekund</strong>
+          vyzveda nove SMS z fronty (tzv. polling). To funguje dobre, ale
+          mezi vytvorenim SMS v administraci a zacatkem odesilani muze byt
+          prodleva az 10 sekund.
+        </p>
+
+        <p>
+          <strong>FCM (Firebase Cloud Messaging)</strong> tuto prodlevu
+          eliminuje. Kdyz je FCM povoleno, administrace posle telefonu
+          okamzity &bdquo;push&ldquo; impuls &mdash; aplikace zacne
+          odesilat prakticky ihned.
+        </p>
+
+        <h3>Jak FCM zapnout</h3>
+        <ol class="steps">
+          <li>
+            Prejdete do
+            <span class="path">Nastaveni &rarr; SMS Gateway</span>
+          </li>
+          <li>
+            Zapnete prepinac <strong>FCM Push Enabled</strong>
+          </li>
+          <li>
+            Nahrajte soubor <strong>Firebase Service Account JSON</strong>
+            &mdash; ziskate ho ve
+            <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a>
+            (Project Settings &rarr; Service accounts &rarr; Generate new private key)
+          </li>
+          <li>Ulozte nastaveni</li>
+        </ol>
+
+        <div class="info">
+          <strong>Jeden Firebase projekt pro vsechny instance.</strong>
+          Pokud provozujete vice Varyshop instanci (napr. pro ruzne
+          zakazniky), staci jeden Firebase projekt a jeden Service Account
+          JSON soubor. Kazda instance ho pouzije samostatne.
+        </div>
+
+        <div class="tip">
+          <strong>Co kdyz FCM nenastavim?</strong> Aplikace funguje
+          naprosto normalne i bez FCM &mdash; pouzije standardni polling.
+          SMS se odeslou, jen s mirne vyssi prodlevou (do 10 sekund).
+          FCM je volitelne vylepseni, ne nutnost.
+        </div>
+
+        <!-- ==================== POZADI A SPOLEHLIVOST ==================== -->
+        <h2 id="background">Pozadi a spolehlivost</h2>
+
+        <p>
+          Aplikace Varyshop SMS odesila zpravy i kdyz je
+          <strong>obrazovka zamknuta</strong> nebo kdyz pouzivate jiny
+          program. Aby to fungovalo spolehlivě, musi byt spravne nastavena
+          optimalizace baterie.
+        </p>
+
+        <h3>Optimalizace baterie</h3>
+        <p>
+          Android se snazi setrit baterii a muze aplikacim na pozadi
+          omezit cinnost. Pro Varyshop SMS je treba toto omezeni vypnout:
+        </p>
+        <ol class="steps">
+          <li>
+            Otevrete <span class="path">Nastaveni telefonu &rarr; Baterie &rarr; Vyuziti baterie aplikacemi</span>
+          </li>
+          <li>
+            Najdete aplikaci <strong>SMS Gateway</strong>
+          </li>
+          <li>
+            Zvolte <strong>Neomezene</strong> (Unrestricted)
+          </li>
+        </ol>
+
+        <div class="info">
+          <strong>Jak to overit:</strong>
+          <span class="path">Nastaveni &rarr; Baterie &rarr; Vyuziti baterie aplikacemi &rarr; SMS Gateway</span>
+          &mdash; melo by tam byt nastaveno <em>Neomezene</em>.
+        </div>
+
+        <h3>Xiaomi / MIUI &mdash; extra kroky</h3>
+        <p>
+          Telefony Xiaomi s nadstavbou MIUI maji agresivnejsi spravu
+          baterie. Krome vyjimky z optimalizace baterie je treba navic:
+        </p>
+        <ul>
+          <li>
+            Povolit <strong>Autostart</strong>:
+            <span class="path">Nastaveni &rarr; Aplikace &rarr; Opravneni &rarr; Autostart</span>
+            &mdash; zapnout pro SMS Gateway
+          </li>
+          <li>
+            V nastaveni baterie pro aplikaci zvolit <strong>Bez omezeni</strong>
+          </li>
+        </ul>
+
+        <div class="warning">
+          <strong>Dulezite:</strong> Pokud se SMS neodesilaji pri zamknute
+          obrazovce, optimalizace baterie je nejcastejsi pricina. Vzdy
+          nejdriv zkontrolujte toto nastaveni.
+        </div>
+
         <!-- ==================== OVERENI ==================== -->
         <h2 id="overeni">Jak overit ze vse funguje</h2>
 
@@ -1352,6 +1473,48 @@
             </li>
             <li>
               Pouzit vice telefonu &mdash; limit plati na kazdy telefon zvlast
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">SMS se neodesilaji pri zamknute obrazovce</p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Nejcastejsi pricina: <strong>optimalizace baterie</strong> uspi
+              aplikaci na pozadi. Zkontrolujte
+              <span class="path">Nastaveni &rarr; Baterie &rarr; Vyuziti baterie aplikacemi &rarr; SMS Gateway</span>
+              a nastavte na <em>Neomezene</em>
+            </li>
+            <li>
+              Na Xiaomi/MIUI: povolte take <em>Autostart</em> (viz sekce
+              <a href="#background">Pozadi a spolehlivost</a>)
+            </li>
+            <li>
+              Overit, ze aplikace ma povolene notifikace (potreba pro sluzbu na pozadi)
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">
+          STOP zpravy se neobjevi v blacklistu
+        </p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Overit, ze aplikace ma opravneni <strong>Prijimani SMS</strong>
+              (<em>RECEIVE_SMS</em>) &mdash; bez nej aplikace odpovedi neuvidi
+            </li>
+            <li>
+              Zkontrolujte pripojeni k internetu &mdash; aplikace musi
+              zaslat informaci o STOP zprave zpet na server
+            </li>
+            <li>
+              Prijemce musi odpovedet na <strong>stejne cislo</strong>, ze
+              ktereho SMS prisel
+            </li>
+            <li>
+              Zprava musi obsahovat slovo STOP (velka/mala pismena nehraji roli)
             </li>
           </ul>
         </div>

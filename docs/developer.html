@@ -192,6 +192,8 @@
         <li><a href="#13-dual-sim">13. Dual SIM podpora</a></li>
         <li><a href="#14-api">14. API reference</a></li>
         <li><a href="#15-troubleshooting">15. Reseni problemu</a></li>
+        <li><a href="#16-fcm">16. FCM Push Notifications</a></li>
+        <li><a href="#17-pozadi">17. Pozadi a spolehlivost (Android)</a></li>
       </ul>
     </div>
 
@@ -1022,6 +1024,42 @@ STOP pro odhlaseni</code></pre>
     ]
 }</code></pre>
 
+    <h3>POST /sms-gateway/register-fcm</h3>
+    <p>Registrace FCM tokenu pro push notifikace. Telefon posle svuj FCM token po sparovani nebo kdyz se token obnovi.</p>
+    <pre><code>// Request
+{
+    "fcm_token": "dK3xP9...dlouhy_firebase_token"
+}
+
+// Response - uspech
+{
+    "success": true,
+    "message": "FCM token registered"
+}
+
+// Response - FCM neni povoleno
+{
+    "success": true,
+    "message": "FCM not enabled, token ignored"
+}</code></pre>
+
+    <h3>POST /sms-gateway/confirm-batch</h3>
+    <p>Hromadne potvrzeni stavu vice SMS najednou. Efektivnejsi nez jednotlive <code>/confirm/{sms_id}</code> volani.</p>
+    <pre><code>// Request
+{
+    "results": [
+        {"sms_id": 123, "status": "sent"},
+        {"sms_id": 124, "status": "sent"},
+        {"sms_id": 125, "status": "error", "error_message": "Number unreachable"}
+    ]
+}
+
+// Response
+{
+    "success": true,
+    "processed": 3
+}</code></pre>
+
     <!-- ==================== 15. TROUBLESHOOTING ==================== -->
     <h2 id="15-troubleshooting">15. Reseni problemu</h2>
 
@@ -1104,6 +1142,41 @@ STOP pro odhlaseni</code></pre>
           kampan pauzovana.
         </td>
       </tr>
+      <tr>
+        <td>SMS se neodesilaji pri zamknute obrazovce</td>
+        <td>Android ukonci aplikaci kvuli optimalizaci baterie</td>
+        <td>
+          <ul>
+            <li>Vypnete Battery Optimization pro SMS Gateway (Nastaveni &gt; Aplikace &gt; SMS Gateway &gt; Baterie &gt; Neomezovat)</li>
+            <li>Na MIUI/HarmonyOS: pridejte do Autostart a zakaste DuraSpeed / Battery saver</li>
+            <li>Overete, ze AlarmManager ma opravneni <code>SCHEDULE_EXACT_ALARM</code></li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td>STOP SMS chybi v blacklistu</td>
+        <td>InboundSmsWorker selhal nebo neni sit</td>
+        <td>
+          <ul>
+            <li>Zkontrolujte, ze WorkManager ma pristup k siti (Nastaveni &gt; Datove pripojeni)</li>
+            <li>Overete opravneni <code>RECEIVE_SMS</code></li>
+            <li>V logu aplikace hledejte chyby InboundSmsWorker</li>
+            <li>Zkontrolujte, ze endpoint <code>/sms-gateway/inbound</code> je dostupny z telefonu</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td>FCM push nedochazi</td>
+        <td>FCM neni spravne nakonfigurovano</td>
+        <td>
+          <ul>
+            <li>Overete <code>sms_gateway.fcm_enabled = True</code> v System Parameters</li>
+            <li>Zkontrolujte, ze <code>sms_gateway.fcm_credentials_json</code> nebo <code>sms_gateway.fcm_credentials_path</code> je nastaveno</li>
+            <li>Overete instalaci: <code>pip list | grep firebase-admin</code></li>
+            <li>Zkontrolujte, ze telefon ma platny FCM token (endpoint <code>/sms-gateway/register-fcm</code>)</li>
+          </ul>
+        </td>
+      </tr>
     </table>
 
     <h3>Diagnosticke prikazy (curl)</h3>
@@ -1125,10 +1198,238 @@ curl -X POST https://vas-server.cz/sms-gateway/inbound \
   -H "X-API-Key: VAS_API_KLIC" \
   -d '{"from_number": "+420999888777", "message": "STOP", "to_number": "+420777123456"}'</code></pre>
 
+    <!-- ==================== 16. FCM PUSH NOTIFICATIONS ==================== -->
+    <h2 id="16-fcm">16. FCM Push Notifications</h2>
+
+    <p>
+      Od verze v18.0.2.0.0 modul podporuje <strong>Firebase Cloud Messaging (FCM)</strong>
+      pro okamzite probuzeni telefonu pri novych SMS ve fronte. Misto cekani na dalsi
+      polling interval telefon obdrzi push notifikaci a okamzite si vyzvedne cekajici SMS.
+    </p>
+
+    <h3>Architektura</h3>
+    <div class="flow-diagram">
+Odoo Server                    Google FCM                   Android App
+    │                              │                            │
+    │  1. Nova SMS ve fronte       │                            │
+    │──────────────────────────────▶                            │
+    │  send_fcm_wake()             │                            │
+    │  (data message)              │  2. Push notification      │
+    │                              │───────────────────────────▶│
+    │                              │                            │  3. FcmMessageHandler
+    │                              │                            │     probudi aplikaci
+    │  4. GET /sms-gateway/pending │                            │
+    │◀──────────────────────────────────────────────────────────│
+    │  5. SMS data                 │                            │
+    │──────────────────────────────────────────────────────────▶│
+    │                              │                            │  6. Odesle SMS
+    </div>
+
+    <h3>Konfigurace na strane Odoo</h3>
+    <table>
+      <tr>
+        <th>System Parameter</th>
+        <th>Typ</th>
+        <th>Popis</th>
+      </tr>
+      <tr>
+        <td><code>sms_gateway.fcm_enabled</code></td>
+        <td>Boolean</td>
+        <td>Zapne/vypne FCM push notifikace. Vychozi: <code>False</code></td>
+      </tr>
+      <tr>
+        <td><code>sms_gateway.fcm_credentials_json</code></td>
+        <td>Text (JSON)</td>
+        <td>Inline obsah Firebase service account JSON souboru. Ma prednost pred <code>fcm_credentials_path</code>.</td>
+      </tr>
+      <tr>
+        <td><code>sms_gateway.fcm_credentials_path</code></td>
+        <td>Text (cesta)</td>
+        <td>Absolutni cesta k Firebase service account JSON souboru na serveru. Pouzije se pokud <code>fcm_credentials_json</code> neni nastaven.</td>
+      </tr>
+    </table>
+
+    <h3>Python zavislost</h3>
+    <pre><code>pip install firebase-admin</code></pre>
+    <p>
+      Knihovna <code>firebase-admin</code> je automaticky nainstalovana pri instalaci modulu
+      (deklarovana v <code>external_dependencies</code> manifestu). Pokud instalace selze
+      (napr. chybi systemove knihovny), FCM funkce se ticha deaktivuje a telefony
+      pokracuji v polling rezimu.
+    </p>
+
+    <h3>Implementace: <code>tools/fcm_service.py</code></h3>
+    <p>
+      Hlavni funkce <code>send_fcm_wake(phone)</code> odesle FCM data message na registrovany
+      telefon. Data message (na rozdil od notification message) probudi aplikaci i na pozadi
+      bez zobrazeni notifikace uzivateli.
+    </p>
+    <pre><code># Format FCM data message
+{
+    "type": "sms_pending",
+    "phone_id": "7",
+    "timestamp": "1710751200"
+}</code></pre>
+
+    <table>
+      <tr>
+        <th>Pole</th>
+        <th>Popis</th>
+      </tr>
+      <tr>
+        <td><code>type</code></td>
+        <td>Vzdy <code>"sms_pending"</code> — aplikace podle typu rozhodne akci</td>
+      </tr>
+      <tr>
+        <td><code>phone_id</code></td>
+        <td>ID zaznamu <code>sms.gateway.phone</code> v Odoo</td>
+      </tr>
+      <tr>
+        <td><code>timestamp</code></td>
+        <td>Unix timestamp odeslani — pro deduplication na strane aplikace</td>
+      </tr>
+    </table>
+
+    <h3>Zpetna kompatibilita</h3>
+    <div class="success">
+      <strong>Bezpecny upgrade:</strong> Telefony bez registrovaneho FCM tokenu (pole
+      <code>fcm_token</code> na <code>sms.gateway.phone</code>) pokracuji v polling rezimu
+      bez jakekoliv zmeny chovani. FCM je ciste aditivni vylepseni — zadny existujici
+      telefon neprestane fungovat.
+    </div>
+
+    <!-- ==================== 17. POZADI A SPOLEHLIVOST ==================== -->
+    <h2 id="17-pozadi">17. Pozadi a spolehlivost (Android)</h2>
+
+    <p>
+      Android agresivne omezuje pozadi aplikaci kvuli uspore baterie. Tato sekce
+      dokumentuje strategie pouzite v SMS Gateway aplikaci pro spolehlivy provoz
+      i pri zamknute obrazovce a Doze rezimu.
+    </p>
+
+    <h3>AlarmManager vs ScheduledExecutorService</h3>
+    <p>
+      Pro pravidelny polling (heartbeat + vyzvedavani SMS) aplikace pouziva
+      <strong>AlarmManager</strong> s presnym budenim namisto
+      <code>ScheduledExecutorService</code> nebo <code>Handler.postDelayed()</code>.
+    </p>
+    <table>
+      <tr>
+        <th>Pristup</th>
+        <th>Chovani v Doze</th>
+        <th>MIUI/HarmonyOS</th>
+      </tr>
+      <tr>
+        <td><code>ScheduledExecutorService</code></td>
+        <td>Zastaven po ~1 min v Doze</td>
+        <td>Agresivne ukoncen</td>
+      </tr>
+      <tr>
+        <td><code>Handler.postDelayed</code></td>
+        <td>Zastaven po ~1 min v Doze</td>
+        <td>Agresivne ukoncen</td>
+      </tr>
+      <tr>
+        <td><strong><code>AlarmManager.setExactAndAllowWhileIdle</code></strong></td>
+        <td>Probudi zarizeni z Doze</td>
+        <td>Funguje i na MIUI (s vyjimkou baterie)</td>
+      </tr>
+    </table>
+    <div class="warning">
+      <strong>Opravneni:</strong> Od Android 12 (API 31) je nutne opravneni
+      <code>SCHEDULE_EXACT_ALARM</code> nebo <code>USE_EXACT_ALARM</code>.
+      Aplikace o nej zada automaticky pri prvnim spusteni.
+    </div>
+
+    <h3>WorkManager pro prichozi SMS</h3>
+    <p>
+      Zpracovani prichozich SMS (detekce STOP) pouziva <strong>WorkManager</strong>
+      (<code>InboundSmsWorker</code>) namisto primych HTTP volani z BroadcastReceiveru.
+      Duvody:
+    </p>
+    <ul>
+      <li>BroadcastReceiver ma casovy limit ~10 sekund — sitovy pozadavek muze selhat</li>
+      <li>WorkManager automaticky retryuje pri neuspechu (exponential backoff)</li>
+      <li>WorkManager respektuje sitove podminky (constraint: <code>NetworkType.CONNECTED</code>)</li>
+      <li>Prezije restart zarizeni</li>
+    </ul>
+
+    <h3>WakeLock strategie</h3>
+    <p>
+      Aplikace pouziva <code>PowerManager.WakeLock</code> na dvou mistech
+      pro zabraneni uspaní CPU behem kritickych operaci:
+    </p>
+    <table>
+      <tr>
+        <th>Komponenta</th>
+        <th>WakeLock tag</th>
+        <th>Trvani</th>
+        <th>Ucel</th>
+      </tr>
+      <tr>
+        <td><code>FcmMessageHandler</code></td>
+        <td><code>sms-gateway:fcm-wake</code></td>
+        <td>Max 60 sekund</td>
+        <td>Drzi CPU vzhuru behem poll + odeslani SMS po FCM wake</td>
+      </tr>
+      <tr>
+        <td><code>SmsBroadcastReceiver</code></td>
+        <td><code>sms-gateway:inbound-sms</code></td>
+        <td>Max 30 sekund</td>
+        <td>Drzi CPU behem zpracovani prichozi SMS a enqueue do WorkManager</td>
+      </tr>
+    </table>
+
+    <h3>IMPORTANCE_HIGH notifikacni kanal</h3>
+    <p>
+      Foreground service notifikace pouziva kanal s <code>IMPORTANCE_HIGH</code>.
+      To zajistuje, ze Android nezabije sluzbu ani pri nedostatku pameti. Uzivatel
+      vidi trvalou notifikaci ve stavovem radku (pozadavek Androidu pro foreground
+      service).
+    </p>
+
+    <h3>Vyjimka z optimalizace baterie</h3>
+    <p>
+      Pri prvnim spusteni aplikace zada uzivatele o vyjimku z optimalizace baterie
+      (<code>REQUEST_IGNORE_BATTERY_OPTIMIZATIONS</code>). Bez teto vyjimky muze
+      Android:
+    </p>
+    <ul>
+      <li>Odlozit AlarmManager alarmy v Doze (sdruzi je do maintenance window)</li>
+      <li>Omezit sitovy pristup na pozadi</li>
+      <li>Ukoncit foreground service po delsi neaktivite (MIUI, Samsung)</li>
+    </ul>
+    <div class="note">
+      <strong>Kontrola:</strong> V aplikaci v sekci Nastaveni je indikator stavu
+      optimalizace baterie. Pokud sviti cervene, uzivatel musi rucne pridat vyjimku.
+    </div>
+
+    <h3>Heartbeat safety net</h3>
+    <p>
+      I s FCM muze dojit k situaci, kdy push notifikace nedorazi (napr. docasny vypadek
+      Google sluzeb). Proto aplikace udrzuje <strong>heartbeat safety net</strong>:
+    </p>
+    <ol>
+      <li>Kazdy heartbeat vraci <code>pending_count</code> pro kazde cislo</li>
+      <li>Pokud <code>pending_count &gt; 0</code>, aplikace okamzite spusti poll cyklus</li>
+      <li>Heartbeat interval je typicky 60 sekund — maximalni zpozdeni pri vypadku FCM je tedy 1 minuta</li>
+      <li>Tento mechanismus funguje nezavisle na FCM a zajistuje doruceni i bez push notifikaci</li>
+    </ol>
+
+    <div class="flow-diagram">
+FCM push (okamzite)  ──▶  Poll + Send
+        │
+        │ (pokud FCM selze)
+        │
+Heartbeat (60s)      ──▶  pending_count > 0?  ──▶  Poll + Send
+                                │
+                                └── pending_count == 0  ──▶  Zadna akce
+    </div>
+
     <hr />
 
     <p style="color: #6b7280; text-align: center; margin-top: 40px">
-      SMS Gateway v18.0.1.0.0 &bull; VaryShop &bull; 2026
+      SMS Gateway v18.0.2.0.0 &bull; VaryShop &bull; 2026
     </p>
   </body>
 </html>

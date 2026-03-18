@@ -11,6 +11,14 @@ Send SMS through physical Android phones instead of Odoo IAP. Supports multiple 
 │  Odoo 18     │◄─────────────────────►│  Android App    │
 │  sms_gateway │  heartbeat / pending  │  (React Native) │
 │  module      │  confirm / inbound    │  SMS Gateway    │
+└──────┬───────┘                       └─────────────────┘
+       │                                      ▲
+       │  FCM push (data-only)                │
+       │  via Google Firebase                 │  wakes app instantly
+       ▼                                      │
+┌──────────────┐  push: sms_pending    ┌──────┴──────────┐
+│  FCM         │──────────────────────►│  FCM SDK        │
+│  (Google)    │  wake-up signal       │  on device      │
 └──────────────┘                       └─────────────────┘
        │                                      │
        │  assigns SMS to phone queue          │  sends via native
@@ -20,6 +28,8 @@ Send SMS through physical Android phones instead of Odoo IAP. Supports multiple 
   sms.gateway.phone                    Physical SIM cards
   (load balancer)                      (Dual SIM support)
 ```
+
+When FCM push is configured, Odoo sends a data-only FCM message immediately after assigning SMS to a phone queue. The app wakes up, fetches pending messages via REST API, and sends them. If FCM is not configured, the app falls back to 5-minute interval polling.
 
 ### Components
 
@@ -35,6 +45,7 @@ Send SMS through physical Android phones instead of Odoo IAP. Supports multiple 
 
 - Odoo 18 Community or Enterprise
 - Python package: `qrcode` (`pip install qrcode[pil]`)
+- Python package (optional): `firebase-admin` (`pip install firebase-admin`) — required for FCM push notifications; auto-installed on Odoo startup if FCM is enabled and the package is missing
 - Android phone with SIM card(s)
 
 ### 1. Install the Odoo Module
@@ -116,9 +127,16 @@ gh release create v1.0.0 ./build/*.apk \
 
 #### First launch
 
-On first launch, scan the QR code from the Odoo phone record. The app will:
-- Send heartbeats every 30 seconds
-- Poll for pending SMS in the queue
+On first launch:
+1. **Notification permission** — on Android 13+ the app requests `POST_NOTIFICATIONS` permission (required to show the foreground service notification)
+2. **Battery optimization exemption** — the app requests to be excluded from battery optimization (ensures AlarmManager wake-ups are not deferred by Doze mode)
+3. **Scan QR code** — scan the QR code from the Odoo phone record to pair with the Odoo instance
+4. **FCM token auto-registration** — after pairing, the app automatically registers its Firebase Cloud Messaging token with Odoo via `/sms-gateway/register-fcm` for instant push notifications
+
+Once paired, the app will:
+- Receive FCM push notifications when new SMS are queued (instant wake-up)
+- Fall back to 5-minute polling if FCM is not configured on the server
+- Send heartbeats to report battery and signal status
 - Send SMS via the native Android SmsManager
 - Report delivery status back to Odoo
 - Forward inbound SMS containing "STOP" to trigger blacklisting
@@ -204,7 +222,9 @@ All endpoints use `POST` with JSON body. Authentication via `X-API-Key` header.
 | `/sms-gateway/heartbeat` | Phone sends heartbeat (battery, signal) |
 | `/sms-gateway/pending` | Phone fetches pending SMS from queue |
 | `/sms-gateway/confirm/<id>` | Phone reports SMS status (sending/sent/error) |
+| `/sms-gateway/confirm-batch` | Phone reports status for multiple SMS in one request |
 | `/sms-gateway/inbound` | Phone forwards received SMS (STOP detection) |
+| `/sms-gateway/register-fcm` | Phone registers its FCM token for push notifications |
 | `/sms-gateway/stats` | Phone requests its statistics |
 
 ### Example: Heartbeat
@@ -289,139 +309,119 @@ curl -X POST https://your-odoo.com/sms-gateway/confirm/42 \
 - A 160-char Czech message uses 3 segments, not 1
 - Check `sms_gateway/tools/sms_utils.py` for the exact algorithm
 
-## Roadmap: Polling → Event-Driven Architecture
+## FCM Push Notifications (Event-Driven)
 
-### Current Problem
+The gateway uses **Firebase Cloud Messaging (FCM)** to deliver instant wake-up signals to the Android app when new SMS are queued. This replaces the old interval-based polling with a push-first, poll-as-fallback architecture.
 
-The app uses **interval-based polling** — every 10s it calls `/sms-gateway/pending` and every 60s sends a heartbeat. This has several downsides:
-
-| Problem | Impact |
-|---------|--------|
-| **Latency** | SMS waits up to 10s in queue before the app picks it up |
-| **Battery drain** | Constant HTTP requests even when queue is empty |
-| **Server load** | N phones × 6 requests/min = unnecessary Odoo worker load |
-| **Wasted bandwidth** | 99% of poll responses return empty `sms_list: []` |
-| **Background kill** | Android aggressively kills background apps; polling stops |
-
-### Proposed Solutions
-
-#### Option A: Firebase Cloud Messaging (FCM) — Recommended
-
-The most battery-efficient and reliable approach for Android. Odoo sends a push notification when new SMS are queued, the app wakes up and fetches them.
+### How It Works
 
 ```
-┌──────────┐    1. SMS queued     ┌──────────┐    2. push     ┌─────────┐
-│  Odoo    │ ──────────────────►  │  FCM     │ ────────────►  │  App    │
-│  module  │                      │  (Google)│                │         │
-└──────────┘                      └──────────┘                └────┬────┘
-      ▲                                                           │
-      └───────── 3. GET /pending ──────── 4. send SMS ────────────┘
+┌──────────┐   1. SMS queued    ┌──────────┐   2. data push   ┌─────────┐
+│  Odoo    │ ─────────────────► │  FCM     │ ────────────────► │  App    │
+│  module  │                    │  (Google)│                   │         │
+└──────────┘                    └──────────┘                   └────┬────┘
+      ▲                                                             │
+      └────────── 3. POST /pending ────── 4. send via SmsManager ───┘
 ```
 
-**Odoo side changes:**
-- New field `fcm_token` on `sms.gateway.phone` (app registers its token after pairing)
-- After `_send()` assigns SMS to a phone, call FCM HTTP v1 API to send a **data-only** message (no notification, just wake-up signal)
-- Minimal payload: `{"data": {"type": "sms_pending", "count": "15"}}`
+1. Odoo assigns SMS to a phone queue via `_send()`
+2. Odoo sends a **data-only** FCM message (no visible notification, just a wake-up signal) with payload: `{"type": "sms_pending", "count": "15"}`
+3. The app wakes up immediately (even from background/killed state) and calls `/sms-gateway/pending`
+4. The app sends the SMS and confirms delivery back to Odoo
 
-**App side changes:**
-- Add `@react-native-firebase/messaging`
-- Register FCM token on pairing and send to Odoo via new endpoint `/sms-gateway/register-token`
-- On receiving data message → call `pollAndSend()` immediately
-- Keep heartbeat at 5 min interval (health check only, not for SMS discovery)
-- Remove polling interval entirely
+### Key Design Decisions
 
-**Pros:** Works when app is in background/killed (FCM wakes it), near-zero latency, minimal battery usage, proven at scale.
+- **One Firebase project** is shared across all Odoo instances. The app does not know which Odoo server will send it a push — it pairs to a specific instance via QR code at setup time.
+- **FCM token registration**: after pairing, the app sends its FCM token to Odoo via `POST /sms-gateway/register-fcm`. The token is stored on the `sms.gateway.phone` record.
+- **Data-only messages**: FCM messages carry no notification payload — they silently wake the app to trigger a poll cycle. This avoids user-visible push notifications for internal operations.
+- **Fallback to 5-minute polling**: if FCM is not configured on the server (no credentials), the app automatically falls back to polling every 5 minutes.
+- **Heartbeat safety net**: even with FCM enabled, if `pending_count > 0` and the last poll was too long ago, the heartbeat response triggers an immediate poll. This catches edge cases where an FCM message was lost.
+- **`firebase-admin` auto-install**: the Odoo module attempts to install `firebase-admin` via pip on startup if FCM is enabled and the package is missing. This is logged as a warning — in production, pre-install the package in your Docker image or virtualenv.
 
-**Cons:** Depends on Google Play Services, requires Firebase project setup, adds external dependency.
+### Token Lifecycle
 
-#### Option B: WebSocket (Persistent Connection)
+| Event | Action |
+|-------|--------|
+| App pairs via QR code | FCM token sent to `/sms-gateway/register-fcm` |
+| FCM token refresh (automatic by Firebase SDK) | App re-sends new token to `/sms-gateway/register-fcm` |
+| Phone record deleted in Odoo | Token becomes orphaned (harmless, FCM will eventually expire it) |
+| App uninstalled | Token invalidated by Google; Odoo FCM send will fail silently |
 
-Bidirectional real-time channel between Odoo and the app.
+## Odoo FCM Configuration
 
+### 1. Create a Firebase Project
+
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Create a new project (or use an existing one)
+3. No need to add an Android app in the console — the app already has Firebase configured with its own `google-services.json`
+
+### 2. Get a Service Account Key
+
+1. In Firebase Console, go to **Project Settings → Service Accounts**
+2. Click **Generate new private key**
+3. Download the JSON file
+
+### 3. Configure in Odoo
+
+Go to **Settings → SMS Gateway** (or **Settings → Technical → SMS Gateway Settings**):
+
+- **FCM Push Enabled**: check this box to enable push notifications
+- **FCM Credentials JSON**: paste the entire contents of the service account JSON file here (inline). This is the preferred method — no file path management needed.
+- **FCM Credentials Path**: alternatively, provide an absolute path to the service account JSON file on the server filesystem (e.g. `/etc/odoo/firebase-sa.json`). Use this if you prefer not to store credentials in the database.
+
+> **Note:** If both are provided, the inline JSON takes precedence over the file path.
+
+### 4. Verify
+
+After saving, check the Odoo server log for:
 ```
-┌──────────┐                    ┌─────────┐
-│  Odoo    │ ◄══ WebSocket ══►  │  App    │
-│  module  │   persistent conn  │         │
-└──────────┘                    └─────────┘
-  push: new_sms event             heartbeat via WS ping
-  push: config_update             confirm via WS message
-```
-
-**Implementation approach:**
-- Add a lightweight WebSocket server alongside Odoo (e.g. standalone Python process with `websockets` or `FastAPI WebSocket`) — Odoo workers don't support long-lived connections well
-- Odoo module signals the WS server via internal HTTP call or Redis pub/sub when SMS are queued
-- App connects to WS on startup, auto-reconnects on disconnect
-- Heartbeat becomes a WS ping/pong (free, no HTTP overhead)
-
-**Pros:** True real-time, bidirectional, no third-party dependency, single connection replaces both polling and heartbeat.
-
-**Cons:** Needs a separate process (Odoo workers can't hold WebSockets), connection management complexity (reconnect, auth refresh), mobile OS may kill background WS connections.
-
-#### Option C: Server-Sent Events (SSE)
-
-Lightweight server-push over HTTP. The app opens a long-lived GET connection and Odoo pushes events.
-
-```
-┌──────────┐   SSE stream    ┌─────────┐
-│  Odoo    │ ─────────────►  │  App    │
-│  /stream │  event: sms     │         │
-└──────────┘  data: {...}    └─────────┘
-```
-
-**Implementation approach:**
-- New endpoint `/sms-gateway/stream` that holds the connection open
-- Odoo sends `event: sms_pending\ndata: {"count": 5}\n\n` when SMS are queued
-- App uses `EventSource` or `fetch` with streaming reader
-- Fallback to polling if SSE connection drops
-
-**Pros:** Simple protocol (HTTP), works through proxies/CDN, no external dependency, native browser support.
-
-**Cons:** Unidirectional (app still needs POST for confirm/heartbeat), Odoo workers aren't designed for long-lived connections (same problem as WebSocket), needs dedicated process or Odoo bus module customization.
-
-#### Option D: Hybrid — FCM Push + Adaptive Polling (Pragmatic)
-
-Minimal changes, biggest impact. Add FCM for instant wake-up, keep polling as fallback with adaptive intervals.
-
-```python
-# Adaptive polling logic in the app:
-if pending_count > 0:
-    next_poll = 2s      # queue is active, poll fast
-elif last_sms_sent < 5min:
-    next_poll = 10s     # recently active
-else:
-    next_poll = 60s     # idle, rely on FCM for wake-up
+INFO: FCM initialized successfully for project: your-project-id
 ```
 
-**App side changes:**
-- Add FCM (same as Option A)
-- Replace fixed `setInterval` with adaptive timer
-- On FCM wake-up → immediate poll → fast-poll mode until queue drains → back to slow
+Send a test SMS — the app should receive it within 1-2 seconds instead of waiting for the next poll cycle.
 
-**Pros:** Best of both worlds — FCM for instant delivery, polling as reliable fallback, graceful degradation if FCM fails, minimal Odoo changes.
+## Background Execution (Android)
 
-**Cons:** Still has polling (though much less frequent), FCM dependency.
+The app uses several Android mechanisms to ensure reliable operation even when the device is in Doze mode, the app is in the background, or the manufacturer applies aggressive battery optimization (e.g. MIUI/Xiaomi, Samsung, Huawei).
 
-### Recommendation
+### AlarmManager (Poll + Heartbeat)
 
-**Start with Option D (Hybrid)**, then evaluate if pure FCM (Option A) is sufficient:
+- Uses `AlarmManager.setExactAndAllowWhileIdle()` for both poll and heartbeat alarms
+- This API is allowed to fire during Doze mode idle windows, ensuring the app wakes up even on heavily optimized devices (Xiaomi MIUI, Samsung OneUI)
+- Alarms reschedule themselves after each execution to maintain the cycle
 
-1. **Phase 1** — Adaptive polling (app-only change, no Odoo changes needed)
-2. **Phase 2** — Add FCM push for instant wake-up
-3. **Phase 3** — Evaluate: if FCM is reliable enough, remove polling entirely (Option A)
+### WorkManager (Inbound SMS Reporting)
 
-WebSocket (Option B) makes sense only if you later need server-initiated config changes, remote control, or real-time dashboard sync. For pure SMS dispatch, FCM is simpler and more battery-friendly.
+- Inbound SMS (STOP keyword detection) is reported to Odoo via `WorkManager` enqueued work
+- WorkManager guarantees delivery even if the app is killed between receiving the SMS and completing the HTTP request
+- Uses `OneTimeWorkRequest` with network constraint to ensure connectivity
 
-### Comparison Matrix
+### Notification Channel
 
-| Criteria | Polling (current) | FCM (A) | WebSocket (B) | SSE (C) | Hybrid (D) |
-|----------|:-:|:-:|:-:|:-:|:-:|
-| Latency | ~10s | <1s | <1s | <1s | <2s |
-| Battery | poor | excellent | moderate | moderate | good |
-| Background reliability | poor | excellent | poor | poor | good |
-| Odoo complexity | none | low | high | high | low |
-| External dependencies | none | Firebase | none | none | Firebase |
-| Bidirectional | yes | no (needs HTTP) | yes | no | no (needs HTTP) |
-| Works without Google Play | yes | no | yes | yes | fallback yes |
+- The foreground service uses an `IMPORTANCE_HIGH` notification channel
+- This prevents Android from silently demoting the service or hiding its notification
+- The persistent notification shows gateway status (connected, phone number, pending count)
+
+### Battery Optimization Exemption
+
+- On first launch, the app requests exclusion from battery optimization via `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`
+- This is critical for reliable AlarmManager wake-ups on all Android manufacturers
+- Without this exemption, some OEMs (Xiaomi, Huawei, Oppo) will kill the app within minutes of going to background
+
+### Permissions
+
+| Permission | Required | Purpose |
+|-----------|---------|---------|
+| `SEND_SMS` | Yes | Send SMS via SmsManager |
+| `RECEIVE_SMS` | Yes | Detect inbound STOP messages |
+| `POST_NOTIFICATIONS` | Android 13+ | Show foreground service notification |
+| `SCHEDULE_EXACT_ALARM` | Android 12+ | Exact AlarmManager scheduling |
+| `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` | Yes | Request Doze exemption |
+
+### WakeLock Usage
+
+- `FcmMessageHandler`: acquires a partial WakeLock when an FCM data message arrives to ensure the poll-and-send cycle completes before the CPU goes back to sleep
+- `SmsBroadcastReceiver`: acquires a partial WakeLock while processing an inbound SMS broadcast, released after the WorkManager task is enqueued
 
 ## License
 
