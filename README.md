@@ -423,6 +423,10 @@ The app uses several Android mechanisms to ensure reliable operation even when t
 - `FcmMessageHandler`: acquires a partial WakeLock when an FCM data message arrives to ensure the poll-and-send cycle completes before the CPU goes back to sleep
 - `SmsBroadcastReceiver`: acquires a partial WakeLock while processing an inbound SMS broadcast, released after the WorkManager task is enqueued
 
+## Contact
+
+V případě jakýchkoli dotazů nebo potřebné pomoci s nastavením kontaktujte [info@varyshop.eu](mailto:info@varyshop.eu) nebo přímo vývojáře [info@michalvarys.eu](mailto:info@michalvarys.eu)
+
 ## License
 
 LGPL-3
