@@ -557,12 +557,17 @@ class SmsGatewayController(http.Controller):
             offset = int(data.get('offset', 0))
             stop_only = data.get('stop_only', False)
             stop_not_blacklisted = data.get('stop_not_blacklisted', False)
+            search = data.get('search', '').strip()
 
             domain = [('phone_id', 'in', phones.ids)]
             if stop_not_blacklisted:
                 domain.extend([('is_stop', '=', True), ('blacklisted', '=', False)])
             elif stop_only:
                 domain.append(('is_stop', '=', True))
+            if search:
+                domain.append('|')
+                domain.append(('from_number', 'ilike', search))
+                domain.append(('message', 'ilike', search))
 
             records = request.env['sms.gateway.inbound'].sudo().search(
                 domain, limit=limit, offset=offset, order='received_at desc',
