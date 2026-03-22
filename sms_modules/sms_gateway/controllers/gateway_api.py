@@ -435,7 +435,7 @@ class SmsGatewayController(http.Controller):
                     ('phone_id', 'in', phones.ids),
                 ], limit=1)
                 if existing_inbound:
-                    # Already recorded — but still check STOP blacklist
+                    # Already recorded — but still ensure STOP is blacklisted
                     is_stop = 'STOP' in message.upper()
                     if is_stop:
                         bl = request.env['phone.blacklist'].sudo().search([
@@ -445,6 +445,13 @@ class SmsGatewayController(http.Controller):
                         ], limit=1)
                         if bl:
                             already_blacklisted += 1
+                        else:
+                            try:
+                                request.env['phone.blacklist'].sudo().add(from_number)
+                                blacklisted_count += 1
+                                _logger.info('SMS Gateway: Retroactive blacklist %s (STOP, dedup)', from_number)
+                            except Exception as e:
+                                _logger.error('SMS Gateway: Failed to blacklist %s: %s', from_number, e)
                     skipped += 1
                     continue
 
