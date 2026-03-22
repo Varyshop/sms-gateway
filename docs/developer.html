@@ -988,7 +988,7 @@ STOP pro odhlaseni</code></pre>
 {"success": true}</code></pre>
 
     <h3>POST /sms-gateway/inbound</h3>
-    <p>Nahlaseni prichozi SMS (pro STOP detekci).</p>
+    <p>Nahlaseni prichozi SMS (pro STOP detekci). Zprava se ulozi do modelu <code>sms.gateway.inbound</code> a pokud obsahuje STOP, cislo se prida na blacklist.</p>
     <pre><code>// Request
 {
     "from_number": "+420999888777",
@@ -1002,6 +1002,93 @@ STOP pro odhlaseni</code></pre>
     "blacklisted": true,
     "partner_found": true
 }</code></pre>
+
+    <h3>POST /sms-gateway/inbound-batch</h3>
+    <p>
+      Hromadne nahlaseni vice prichozich SMS najednou. Od v1.2.0 aplikace posila <strong>vsechny</strong> prijate
+      SMS (nejen STOP) na server. Server provadi deduplikaci podle kombinace <code>from_number + to_number + message + received_at</code>,
+      takze opakovane odeslani stejnych zprav (napr. pri rescan inboxu) nevytvori duplicity.
+    </p>
+    <pre><code>// Request
+{
+    "messages": [
+        {
+            "from_number": "+420999888777",
+            "message": "STOP",
+            "to_number": "+420777123456",
+            "received_at": "2026-03-22T10:30:00Z"
+        },
+        {
+            "from_number": "+420111222333",
+            "message": "Dekuji za informaci",
+            "to_number": "+420777123456",
+            "received_at": "2026-03-22T11:15:00Z"
+        }
+    ]
+}
+
+// Response
+{
+    "success": true,
+    "processed": 2,
+    "duplicates_skipped": 0
+}</code></pre>
+
+    <div class="note">
+      <strong>Chatter integrace:</strong> Kazda prichozi SMS se automaticky zapise do
+      chatteru partnera v Odoo jako formatovana HTML poznamka (blockquote s textem zpravy).
+      Pokud zprava obsahuje STOP, prida se vizualni stitek STOP.
+    </div>
+
+    <h3>Model: sms.gateway.inbound</h3>
+    <p>Vsechny prichozi SMS se ukladaji do modelu <code>sms.gateway.inbound</code>:</p>
+    <table>
+      <tr>
+        <th>Pole</th>
+        <th>Typ</th>
+        <th>Popis</th>
+      </tr>
+      <tr>
+        <td><code>from_number</code></td>
+        <td>Char</td>
+        <td>Cislo odeslatele (E.164)</td>
+      </tr>
+      <tr>
+        <td><code>to_number</code></td>
+        <td>Char</td>
+        <td>Cislo gateway telefonu, na ktere SMS prisla</td>
+      </tr>
+      <tr>
+        <td><code>message</code></td>
+        <td>Text</td>
+        <td>Obsah SMS zpravy</td>
+      </tr>
+      <tr>
+        <td><code>received_at</code></td>
+        <td>Datetime</td>
+        <td>Cas prijmu zpravy na telefonu</td>
+      </tr>
+      <tr>
+        <td><code>partner_id</code></td>
+        <td>Many2one</td>
+        <td>Nalezeny partner podle cisla odeslatele (muze byt prazdne)</td>
+      </tr>
+      <tr>
+        <td><code>is_stop</code></td>
+        <td>Boolean</td>
+        <td>Zda zprava obsahuje klicove slovo STOP</td>
+      </tr>
+      <tr>
+        <td><code>is_blacklisted</code></td>
+        <td>Boolean</td>
+        <td>Zda je cislo odeslatele na blacklistu</td>
+      </tr>
+      <tr>
+        <td><code>gateway_phone_id</code></td>
+        <td>Many2one</td>
+        <td>Odkaz na <code>sms.gateway.phone</code></td>
+      </tr>
+    </table>
 
     <h3>POST /sms-gateway/stats</h3>
     <p>Statistiky gateway telefonu.</p>
@@ -1162,6 +1249,18 @@ STOP pro odhlaseni</code></pre>
             <li>Overete opravneni <code>RECEIVE_SMS</code></li>
             <li>V logu aplikace hledejte chyby InboundSmsWorker</li>
             <li>Zkontrolujte, ze endpoint <code>/sms-gateway/inbound</code> je dostupny z telefonu</li>
+            <li>Pouzijte tlacitko <strong>Znovu prohledat prijate SMS</strong> v Nastaveni &gt; Sluzba pro retroaktivni odeslani vsech prijatych SMS za poslednich 30 dni</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td>Prichozi SMS nedochazeji na server</td>
+        <td>InboundSmsWorker pouzival spatnou autentifikaci (Authorization: Bearer misto X-API-Key)</td>
+        <td>
+          <ul>
+            <li><strong>Fix v1.2.0:</strong> InboundSmsWorker nyni pouziva spravne hlavicku <code>X-API-Key</code> (stejne jako ostatni endpointy)</li>
+            <li>Aktualizujte aplikaci na v1.2.0+</li>
+            <li>Po aktualizaci pouzijte <strong>Znovu prohledat prijate SMS</strong> pro odeslani chybejicich zprav z minulosti</li>
           </ul>
         </td>
       </tr>
@@ -1404,6 +1503,40 @@ Odoo Server                    Google FCM                   Android App
       optimalizace baterie. Pokud sviti cervene, uzivatel musi rucne pridat vyjimku.
     </div>
 
+    <h3>Rescan Inbox (nativni metoda)</h3>
+    <p>
+      Aplikace od v1.2.0 obsahuje nativni metodu <code>SmsModule.rescanInbox(days)</code>,
+      ktera precte SMS inbox za poslednich N dni (vychozi: 30) a vsechny nalezene zpravy
+      odesle na server pres endpoint <code>/sms-gateway/inbound-batch</code>.
+    </p>
+    <p>
+      Tato funkce je dostupna uzivateli pres tlacitko
+      <strong>Znovu prohledat prijate SMS</strong> v Nastaveni &gt; Sluzba.
+      Server provadi deduplikaci, takze je bezpecne spustit rescan opakavane.
+    </p>
+    <pre><code>// React Native volani
+import { NativeModules } from 'react-native';
+const messages = await NativeModules.SmsModule.rescanInbox(30);
+// messages: Array&lt;{from: string, body: string, date: number}&gt;
+
+// Nasledne se zpravy odeslou pres inbound-batch endpoint</code></pre>
+
+    <h3>WRITE_SECURE_SETTINGS opravneni</h3>
+    <p>
+      Pro zvyseni nativniho Android limitu na pocet odchozich SMS je potreba udelit
+      aplikaci opravneni <code>WRITE_SECURE_SETTINGS</code>. Toto opravneni nelze
+      udelit z GUI telefonu &mdash; vyzaduje ADB pripojeni:
+    </p>
+    <pre><code># Primo pres ADB
+adb shell pm grant com.varyshop.smsgatewayapp android.permission.WRITE_SECURE_SETTINGS
+
+# Nebo pri buildu ze zdrojaku
+yarn grant-permission</code></pre>
+    <div class="warning">
+      <strong>Bez tohoto opravneni</strong> Android muze blokovat odesilani po prekroceni
+      nativniho limitu (~30 SMS za 30 minut). S opravnenim aplikace automaticky zvysi limit.
+    </div>
+
     <h3>Heartbeat safety net</h3>
     <p>
       I s FCM muze dojit k situaci, kdy push notifikace nedorazi (napr. docasny vypadek
@@ -1435,7 +1568,7 @@ Heartbeat (60s)      ──▶  pending_count > 0?  ──▶  Poll + Send
     <hr />
 
     <p style="color: #6b7280; text-align: center; margin-top: 40px">
-      SMS Gateway v18.0.2.0.0 &bull; VaryShop &bull; 2026
+      SMS Gateway v18.0.2.1.0 &bull; VaryShop &bull; 2026
     </p>
   </body>
 </html>

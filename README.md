@@ -130,8 +130,14 @@ gh release create v1.0.0 ./build/*.apk \
 On first launch:
 1. **Notification permission** — on Android 13+ the app requests `POST_NOTIFICATIONS` permission (required to show the foreground service notification)
 2. **Battery optimization exemption** — the app requests to be excluded from battery optimization (ensures AlarmManager wake-ups are not deferred by Doze mode)
-3. **Scan QR code** — scan the QR code from the Odoo phone record to pair with the Odoo instance
-4. **FCM token auto-registration** — after pairing, the app automatically registers its Firebase Cloud Messaging token with Odoo via `/sms-gateway/register-fcm` for instant push notifications
+3. **WRITE_SECURE_SETTINGS permission** — grant via ADB to increase the native Android SMS sending limit:
+   ```bash
+   adb shell pm grant com.varyshop.smsgatewayapp android.permission.WRITE_SECURE_SETTINGS
+   # Or if building from source:
+   yarn grant-permission
+   ```
+4. **Scan QR code** — scan the QR code from the Odoo phone record to pair with the Odoo instance
+5. **FCM token auto-registration** — after pairing, the app automatically registers its Firebase Cloud Messaging token with Odoo via `/sms-gateway/register-fcm` for instant push notifications
 
 Once paired, the app will:
 - Receive FCM push notifications when new SMS are queued (instant wake-up)
@@ -139,7 +145,9 @@ Once paired, the app will:
 - Send heartbeats to report battery and signal status
 - Send SMS via the native Android SmsManager
 - Report delivery status back to Odoo
-- Forward inbound SMS containing "STOP" to trigger blacklisting
+- Forward ALL inbound SMS to Odoo (not just STOP), with deduplication
+- Post inbound SMS to partner chatter in Odoo with formatted HTML (blockquote + STOP badge)
+- **Inbound SMS tab** ("Prichozi") showing received SMS with filtering (all/STOP), pagination, partner name, and blacklist status
 
 ### 4. Configure SMS Provider on Campaigns
 
@@ -197,7 +205,9 @@ Outgoing SMS replaces the long unsubscribe URL with a short notice:
 odhl. sms: STOP
 ```
 
-When the app receives an inbound SMS containing "STOP", the sender's number is added to `phone.blacklist` (GDPR compliance). If the sender matches a partner, a chatter note is posted.
+The app forwards ALL received inbound SMS to Odoo (not just STOP). Each inbound SMS is recorded in `sms.gateway.inbound` and posted to the partner's chatter as a formatted HTML note (blockquote with message text + STOP badge if applicable). When the message contains "STOP", the sender's number is added to `phone.blacklist` (GDPR compliance).
+
+**Rescan Inbox**: If inbound SMS are missing (e.g. due to the auth fix in v1.2.0), use the "Znovu prohledat prijate SMS" button in the app's Settings > Sluzba. This re-reads the SMS inbox from the last 30 days and sends all messages to the server with deduplication.
 
 ### Domain Filtering
 
@@ -223,7 +233,8 @@ All endpoints use `POST` with JSON body. Authentication via `X-API-Key` header.
 | `/sms-gateway/pending` | Phone fetches pending SMS from queue |
 | `/sms-gateway/confirm/<id>` | Phone reports SMS status (sending/sent/error) |
 | `/sms-gateway/confirm-batch` | Phone reports status for multiple SMS in one request |
-| `/sms-gateway/inbound` | Phone forwards received SMS (STOP detection) |
+| `/sms-gateway/inbound` | Phone forwards received SMS (STOP detection + chatter post) |
+| `/sms-gateway/inbound-batch` | Phone forwards multiple received SMS with deduplication |
 | `/sms-gateway/register-fcm` | Phone registers its FCM token for push notifications |
 | `/sms-gateway/stats` | Phone requests its statistics |
 
@@ -413,7 +424,8 @@ The app uses several Android mechanisms to ensure reliable operation even when t
 | Permission | Required | Purpose |
 |-----------|---------|---------|
 | `SEND_SMS` | Yes | Send SMS via SmsManager |
-| `RECEIVE_SMS` | Yes | Detect inbound STOP messages |
+| `RECEIVE_SMS` | Yes | Detect inbound SMS messages (STOP + all) |
+| `WRITE_SECURE_SETTINGS` | ADB grant | Increase native SMS sending limit (via `adb` or `yarn grant-permission`) |
 | `POST_NOTIFICATIONS` | Android 13+ | Show foreground service notification |
 | `SCHEDULE_EXACT_ALARM` | Android 12+ | Exact AlarmManager scheduling |
 | `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` | Yes | Request Doze exemption |

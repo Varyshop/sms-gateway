@@ -448,6 +448,7 @@
           <div class="nav-group">Sledovani a GDPR</div>
           <a href="#odkazy" data-section="odkazy">Odkazy a kliknuti</a>
           <a href="#odhlaseni" data-section="odhlaseni">Odhlaseni a STOP</a>
+          <a href="#prichozi-sms" data-section="prichozi-sms">Prichozi SMS</a>
           <a href="#statistiky" data-section="statistiky">Statistiky</a>
 
           <div class="nav-group">Pokrocile nastaveni</div>
@@ -480,6 +481,14 @@
           systemem, automaticky prijima zpravy z front a odesila je jako bezne
           SMS. Muzete pouzit vice telefonu najednou &mdash; system sam rozdeli
           zatez.
+        </div>
+
+        <div class="highlight-box">
+          <strong>Novinka v1.2.0: Prichozi SMS</strong><br />
+          Aplikace nyne obsahuje novy tab <strong>Prichozi</strong>, kde vidite vsechny
+          prijate SMS zpravy. Muzete filtrovat na vsechny zpravy nebo jen STOP zpravy.
+          U kazde zpravy vidite jmeno partnera (pokud existuje v systemu) a stav blacklistu.
+          Vsechny prijate SMS se automaticky zasilaji na server a zobrazuji v chatteru partnera v Odoo.
         </div>
 
         <!-- ==================== JAK TO FUNGUJE ==================== -->
@@ -702,6 +711,16 @@
             <td>Pro zobrazeni stavu odesilani a sluzby na pozadi (Android 13+ se pta v dialogu)</td>
           </tr>
         </table>
+
+        <p>
+        <div class="warning">
+          <strong>Zvyseni SMS limitu (WRITE_SECURE_SETTINGS):</strong> Pro zvyseni
+          nativniho Android limitu na odchozi SMS je potreba udelit aplikaci opravneni
+          <code>WRITE_SECURE_SETTINGS</code>. To nelze udelit z telefonu &mdash;
+          je nutne pripojit telefon k pocitaci pres USB a spustit:
+          <pre><code>adb shell pm grant com.varyshop.smsgatewayapp android.permission.WRITE_SECURE_SETTINGS</code></pre>
+          Pokud buildujete ze zdrojaku, muzete pouzit: <code>yarn grant-permission</code>
+        </div>
 
         <p>
           Krome techto opravneni aplikace zobrazi take dialog pro
@@ -1203,6 +1222,45 @@
           </li>
         </ul>
 
+        <!-- ==================== PRICHOZI SMS ==================== -->
+        <h2 id="prichozi-sms">Prichozi SMS</h2>
+
+        <p>
+          Od verze 1.2.0 aplikace obsahuje novy tab <strong>Prichozi</strong>,
+          kde muzete sledovat vsechny prijate SMS zpravy na vasem gateway telefonu.
+        </p>
+
+        <h3>Co tab Prichozi ukazuje</h3>
+        <ul>
+          <li><strong>Odesilatel</strong> &mdash; cislo odeslatele a jmeno partnera (pokud existuje v systemu)</li>
+          <li><strong>Text zpravy</strong> &mdash; obsah prijate SMS</li>
+          <li><strong>Stav blacklistu</strong> &mdash; zda je cislo na cerne listine</li>
+          <li><strong>Datum a cas</strong> &mdash; kdy byla zprava prijata</li>
+        </ul>
+
+        <h3>Filtrovani</h3>
+        <p>
+          V horni casti obrazovky muzete prepnout mezi zobrazenim
+          <strong>Vsechny zpravy</strong> a <strong>Pouze STOP</strong>.
+          Seznam podporuje strankovani pro snazsi prochazeni velkeho objemu zprav.
+        </p>
+
+        <h3>Chatter integrace</h3>
+        <p>
+          Vsechny prijate SMS se automaticky zobrazuji v <strong>chatteru partnera</strong>
+          v Odoo. Kazda prichozi zprava se zobrazi jako formatovana poznamka s textem
+          v blockquote a pripadne se stitkem STOP, pokud zprava obsahovala klic pro odhlaseni.
+        </p>
+
+        <h3>Znovu prohledani inboxu</h3>
+        <p>
+          Pokud chybi nektere prichozi zpravy, prejdete v aplikaci do
+          <em>Nastaveni &rarr; Sluzba</em> a kliknete
+          <span class="btn">Znovu prohledat prijate SMS</span>. Aplikace precte
+          SMS inbox za poslednich 30 dni a vsechny nalezene zpravy odesle na server.
+          Duplicity se automaticky ignoruji.
+        </p>
+
         <!-- ==================== STATISTIKY ==================== -->
         <h2 id="statistiky">Statistiky kampane</h2>
 
@@ -1516,6 +1574,13 @@
             <li>
               Zprava musi obsahovat slovo STOP (velka/mala pismena nehraji roli)
             </li>
+            <li>
+              <strong>Znovu prohledat prijate SMS:</strong> V aplikaci prejdete do
+              <em>Nastaveni &rarr; Sluzba</em> a kliknete tlacitko
+              <span class="btn">Znovu prohledat prijate SMS</span>. Aplikace znovu
+              precte SMS inbox za poslednich 30 dni a odesle nalezene zpravy na server
+              (s deduplikaci &mdash; duplicity se ignoruji).
+            </li>
           </ul>
         </div>
 
@@ -1596,7 +1661,7 @@
             font-size: 0.9em;
           "
         >
-          Varyshop SMS v18.0.1.0.0 &bull; VaryShop &bull; 2026
+          Varyshop SMS v18.0.1.2.0 &bull; VaryShop &bull; 2026
         </p>
       </main>
     </div>
