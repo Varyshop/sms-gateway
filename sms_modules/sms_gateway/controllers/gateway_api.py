@@ -391,23 +391,16 @@ class SmsGatewayController(http.Controller):
             _logger.exception('SMS Gateway inbound error')
             return self._error_response(str(e), 500)
 
-    # ---- Batch Inbound (retroactive STOP check) ----
+    # ---- Batch Inbound (retroactive inbound check) ----
 
     @http.route('/sms-gateway/inbound-batch', type='http', auth='public',
                 methods=['POST'], csrf=False, cors='*')
     def inbound_batch(self, **kwargs):
-        """Batch-process inbound SMS (used for retroactive STOP blacklist check).
+        """Batch-process inbound SMS from device inbox.
 
-        Expects JSON body:
-        {
-            "messages": [
-                {"from_number": "+420...", "message": "STOP", "to_number": "+420..."},
-                ...
-            ]
-        }
-
-        Only processes messages containing STOP keyword.
-        Skips numbers that are already blacklisted.
+        Records all messages into sms.gateway.inbound (deduplicating by
+        from_number + message text). For messages containing STOP, also
+        blacklists the number and posts to partner chatter.
         """
         try:
             api_key = self._get_api_key()
@@ -420,71 +413,118 @@ class SmsGatewayController(http.Controller):
             if not messages or not isinstance(messages, list):
                 return self._error_response('messages list is required')
 
+            Inbound = request.env['sms.gateway.inbound'].sudo()
             blacklisted_count = 0
             already_blacklisted = 0
+            recorded = 0
             skipped = 0
 
             for msg in messages:
                 from_number = msg.get('from_number', '')
                 message = msg.get('message', '')
+                to_number = msg.get('to_number', '')
 
                 if not from_number or not message:
                     skipped += 1
                     continue
 
-                if 'STOP' not in message.upper():
+                # Deduplicate: skip if already recorded with same from+message
+                existing_inbound = Inbound.search([
+                    ('from_number', '=', from_number),
+                    ('message', '=', message),
+                    ('phone_id', 'in', phones.ids),
+                ], limit=1)
+                if existing_inbound:
+                    # Already recorded — but still check STOP blacklist
+                    is_stop = 'STOP' in message.upper()
+                    if is_stop:
+                        bl = request.env['phone.blacklist'].sudo().search([
+                            '|',
+                            ('number', '=', self._normalize_phone(from_number)),
+                            ('number', '=', from_number),
+                        ], limit=1)
+                        if bl:
+                            already_blacklisted += 1
                     skipped += 1
                     continue
 
-                # Check if already blacklisted
-                existing = request.env['phone.blacklist'].sudo().search([
-                    ('number', '=', self._normalize_phone(from_number)),
+                # Find partner
+                partner = request.env['res.partner'].sudo().search([
+                    '|',
+                    ('mobile', '=', from_number),
+                    ('phone', '=', from_number),
                 ], limit=1)
-                if not existing:
-                    # Also try with full number
-                    existing = request.env['phone.blacklist'].sudo().search([
-                        ('number', '=', from_number),
-                    ], limit=1)
-
-                if existing:
-                    already_blacklisted += 1
-                    continue
-
-                try:
-                    request.env['phone.blacklist'].sudo().add(from_number)
-                    blacklisted_count += 1
-                    _logger.info('SMS Gateway: Retroactive blacklist %s (STOP)', from_number)
-
-                    # Post to partner chatter
+                if not partner:
+                    sanitized = from_number.replace(' ', '').replace('-', '')
                     partner = request.env['res.partner'].sudo().search([
                         '|',
-                        ('mobile', '=', from_number),
-                        ('phone', '=', from_number),
+                        ('mobile', 'ilike', sanitized),
+                        ('phone', 'ilike', sanitized),
                     ], limit=1)
-                    if not partner:
-                        sanitized = from_number.replace(' ', '').replace('-', '')
-                        partner = request.env['res.partner'].sudo().search([
-                            '|',
-                            ('mobile', 'ilike', sanitized),
-                            ('phone', 'ilike', sanitized),
-                        ], limit=1)
-                    if partner:
+
+                is_stop = 'STOP' in message.upper()
+                blacklisted = False
+
+                # Blacklist STOP messages
+                if is_stop:
+                    bl = request.env['phone.blacklist'].sudo().search([
+                        '|',
+                        ('number', '=', self._normalize_phone(from_number)),
+                        ('number', '=', from_number),
+                    ], limit=1)
+                    if bl:
+                        already_blacklisted += 1
+                    else:
+                        try:
+                            request.env['phone.blacklist'].sudo().add(from_number)
+                            blacklisted = True
+                            blacklisted_count += 1
+                            _logger.info('SMS Gateway: Retroactive blacklist %s (STOP)', from_number)
+                        except Exception as e:
+                            _logger.error('SMS Gateway: Failed to blacklist %s: %s', from_number, e)
+
+                # Record inbound SMS
+                try:
+                    Inbound.create({
+                        'from_number': from_number,
+                        'to_number': to_number,
+                        'message': message,
+                        'phone_id': phones[0].id if phones else False,
+                        'partner_id': partner.id if partner else False,
+                        'is_stop': is_stop,
+                        'blacklisted': blacklisted,
+                    })
+                    recorded += 1
+                except Exception as e:
+                    _logger.error('SMS Gateway: Failed to save inbound SMS: %s', e)
+
+                # Post to partner chatter
+                if partner:
+                    stop_html = (
+                        '<br/><span style="color: #dc2626; font-weight: bold;">'
+                        '&#9940; Cislo pridano na blacklist (STOP)</span>'
+                    ) if blacklisted else ''
+                    body_html = (
+                        f'<b>&#128233; Prichozi SMS od {from_number}</b>'
+                        f'<br/><blockquote style="border-left: 3px solid #3B82F6; '
+                        f'padding-left: 8px; margin: 4px 0; color: #374151;">'
+                        f'{message}</blockquote>{stop_html}'
+                    )
+                    try:
                         partner.message_post(
-                            body=f"Prichozi SMS: {message}\n"
-                                 f"[Cislo pridano na blacklist - STOP (retroaktivni)]",
-                            subject=f"SMS od {from_number}",
+                            body=body_html,
                             message_type='comment',
                             subtype_xmlid='mail.mt_note',
                         )
-                except Exception as e:
-                    _logger.error('SMS Gateway: Failed to retroactively blacklist %s: %s',
-                                  from_number, e)
+                    except Exception as e:
+                        _logger.error('SMS Gateway: Failed to post chatter: %s', e)
 
-            if blacklisted_count > 0:
+            if recorded > 0 or blacklisted_count > 0:
                 request.env.cr.commit()
 
             return self._json_response({
                 'success': True,
+                'recorded': recorded,
                 'blacklisted': blacklisted_count,
                 'already_blacklisted': already_blacklisted,
                 'skipped': skipped,
