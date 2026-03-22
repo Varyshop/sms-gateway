@@ -556,9 +556,12 @@ class SmsGatewayController(http.Controller):
             limit = min(int(data.get('limit', 50)), 200)
             offset = int(data.get('offset', 0))
             stop_only = data.get('stop_only', False)
+            stop_not_blacklisted = data.get('stop_not_blacklisted', False)
 
             domain = [('phone_id', 'in', phones.ids)]
-            if stop_only:
+            if stop_not_blacklisted:
+                domain.extend([('is_stop', '=', True), ('blacklisted', '=', False)])
+            elif stop_only:
                 domain.append(('is_stop', '=', True))
 
             records = request.env['sms.gateway.inbound'].sudo().search(
@@ -588,6 +591,66 @@ class SmsGatewayController(http.Controller):
             })
         except Exception as e:
             _logger.exception('SMS Gateway inbound-history error')
+            return self._error_response(str(e), 500)
+
+    # ---- Blacklist from Inbound ----
+
+    @http.route('/sms-gateway/inbound-blacklist', type='http', auth='public',
+                methods=['POST'], csrf=False, cors='*')
+    def inbound_blacklist(self, **kwargs):
+        """Blacklist one or more phone numbers from inbound SMS records.
+
+        Expects JSON body:
+        {
+            "ids": [1, 2, 3]  // sms.gateway.inbound record IDs
+        }
+        """
+        try:
+            api_key = self._get_api_key()
+            phones = self._validate_api_key(api_key)
+            if not phones:
+                return self._error_response('Invalid API key', 401)
+
+            data = self._get_json_data()
+            ids = data.get('ids', [])
+            if not ids or not isinstance(ids, list):
+                return self._error_response('ids list is required')
+
+            Inbound = request.env['sms.gateway.inbound'].sudo()
+            records = Inbound.search([
+                ('id', 'in', ids),
+                ('phone_id', 'in', phones.ids),
+                ('blacklisted', '=', False),
+            ])
+
+            blacklisted_count = 0
+            for rec in records:
+                try:
+                    request.env['phone.blacklist'].sudo().add(rec.from_number)
+                    rec.blacklisted = True
+                    blacklisted_count += 1
+
+                    if rec.partner_id:
+                        rec.partner_id.message_post(
+                            body=(
+                                f'<b>&#9940; Cislo {rec.from_number} pridano na blacklist</b>'
+                                f'<br/><span style="color: #6B7280;">Rucne z mobilni aplikace</span>'
+                            ),
+                            message_type='comment',
+                            subtype_xmlid='mail.mt_note',
+                        )
+                except Exception as e:
+                    _logger.error('SMS Gateway: Failed to blacklist %s: %s', rec.from_number, e)
+
+            if blacklisted_count > 0:
+                request.env.cr.commit()
+
+            return self._json_response({
+                'success': True,
+                'blacklisted': blacklisted_count,
+            })
+        except Exception as e:
+            _logger.exception('SMS Gateway inbound-blacklist error')
             return self._error_response(str(e), 500)
 
     # ---- Register FCM Token ----
