@@ -893,6 +893,7 @@ class SmsGatewayController(http.Controller):
             template_id = data.get('template_id')
             segment_id = data.get('segment_id')
             limit = data.get('limit', 100)
+            custom_body = data.get('custom_body')
 
             template = request.env['sms.marketing.template'].sudo().browse(template_id)
             if not template.exists() or template.phone_id.id not in phones.ids:
@@ -904,6 +905,9 @@ class SmsGatewayController(http.Controller):
 
             phone = phones[0]
             effective_limit = min(limit, template.max_limit)
+
+            # Use custom body from app if provided, otherwise template body
+            sms_body = custom_body.strip() if custom_body else template.body
 
             # Build combined domain
             exclude_days = template.exclude_contacted_days or 0
@@ -929,7 +933,7 @@ class SmsGatewayController(http.Controller):
             mailing = request.env['mailing.mailing'].sudo().create({
                 'subject': '%s - %s' % (template.name, fields.Datetime.now().strftime('%d.%m.%Y %H:%M')),
                 'mailing_type': 'sms',
-                'body_plaintext': template.body,
+                'body_plaintext': sms_body,
                 'sms_provider': 'gateway',
                 'mailing_model_id': partner_model.id,
                 'mailing_domain': repr(domain),
