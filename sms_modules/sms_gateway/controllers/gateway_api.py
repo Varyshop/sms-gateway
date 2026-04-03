@@ -1124,12 +1124,51 @@ class SmsGatewayController(http.Controller):
 
             traces = request.env['mailing.trace'].sudo().search_read(
                 [('mass_mailing_id', '=', mailing.id)],
-                ['trace_status'],
+                ['trace_status', 'links_click_datetime'],
             )
             total = len(traces)
             sent = sum(1 for t in traces if t['trace_status'] == 'sent')
             pending = sum(1 for t in traces if t['trace_status'] in ('outgoing', 'pending', 'process'))
             error = sum(1 for t in traces if t['trace_status'] in ('error', 'cancel', 'bounce'))
+            clicked = sum(1 for t in traces if t['links_click_datetime'])
+
+            # Link click count (total clicks, not unique)
+            total_clicks = request.env['link.tracker.click'].sudo().search_count([
+                ('mass_mailing_id', '=', mailing.id),
+            ])
+
+            # Orders & revenue attributed via UTM campaign
+            order_count = 0
+            revenue = 0.0
+            if mailing.campaign_id:
+                domain = [
+                    ('campaign_id', '=', mailing.campaign_id.id),
+                    ('state', '=', 'sale'),
+                ]
+                if mailing.sent_date:
+                    domain.append(('date_order', '>=', mailing.sent_date))
+                orders = request.env['sale.order'].sudo().search(domain)
+                order_count = len(orders)
+                revenue = sum(o.amount_total for o in orders)
+
+            # STOP / opt-out count: inbound STOP messages from numbers
+            # that were targeted in this campaign, received after the campaign started
+            optout = 0
+            sent_numbers = [
+                t['sms_number'] for t in
+                request.env['mailing.trace'].sudo().search_read(
+                    [('mass_mailing_id', '=', mailing.id), ('sms_number', '!=', False)],
+                    ['sms_number'],
+                )
+            ]
+            if sent_numbers:
+                stop_domain = [
+                    ('is_stop', '=', True),
+                    ('from_number', 'in', sent_numbers),
+                ]
+                if mailing.create_date:
+                    stop_domain.append(('received_at', '>=', mailing.create_date))
+                optout = request.env['sms.gateway.inbound'].sudo().search_count(stop_domain)
 
             return self._json_response({
                 'success': True,
@@ -1140,6 +1179,11 @@ class SmsGatewayController(http.Controller):
                 'sent': sent,
                 'pending': pending,
                 'error': error,
+                'clicked': clicked,
+                'total_clicks': total_clicks,
+                'order_count': order_count,
+                'revenue': revenue,
+                'optout': optout,
                 'created_at': mailing.create_date.isoformat() if mailing.create_date else '',
             })
         except Exception as e:
