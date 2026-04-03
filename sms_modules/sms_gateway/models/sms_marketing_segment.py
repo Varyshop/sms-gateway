@@ -130,7 +130,24 @@ class SmsMarketingSegment(models.Model):
         cutoff = today - timedelta(days=30)
         return [('create_date', '>=', cutoff)]
 
-    def _get_recipient_count(self, phone=None):
+    def _get_excluded_partner_ids(self, days):
+        """Return partner IDs who received an SMS in the last N days."""
+        if not days or days <= 0:
+            return []
+        cutoff = fields.Datetime.now() - timedelta(days=days)
+        cr = self.env.cr
+        cr.execute("""
+            SELECT DISTINCT res_id
+            FROM mailing_trace
+            WHERE model = 'res.partner'
+              AND trace_type = 'sms'
+              AND trace_status = 'sent'
+              AND write_date >= %s
+              AND res_id IS NOT NULL
+        """, (cutoff,))
+        return [r[0] for r in cr.fetchall()]
+
+    def _get_recipient_count(self, phone=None, exclude_contacted_days=0):
         """Count matching partners, optionally intersected with phone domain_filter."""
         domain = self._get_domain()
         # Exclude blacklisted numbers
@@ -144,4 +161,7 @@ class SmsMarketingSegment(models.Model):
                 domain += phone_domain
             except Exception:
                 pass
+        excluded_ids = self._get_excluded_partner_ids(exclude_contacted_days)
+        if excluded_ids:
+            domain += [('id', 'not in', excluded_ids)]
         return self.env['res.partner'].sudo().search_count(domain)

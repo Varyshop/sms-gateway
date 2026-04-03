@@ -30,3 +30,8 @@ class SmsMarketingTemplate(models.Model):
         default=500, string='Max Recipient Limit',
         help='Hard cap on number of recipients.',
     )
+    exclude_contacted_days = fields.Integer(
+        default=0, string='Exclude Contacted (days)',
+        help='Exclude partners who received an SMS in the last N days. '
+             '0 = disabled (no exclusion).',
+    )

@@ -38,6 +38,7 @@
                         <group>
                             <field name="default_limit"/>
                             <field name="max_limit"/>
+                            <field name="exclude_contacted_days"/>
                         </group>
                     </group>
                     <separator string="SMS Text"/>

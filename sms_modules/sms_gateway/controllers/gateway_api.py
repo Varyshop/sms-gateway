@@ -757,6 +757,7 @@ class SmsGatewayController(http.Controller):
                     'body': t.body,
                     'default_limit': t.default_limit,
                     'max_limit': t.max_limit,
+                    'exclude_contacted_days': t.exclude_contacted_days,
                     'segments': [{
                         'id': s.id,
                         'name': s.name,
@@ -782,11 +783,13 @@ class SmsGatewayController(http.Controller):
             data = self._get_json_data()
             template_id = data.get('template_id')
 
+            exclude_days = 0
             if template_id:
                 template = request.env['sms.marketing.template'].sudo().browse(template_id)
                 if not template.exists() or template.phone_id.id not in phones.ids:
                     return self._error_response('Template not found', 404)
                 segments = template.segment_ids
+                exclude_days = template.exclude_contacted_days or 0
             else:
                 segments = request.env['sms.marketing.segment'].sudo().search([
                     ('active', '=', True),
@@ -795,7 +798,9 @@ class SmsGatewayController(http.Controller):
             phone = phones[0]
             result = []
             for seg in segments:
-                count = seg._get_recipient_count(phone=phone)
+                count = seg._get_recipient_count(
+                    phone=phone, exclude_contacted_days=exclude_days,
+                )
                 result.append({
                     'id': seg.id,
                     'code': seg.code,
@@ -833,7 +838,10 @@ class SmsGatewayController(http.Controller):
                 return self._error_response('Segment not found', 404)
 
             phone = phones[0]
-            count = segment._get_recipient_count(phone=phone)
+            exclude_days = template.exclude_contacted_days or 0
+            count = segment._get_recipient_count(
+                phone=phone, exclude_contacted_days=exclude_days,
+            )
             effective_count = min(count, limit, template.max_limit)
 
             # Render preview with a sample partner
@@ -847,6 +855,9 @@ class SmsGatewayController(http.Controller):
                 ]
                 if phone.domain_filter:
                     domain += ast.literal_eval(phone.domain_filter)
+                excluded_ids = segment._get_excluded_partner_ids(exclude_days)
+                if excluded_ids:
+                    domain += [('id', 'not in', excluded_ids)]
                 sample = request.env['res.partner'].sudo().search(domain, limit=1)
                 if sample:
                     preview_text = preview_text.replace('{{object.name}}', sample.name or '')
@@ -895,6 +906,7 @@ class SmsGatewayController(http.Controller):
             effective_limit = min(limit, template.max_limit)
 
             # Build combined domain
+            exclude_days = template.exclude_contacted_days or 0
             domain = segment._get_domain()
             domain += [
                 ('phone_sanitized_blacklisted', '=', False),
@@ -905,6 +917,9 @@ class SmsGatewayController(http.Controller):
                     domain += ast.literal_eval(phone.domain_filter)
                 except Exception:
                     pass
+            excluded_ids = segment._get_excluded_partner_ids(exclude_days)
+            if excluded_ids:
+                domain += [('id', 'not in', excluded_ids)]
 
             # Create mailing
             partner_model = request.env['ir.model'].sudo().search([
