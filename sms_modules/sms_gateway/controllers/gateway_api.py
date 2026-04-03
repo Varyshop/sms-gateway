@@ -896,6 +896,7 @@ class SmsGatewayController(http.Controller):
             segment_id = data.get('segment_id')
             limit = data.get('limit', 100)
             custom_body = data.get('custom_body')
+            send_now = data.get('send_now', True)
 
             template = request.env['sms.marketing.template'].sudo().browse(template_id)
             if not template.exists() or template.phone_id.id not in phones.ids:
@@ -955,6 +956,11 @@ class SmsGatewayController(http.Controller):
             # Generate SMS queue
             mailing.state = 'in_queue'
             mailing.action_force_create_sms_queue()
+            # action_force_create_sms_queue transitions state to 'sending'
+            # and _send() assigns SMS to phones. For queue-only mode,
+            # set back to in_queue and pause so the poll doesn't pick them up.
+            if not send_now:
+                mailing.write({'state': 'in_queue', 'paused': True})
 
             # Count created SMS
             sms_count = request.env['sms.sms'].sudo().search_count([
@@ -966,6 +972,7 @@ class SmsGatewayController(http.Controller):
                 'success': True,
                 'campaign_id': mailing.id,
                 'recipient_count': sms_count,
+                'state': mailing.state,
             })
         except Exception as e:
             _logger.exception('SMS Gateway campaign/create error')
@@ -1023,13 +1030,13 @@ class SmsGatewayController(http.Controller):
                     'message': 'No SMS to assign',
                 })
 
-            # Build SIM slots for round-robin
+            # Build SIM slots for round-robin (None = let mobile app auto-pick)
             if mode == 'split' and len(sim_numbers) >= 2:
                 slots = sim_numbers
             elif sim_number:
                 slots = [sim_number]
             else:
-                return self._error_response('sim_number required for single mode', 400)
+                slots = [False]  # no specific SIM — mobile app decides
 
             assigned = 0
             slot_count = len(slots)
@@ -1038,16 +1045,22 @@ class SmsGatewayController(http.Controller):
             for i, sms in enumerate(sms_to_assign):
                 body = SmsSms._replace_unsubscribe_url(sms.body)
                 sim = slots[i % slot_count]
-                sms.sudo().with_context(sms_skip_msg_notification=True).write({
+                write_vals = {
                     'sms_provider': 'gateway',
                     'gateway_phone_id': phone.id,
-                    'gateway_sim_number': sim,
                     'gateway_state': 'pending',
                     'state': 'pending',
                     'failure_type': False,
                     'body': body,
-                })
+                }
+                if sim:
+                    write_vals['gateway_sim_number'] = sim
+                sms.sudo().with_context(sms_skip_msg_notification=True).write(write_vals)
                 assigned += 1
+
+            # Unpause mailing and set to sending if it was queued/paused
+            if mailing.state == 'in_queue' or mailing.paused:
+                mailing.write({'state': 'sending', 'paused': False})
 
             request.env.cr.commit()
 
