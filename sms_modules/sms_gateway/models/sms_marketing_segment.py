@@ -2,10 +2,11 @@
 
 import ast
 import logging
+import re
+import unicodedata
 from datetime import timedelta
 
 from odoo import api, fields, models
-from odoo.tools import SQL
 
 _logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ class SmsMarketingSegment(models.Model):
     _order = 'sequence, name'
 
     name = fields.Char(required=True, translate=True)
-    code = fields.Char(required=True, index=True)
+    code = fields.Char(index=True, readonly=True, copy=False)
     sequence = fields.Integer(default=10)
     active = fields.Boolean(default=True)
     description = fields.Text(translate=True)
@@ -32,6 +33,31 @@ class SmsMarketingSegment(models.Model):
     _sql_constraints = [
         ('code_unique', 'UNIQUE(code)', 'Segment code must be unique.'),
     ]
+
+    @staticmethod
+    def _slugify(text):
+        """Convert text to a slug suitable for code field."""
+        text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+        text = text.lower().strip()
+        text = re.sub(r'[^a-z0-9]+', '_', text)
+        return text.strip('_')
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get('code') and vals.get('name'):
+                vals['code'] = self._slugify(vals['name'])
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if 'name' in vals and 'code' not in vals:
+            for rec in self:
+                if not rec.code or rec.code == self._slugify(rec.name):
+                    vals_copy = dict(vals)
+                    vals_copy['code'] = self._slugify(vals['name'])
+                    super(SmsMarketingSegment, rec).write(vals_copy)
+                    return True
+        return super().write(vals)
 
     @api.constrains('domain_filter')
     def _check_domain_filter(self):

@@ -734,7 +734,7 @@ class SmsGatewayController(http.Controller):
     # Campaign / Marketing Template endpoints
     # ──────────────────────────────────────────────
 
-    @http.route('/sms-gateway/campaign/templates', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/sms-gateway/campaign/templates', type='http', auth='public', methods=['POST'], csrf=False, cors='*')
     def campaign_templates(self, **kw):
         api_key = self._get_api_key()
         if not api_key:
@@ -769,7 +769,7 @@ class SmsGatewayController(http.Controller):
             _logger.exception('SMS Gateway campaign/templates error')
             return self._error_response(str(e), 500)
 
-    @http.route('/sms-gateway/campaign/filters', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/sms-gateway/campaign/filters', type='http', auth='public', methods=['POST'], csrf=False, cors='*')
     def campaign_filters(self, **kw):
         api_key = self._get_api_key()
         if not api_key:
@@ -779,7 +779,7 @@ class SmsGatewayController(http.Controller):
             return self._error_response('Invalid API key', 401)
 
         try:
-            data = request.get_json_data()
+            data = self._get_json_data()
             template_id = data.get('template_id')
 
             if template_id:
@@ -809,7 +809,7 @@ class SmsGatewayController(http.Controller):
             _logger.exception('SMS Gateway campaign/filters error')
             return self._error_response(str(e), 500)
 
-    @http.route('/sms-gateway/campaign/preview', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/sms-gateway/campaign/preview', type='http', auth='public', methods=['POST'], csrf=False, cors='*')
     def campaign_preview(self, **kw):
         api_key = self._get_api_key()
         if not api_key:
@@ -819,7 +819,7 @@ class SmsGatewayController(http.Controller):
             return self._error_response('Invalid API key', 401)
 
         try:
-            data = request.get_json_data()
+            data = self._get_json_data()
             template_id = data.get('template_id')
             segment_id = data.get('segment_id')
             limit = data.get('limit', 100)
@@ -866,7 +866,7 @@ class SmsGatewayController(http.Controller):
             _logger.exception('SMS Gateway campaign/preview error')
             return self._error_response(str(e), 500)
 
-    @http.route('/sms-gateway/campaign/create', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/sms-gateway/campaign/create', type='http', auth='public', methods=['POST'], csrf=False, cors='*')
     def campaign_create(self, **kw):
         api_key = self._get_api_key()
         if not api_key:
@@ -878,7 +878,7 @@ class SmsGatewayController(http.Controller):
         try:
             import ast
 
-            data = request.get_json_data()
+            data = self._get_json_data()
             template_id = data.get('template_id')
             segment_id = data.get('segment_id')
             limit = data.get('limit', 100)
@@ -943,7 +943,7 @@ class SmsGatewayController(http.Controller):
             _logger.exception('SMS Gateway campaign/create error')
             return self._error_response(str(e), 500)
 
-    @http.route('/sms-gateway/campaign/list', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/sms-gateway/campaign/list', type='http', auth='public', methods=['POST'], csrf=False, cors='*')
     def campaign_list(self, **kw):
         api_key = self._get_api_key()
         if not api_key:
@@ -985,7 +985,7 @@ class SmsGatewayController(http.Controller):
             _logger.exception('SMS Gateway campaign/list error')
             return self._error_response(str(e), 500)
 
-    @http.route('/sms-gateway/campaign/status/<int:mailing_id>', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/sms-gateway/campaign/status/<int:mailing_id>', type='http', auth='public', methods=['POST'], csrf=False, cors='*')
     def campaign_status(self, mailing_id, **kw):
         api_key = self._get_api_key()
         if not api_key:

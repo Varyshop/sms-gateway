@@ -64,7 +64,7 @@
             <list>
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
-                <field name="code"/>
+                <field name="code" optional="hide"/>
                 <field name="description"/>
                 <field name="active" column_invisible="True"/>
             </list>
@@ -81,7 +81,6 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="code"/>
                             <field name="sequence"/>
                             <field name="active"/>
                         </group>
