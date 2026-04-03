@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="segment_no_order_3m" model="sms.marketing.segment">
+        <field name="name">Neobjednali 3 mesice</field>
+        <field name="code">no_order_3m</field>
+        <field name="sequence">10</field>
+        <field name="description">Zakaznici kteri v minulosti objednali, ale za poslednich 90 dni nemaji zadnou objednavku.</field>
+    </record>
+
+    <record id="segment_one_order_only" model="sms.marketing.segment">
+        <field name="name">Pouze 1 objednavka</field>
+        <field name="code">one_order_only</field>
+        <field name="sequence">20</field>
+        <field name="description">Zakaznici kteri maji presne jednu potvrzenou objednavku.</field>
+    </record>
+
+    <record id="segment_new_customers_30d" model="sms.marketing.segment">
+        <field name="name">Novi zakaznici (30 dni)</field>
+        <field name="code">new_customers_30d</field>
+        <field name="sequence">30</field>
+        <field name="description">Zakaznici vytvoreni za poslednich 30 dni.</field>
+    </record>
+
+</odoo>

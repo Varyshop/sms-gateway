@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import random
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
@@ -21,6 +22,24 @@ class Mailing(models.Model):
         default=False,
         help='When active, SMS in the queue for this campaign will not be sent.'
     )
+    gateway_phone_forced_id = fields.Many2one(
+        'sms.gateway.phone', string='Forced Gateway Phone',
+        help='When set, all SMS in this mailing are sent through this phone.',
+    )
+    recipient_limit = fields.Integer(
+        string='Recipient Limit',
+        help='When set, randomly sample this many recipients from the filtered set.',
+    )
+    marketing_template_id = fields.Many2one(
+        'sms.marketing.template', string='Marketing Template',
+    )
+    created_from_app = fields.Boolean(default=False)
+
+    def _get_recipients(self):
+        res_ids = super()._get_recipients()
+        if self.recipient_limit and 0 < self.recipient_limit < len(res_ids):
+            res_ids = random.sample(res_ids, self.recipient_limit)
+        return res_ids
 
     def action_force_create_sms_queue(self):
         """Force create SMS records for recipients without existing mailing.trace."""

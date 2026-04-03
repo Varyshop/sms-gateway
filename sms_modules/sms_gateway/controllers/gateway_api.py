@@ -729,3 +729,296 @@ class SmsGatewayController(http.Controller):
         except Exception as e:
             _logger.exception('SMS Gateway stats error')
             return self._error_response(str(e), 500)
+
+    # ──────────────────────────────────────────────
+    # Campaign / Marketing Template endpoints
+    # ──────────────────────────────────────────────
+
+    @http.route('/sms-gateway/campaign/templates', type='json', auth='public', methods=['POST'], csrf=False)
+    def campaign_templates(self, **kw):
+        api_key = self._get_api_key()
+        if not api_key:
+            return self._error_response('Missing API key', 401)
+        phones = self._validate_api_key(api_key)
+        if not phones:
+            return self._error_response('Invalid API key', 401)
+
+        try:
+            templates = request.env['sms.marketing.template'].sudo().search([
+                ('phone_id', 'in', phones.ids),
+                ('active', '=', True),
+            ], order='sequence, name')
+
+            result = []
+            for t in templates:
+                result.append({
+                    'id': t.id,
+                    'name': t.name,
+                    'body': t.body,
+                    'default_limit': t.default_limit,
+                    'max_limit': t.max_limit,
+                    'segments': [{
+                        'id': s.id,
+                        'name': s.name,
+                        'code': s.code,
+                    } for s in t.segment_ids],
+                })
+
+            return self._json_response({'success': True, 'templates': result})
+        except Exception as e:
+            _logger.exception('SMS Gateway campaign/templates error')
+            return self._error_response(str(e), 500)
+
+    @http.route('/sms-gateway/campaign/filters', type='json', auth='public', methods=['POST'], csrf=False)
+    def campaign_filters(self, **kw):
+        api_key = self._get_api_key()
+        if not api_key:
+            return self._error_response('Missing API key', 401)
+        phones = self._validate_api_key(api_key)
+        if not phones:
+            return self._error_response('Invalid API key', 401)
+
+        try:
+            data = request.get_json_data()
+            template_id = data.get('template_id')
+
+            if template_id:
+                template = request.env['sms.marketing.template'].sudo().browse(template_id)
+                if not template.exists() or template.phone_id.id not in phones.ids:
+                    return self._error_response('Template not found', 404)
+                segments = template.segment_ids
+            else:
+                segments = request.env['sms.marketing.segment'].sudo().search([
+                    ('active', '=', True),
+                ])
+
+            phone = phones[0]
+            result = []
+            for seg in segments:
+                count = seg._get_recipient_count(phone=phone)
+                result.append({
+                    'id': seg.id,
+                    'code': seg.code,
+                    'name': seg.name,
+                    'description': seg.description or '',
+                    'recipient_count': count,
+                })
+
+            return self._json_response({'success': True, 'filters': result})
+        except Exception as e:
+            _logger.exception('SMS Gateway campaign/filters error')
+            return self._error_response(str(e), 500)
+
+    @http.route('/sms-gateway/campaign/preview', type='json', auth='public', methods=['POST'], csrf=False)
+    def campaign_preview(self, **kw):
+        api_key = self._get_api_key()
+        if not api_key:
+            return self._error_response('Missing API key', 401)
+        phones = self._validate_api_key(api_key)
+        if not phones:
+            return self._error_response('Invalid API key', 401)
+
+        try:
+            data = request.get_json_data()
+            template_id = data.get('template_id')
+            segment_id = data.get('segment_id')
+            limit = data.get('limit', 100)
+
+            template = request.env['sms.marketing.template'].sudo().browse(template_id)
+            if not template.exists() or template.phone_id.id not in phones.ids:
+                return self._error_response('Template not found', 404)
+
+            segment = request.env['sms.marketing.segment'].sudo().browse(segment_id)
+            if not segment.exists():
+                return self._error_response('Segment not found', 404)
+
+            phone = phones[0]
+            count = segment._get_recipient_count(phone=phone)
+            effective_count = min(count, limit, template.max_limit)
+
+            # Render preview with a sample partner
+            preview_text = template.body
+            try:
+                import ast
+                domain = segment._get_domain()
+                domain += [
+                    ('phone_sanitized_blacklisted', '=', False),
+                    '|', ('mobile', '!=', False), ('phone', '!=', False),
+                ]
+                if phone.domain_filter:
+                    domain += ast.literal_eval(phone.domain_filter)
+                sample = request.env['res.partner'].sudo().search(domain, limit=1)
+                if sample:
+                    preview_text = preview_text.replace('{{object.name}}', sample.name or '')
+                    preview_text = preview_text.replace('{{object.email}}', sample.email or '')
+                    preview_text = preview_text.replace('{{object.phone}}', sample.phone or sample.mobile or '')
+            except Exception:
+                pass  # preview with raw placeholders is fine
+
+            return self._json_response({
+                'success': True,
+                'recipient_count': effective_count,
+                'preview_text': preview_text,
+                'template_name': template.name,
+                'segment_name': segment.name,
+            })
+        except Exception as e:
+            _logger.exception('SMS Gateway campaign/preview error')
+            return self._error_response(str(e), 500)
+
+    @http.route('/sms-gateway/campaign/create', type='json', auth='public', methods=['POST'], csrf=False)
+    def campaign_create(self, **kw):
+        api_key = self._get_api_key()
+        if not api_key:
+            return self._error_response('Missing API key', 401)
+        phones = self._validate_api_key(api_key)
+        if not phones:
+            return self._error_response('Invalid API key', 401)
+
+        try:
+            import ast
+
+            data = request.get_json_data()
+            template_id = data.get('template_id')
+            segment_id = data.get('segment_id')
+            limit = data.get('limit', 100)
+
+            template = request.env['sms.marketing.template'].sudo().browse(template_id)
+            if not template.exists() or template.phone_id.id not in phones.ids:
+                return self._error_response('Template not found', 404)
+
+            segment = request.env['sms.marketing.segment'].sudo().browse(segment_id)
+            if not segment.exists():
+                return self._error_response('Segment not found', 404)
+
+            phone = phones[0]
+            effective_limit = min(limit, template.max_limit)
+
+            # Build combined domain
+            domain = segment._get_domain()
+            domain += [
+                ('phone_sanitized_blacklisted', '=', False),
+                '|', ('mobile', '!=', False), ('phone', '!=', False),
+            ]
+            if phone.domain_filter:
+                try:
+                    domain += ast.literal_eval(phone.domain_filter)
+                except Exception:
+                    pass
+
+            # Create mailing
+            partner_model = request.env['ir.model'].sudo().search([
+                ('model', '=', 'res.partner'),
+            ], limit=1)
+
+            mailing = request.env['mailing.mailing'].sudo().create({
+                'subject': '%s - %s' % (template.name, fields.Datetime.now().strftime('%d.%m.%Y %H:%M')),
+                'mailing_type': 'sms',
+                'body_plaintext': template.body,
+                'sms_provider': 'gateway',
+                'mailing_model_id': partner_model.id,
+                'mailing_domain': repr(domain),
+                'gateway_phone_forced_id': phone.id,
+                'recipient_limit': effective_limit,
+                'marketing_template_id': template.id,
+                'created_from_app': True,
+            })
+
+            # Generate SMS queue
+            mailing.state = 'in_queue'
+            mailing.action_force_create_sms_queue()
+
+            # Count created SMS
+            sms_count = request.env['sms.sms'].sudo().search_count([
+                ('mailing_id', '=', mailing.id),
+                ('state', 'in', ('pending', 'outgoing')),
+            ])
+
+            return self._json_response({
+                'success': True,
+                'campaign_id': mailing.id,
+                'recipient_count': sms_count,
+            })
+        except Exception as e:
+            _logger.exception('SMS Gateway campaign/create error')
+            return self._error_response(str(e), 500)
+
+    @http.route('/sms-gateway/campaign/list', type='json', auth='public', methods=['POST'], csrf=False)
+    def campaign_list(self, **kw):
+        api_key = self._get_api_key()
+        if not api_key:
+            return self._error_response('Missing API key', 401)
+        phones = self._validate_api_key(api_key)
+        if not phones:
+            return self._error_response('Invalid API key', 401)
+
+        try:
+            mailings = request.env['mailing.mailing'].sudo().search([
+                ('gateway_phone_forced_id', 'in', phones.ids),
+                ('created_from_app', '=', True),
+            ], order='create_date desc', limit=50)
+
+            result = []
+            for m in mailings:
+                traces = request.env['mailing.trace'].sudo().search_read(
+                    [('mass_mailing_id', '=', m.id)],
+                    ['trace_status'],
+                )
+                total = len(traces)
+                sent = sum(1 for t in traces if t['trace_status'] == 'sent')
+                pending = sum(1 for t in traces if t['trace_status'] in ('outgoing', 'pending', 'process'))
+                error = sum(1 for t in traces if t['trace_status'] in ('error', 'cancel', 'bounce'))
+
+                result.append({
+                    'id': m.id,
+                    'name': m.subject or m.name,
+                    'state': m.state,
+                    'date_created': m.create_date.isoformat() if m.create_date else '',
+                    'total': total,
+                    'sent': sent,
+                    'pending': pending,
+                    'error': error,
+                })
+
+            return self._json_response({'success': True, 'campaigns': result})
+        except Exception as e:
+            _logger.exception('SMS Gateway campaign/list error')
+            return self._error_response(str(e), 500)
+
+    @http.route('/sms-gateway/campaign/status/<int:mailing_id>', type='json', auth='public', methods=['POST'], csrf=False)
+    def campaign_status(self, mailing_id, **kw):
+        api_key = self._get_api_key()
+        if not api_key:
+            return self._error_response('Missing API key', 401)
+        phones = self._validate_api_key(api_key)
+        if not phones:
+            return self._error_response('Invalid API key', 401)
+
+        try:
+            mailing = request.env['mailing.mailing'].sudo().browse(mailing_id)
+            if not mailing.exists() or mailing.gateway_phone_forced_id.id not in phones.ids:
+                return self._error_response('Campaign not found', 404)
+
+            traces = request.env['mailing.trace'].sudo().search_read(
+                [('mass_mailing_id', '=', mailing.id)],
+                ['trace_status'],
+            )
+            total = len(traces)
+            sent = sum(1 for t in traces if t['trace_status'] == 'sent')
+            pending = sum(1 for t in traces if t['trace_status'] in ('outgoing', 'pending', 'process'))
+            error = sum(1 for t in traces if t['trace_status'] in ('error', 'cancel', 'bounce'))
+
+            return self._json_response({
+                'success': True,
+                'id': mailing.id,
+                'name': mailing.subject or mailing.name,
+                'state': mailing.state,
+                'total': total,
+                'sent': sent,
+                'pending': pending,
+                'error': error,
+                'created_at': mailing.create_date.isoformat() if mailing.create_date else '',
+            })
+        except Exception as e:
+            _logger.exception('SMS Gateway campaign/status error')
+            return self._error_response(str(e), 500)

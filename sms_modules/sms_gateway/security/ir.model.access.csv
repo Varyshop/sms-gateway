@@ -5,3 +5,7 @@ access_sms_gateway_send_wizard,sms.gateway.send.wizard,model_sms_gateway_send_wi
 access_sms_gateway_send_wizard_line,sms.gateway.send.wizard.line,model_sms_gateway_send_wizard_line,base.group_user,1,1,1,1
 access_sms_gateway_inbound_user,sms.gateway.inbound.user,model_sms_gateway_inbound,base.group_user,1,0,0,0
 access_sms_gateway_inbound_manager,sms.gateway.inbound.manager,model_sms_gateway_inbound,mass_mailing.group_mass_mailing_user,1,1,1,1
+access_sms_marketing_template_user,sms.marketing.template.user,model_sms_marketing_template,base.group_user,1,0,0,0
+access_sms_marketing_template_manager,sms.marketing.template.manager,model_sms_marketing_template,mass_mailing.group_mass_mailing_user,1,1,1,1
+access_sms_marketing_segment_user,sms.marketing.segment.user,model_sms_marketing_segment,base.group_user,1,0,0,0
+access_sms_marketing_segment_manager,sms.marketing.segment.manager,model_sms_marketing_segment,mass_mailing.group_mass_mailing_user,1,1,1,1
