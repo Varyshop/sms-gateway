@@ -104,7 +104,7 @@
     <!-- Menu items -->
     <menuitem id="sms_marketing_menu_root"
               name="SMS Marketing"
-              parent="mass_mailing.mass_mailing_sms_menu"
+              parent="mass_mailing_sms.mass_mailing_sms_menu_root"
               sequence="50"/>
 
     <menuitem id="sms_marketing_template_menu"
