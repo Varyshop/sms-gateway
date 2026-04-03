@@ -162,9 +162,13 @@ class SmsSms(models.Model):
             body = self._replace_unsubscribe_url(sms.body)
             segments = sms_segment_count(body)
 
-            # Use pre-assigned phone or auto-assign
-            if sms.gateway_phone_id:
-                phone = sms.gateway_phone_id
+            # Use pre-assigned phone, forced phone from mailing, or auto-assign
+            forced_phone = (
+                sms.gateway_phone_id
+                or (sms.mailing_id and sms.mailing_id.gateway_phone_forced_id)
+            )
+            if forced_phone:
+                phone = forced_phone
                 sim_number = sms.gateway_sim_number or False
 
                 # Check limit even for pre-assigned phones

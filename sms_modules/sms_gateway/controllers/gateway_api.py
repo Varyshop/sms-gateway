@@ -971,6 +971,69 @@ class SmsGatewayController(http.Controller):
             _logger.exception('SMS Gateway campaign/create error')
             return self._error_response(str(e), 500)
 
+    @http.route('/sms-gateway/campaign/assign-sim', type='http', auth='public', methods=['POST'], csrf=False, cors='*')
+    def campaign_assign_sim(self, **kw):
+        """Assign SIM number(s) to pending SMS in a campaign and optionally trigger immediate send."""
+        api_key = self._get_api_key()
+        if not api_key:
+            return self._error_response('Missing API key', 401)
+        phones = self._validate_api_key(api_key)
+        if not phones:
+            return self._error_response('Invalid API key', 401)
+
+        try:
+            data = self._get_json_data()
+            campaign_id = data.get('campaign_id')
+            # mode: 'single' (one SIM for all) or 'split' (alternate between SIMs)
+            mode = data.get('mode', 'single')
+            # sim_number: required for 'single' mode
+            sim_number = data.get('sim_number')
+            # sim_numbers: list of SIM numbers for 'split' mode
+            sim_numbers = data.get('sim_numbers', [])
+
+            mailing = request.env['mailing.mailing'].sudo().browse(campaign_id)
+            if not mailing.exists() or mailing.gateway_phone_forced_id.id not in phones.ids:
+                return self._error_response('Campaign not found', 404)
+
+            phone = mailing.gateway_phone_forced_id
+
+            # Get all pending SMS for this campaign assigned to this phone
+            pending_sms = request.env['sms.sms'].sudo().search([
+                ('mailing_id', '=', mailing.id),
+                ('gateway_phone_id', '=', phone.id),
+                ('gateway_state', '=', 'pending'),
+                ('state', '=', 'pending'),
+            ])
+
+            if not pending_sms:
+                return self._json_response({
+                    'success': True,
+                    'assigned': 0,
+                    'message': 'No pending SMS to assign',
+                })
+
+            assigned = 0
+            if mode == 'split' and len(sim_numbers) >= 2:
+                # Round-robin assignment across SIMs
+                for i, sms in enumerate(pending_sms):
+                    sim = sim_numbers[i % len(sim_numbers)]
+                    sms.sudo().write({'gateway_sim_number': sim})
+                    assigned += 1
+            elif sim_number:
+                # Single SIM assignment
+                pending_sms.sudo().write({'gateway_sim_number': sim_number})
+                assigned = len(pending_sms)
+            else:
+                return self._error_response('sim_number required for single mode', 400)
+
+            return self._json_response({
+                'success': True,
+                'assigned': assigned,
+            })
+        except Exception as e:
+            _logger.exception('SMS Gateway campaign/assign-sim error')
+            return self._error_response(str(e), 500)
+
     @http.route('/sms-gateway/campaign/list', type='http', auth='public', methods=['POST'], csrf=False, cors='*')
     def campaign_list(self, **kw):
         api_key = self._get_api_key()
