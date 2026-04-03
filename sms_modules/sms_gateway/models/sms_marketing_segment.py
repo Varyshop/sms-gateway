@@ -20,14 +20,46 @@ class SmsMarketingSegment(models.Model):
     sequence = fields.Integer(default=10)
     active = fields.Boolean(default=True)
     description = fields.Text(translate=True)
+    res_model_name = fields.Char(
+        default='res.partner', store=False, readonly=True,
+    )
+    domain_filter = fields.Char(
+        string='Custom Domain Filter',
+        help='Custom Odoo domain for res.partner, e.g. [("country_id.code", "=", "CZ")]. '
+             'When set, this overrides the built-in code-based segment logic.',
+    )
 
     _sql_constraints = [
         ('code_unique', 'UNIQUE(code)', 'Segment code must be unique.'),
     ]
 
+    @api.constrains('domain_filter')
+    def _check_domain_filter(self):
+        for seg in self:
+            if seg.domain_filter:
+                try:
+                    domain = ast.literal_eval(seg.domain_filter)
+                    if not isinstance(domain, list):
+                        raise ValueError('Domain must be a list')
+                    self.env['res.partner'].sudo().search(domain, limit=1)
+                except Exception as e:
+                    raise models.ValidationError(
+                        'Invalid domain filter: %s' % e
+                    )
+
     def _get_domain(self):
-        """Return Odoo domain for res.partner based on segment code."""
+        """Return Odoo domain for res.partner.
+
+        If domain_filter is set, use it directly.
+        Otherwise dispatch to code-based builder.
+        """
         self.ensure_one()
+        if self.domain_filter:
+            try:
+                return ast.literal_eval(self.domain_filter)
+            except Exception:
+                _logger.warning('Invalid domain_filter on segment %s', self.code)
+                return [('id', '=', 0)]
         today = fields.Date.today()
         method = getattr(self, '_domain_%s' % self.code, None)
         if method:
