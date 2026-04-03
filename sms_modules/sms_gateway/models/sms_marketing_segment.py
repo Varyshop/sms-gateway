@@ -153,7 +153,9 @@ class SmsMarketingSegment(models.Model):
         # Exclude blacklisted numbers
         domain += [
             ('phone_sanitized_blacklisted', '=', False),
-            '|', ('mobile', '!=', False), ('phone', '!=', False),
+            '|',
+            '&', ('mobile', '!=', False), ('mobile', '!=', ''),
+            '&', ('phone', '!=', False), ('phone', '!=', ''),
         ]
         if phone and phone.domain_filter:
             try:

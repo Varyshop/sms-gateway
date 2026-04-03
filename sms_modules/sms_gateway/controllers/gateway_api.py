@@ -851,7 +851,9 @@ class SmsGatewayController(http.Controller):
                 domain = segment._get_domain()
                 domain += [
                     ('phone_sanitized_blacklisted', '=', False),
-                    '|', ('mobile', '!=', False), ('phone', '!=', False),
+                    '|',
+                    '&', ('mobile', '!=', False), ('mobile', '!=', ''),
+                    '&', ('phone', '!=', False), ('phone', '!=', ''),
                 ]
                 if phone.domain_filter:
                     domain += ast.literal_eval(phone.domain_filter)
@@ -914,7 +916,9 @@ class SmsGatewayController(http.Controller):
             domain = segment._get_domain()
             domain += [
                 ('phone_sanitized_blacklisted', '=', False),
-                '|', ('mobile', '!=', False), ('phone', '!=', False),
+                '|',
+                '&', ('mobile', '!=', False), ('mobile', '!=', ''),
+                '&', ('phone', '!=', False), ('phone', '!=', ''),
             ]
             if phone.domain_filter:
                 try:
@@ -930,10 +934,15 @@ class SmsGatewayController(http.Controller):
                 ('model', '=', 'res.partner'),
             ], limit=1)
 
+            # email_from is required (NOT NULL) even for SMS mailings
+            company = request.env.company.sudo()
+            email_from = company.email or company.partner_id.email or 'noreply@example.com'
+
             mailing = request.env['mailing.mailing'].sudo().create({
                 'subject': '%s - %s' % (template.name, fields.Datetime.now().strftime('%d.%m.%Y %H:%M')),
                 'mailing_type': 'sms',
                 'body_plaintext': sms_body,
+                'email_from': email_from,
                 'sms_provider': 'gateway',
                 'mailing_model_id': partner_model.id,
                 'mailing_domain': repr(domain),
