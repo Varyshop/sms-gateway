@@ -973,7 +973,13 @@ class SmsGatewayController(http.Controller):
 
     @http.route('/sms-gateway/campaign/assign-sim', type='http', auth='public', methods=['POST'], csrf=False, cors='*')
     def campaign_assign_sim(self, **kw):
-        """Assign SIM number(s) to pending SMS in a campaign and optionally trigger immediate send."""
+        """Assign gateway phone + SIM to SMS in a campaign (same logic as Send via Gateway wizard).
+
+        Picks up SMS in 'outgoing' or 'error' state (not yet assigned) AND
+        SMS already assigned but missing gateway_sim_number ('pending' state).
+        Sets sms_provider, gateway_phone_id, gateway_sim_number, state='pending',
+        gateway_state='pending' so the mobile app poll picks them up immediately.
+        """
         api_key = self._get_api_key()
         if not api_key:
             return self._error_response('Missing API key', 401)
@@ -982,6 +988,8 @@ class SmsGatewayController(http.Controller):
             return self._error_response('Invalid API key', 401)
 
         try:
+            from ..tools.sms_utils import sms_segment_count
+
             data = self._get_json_data()
             campaign_id = data.get('campaign_id')
             # mode: 'single' (one SIM for all) or 'split' (alternate between SIMs)
@@ -997,34 +1005,58 @@ class SmsGatewayController(http.Controller):
 
             phone = mailing.gateway_phone_forced_id
 
-            # Get all pending SMS for this campaign assigned to this phone
-            pending_sms = request.env['sms.sms'].sudo().search([
+            # Find SMS that need assignment:
+            # 1) outgoing/error — never assigned to gateway yet
+            # 2) pending with gateway_phone but no sim_number — assigned to phone, needs SIM
+            sms_to_assign = request.env['sms.sms'].sudo().search([
                 ('mailing_id', '=', mailing.id),
-                ('gateway_phone_id', '=', phone.id),
-                ('gateway_state', '=', 'pending'),
-                ('state', '=', 'pending'),
+                '|',
+                ('state', 'in', ('outgoing', 'error')),
+                '&', ('state', '=', 'pending'),
+                     ('gateway_sim_number', '=', False),
             ])
 
-            if not pending_sms:
+            if not sms_to_assign:
                 return self._json_response({
                     'success': True,
                     'assigned': 0,
-                    'message': 'No pending SMS to assign',
+                    'message': 'No SMS to assign',
                 })
 
-            assigned = 0
+            # Build SIM slots for round-robin
             if mode == 'split' and len(sim_numbers) >= 2:
-                # Round-robin assignment across SIMs
-                for i, sms in enumerate(pending_sms):
-                    sim = sim_numbers[i % len(sim_numbers)]
-                    sms.sudo().write({'gateway_sim_number': sim})
-                    assigned += 1
+                slots = sim_numbers
             elif sim_number:
-                # Single SIM assignment
-                pending_sms.sudo().write({'gateway_sim_number': sim_number})
-                assigned = len(pending_sms)
+                slots = [sim_number]
             else:
                 return self._error_response('sim_number required for single mode', 400)
+
+            assigned = 0
+            slot_count = len(slots)
+            SmsSms = request.env['sms.sms']
+
+            for i, sms in enumerate(sms_to_assign):
+                body = SmsSms._replace_unsubscribe_url(sms.body)
+                sim = slots[i % slot_count]
+                sms.sudo().with_context(sms_skip_msg_notification=True).write({
+                    'sms_provider': 'gateway',
+                    'gateway_phone_id': phone.id,
+                    'gateway_sim_number': sim,
+                    'gateway_state': 'pending',
+                    'state': 'pending',
+                    'failure_type': False,
+                    'body': body,
+                })
+                assigned += 1
+
+            request.env.cr.commit()
+
+            # Wake the phone via FCM
+            try:
+                from ..tools.fcm_service import send_fcm_wake
+                send_fcm_wake(request.env, phone)
+            except Exception:
+                pass  # FCM is best-effort
 
             return self._json_response({
                 'success': True,
