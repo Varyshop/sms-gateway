@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Server action: Recompute Partner Stats (available from list & form) -->
+    <record id="action_recompute_partner_stats" model="ir.actions.server">
+        <field name="name">Recompute Order Stats</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">env['res.partner.stats']._cron_recompute_all()</field>
+    </record>
+
+    <!-- Extend partner form: show stats as a page tab -->
+    <record id="res_partner_view_form_stats" model="ir.ui.view">
+        <field name="name">res.partner.form.stats</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='internal_notes']" position="after">
+                <page string="Order Stats" name="order_stats">
+                    <group>
+                        <group string="Orders">
+                            <field name="stats_order_count"/>
+                            <field name="stats_first_order"/>
+                            <field name="stats_last_order"/>
+                        </group>
+                        <group string="Segments">
+                            <field name="stats_bought_last_3m"/>
+                            <field name="stats_is_new_customer"/>
+                            <field name="stats_did_not_buy_3m"/>
+                            <field name="stats_returning"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

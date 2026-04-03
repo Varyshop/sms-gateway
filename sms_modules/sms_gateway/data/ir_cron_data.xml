@@ -37,5 +37,17 @@
             <field name="active">True</field>
         </record>
 
+        <!-- Recompute partner order stats daily at 3 AM -->
+        <record id="ir_cron_partner_stats_recompute" model="ir.cron">
+            <field name="name">SMS Gateway: Recompute Partner Stats</field>
+            <field name="model_id" ref="model_res_partner_stats"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_recompute_all()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="nextcall" eval="'2026-04-04 03:00:00'"/>
+            <field name="active">True</field>
+        </record>
+
     </data>
 </odoo>

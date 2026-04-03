@@ -9,7 +9,7 @@
         rate limiting, domain filtering, and integration with mass mailing campaigns.
     """,
     'author': 'VaryShop',
-    'depends': ['base_setup', 'sms', 'mass_mailing_sms', 'phone_validation', 'sale'],
+    'depends': ['base_setup', 'sms', 'mass_mailing_sms', 'phone_validation', 'sale', 'point_of_sale'],
     'external_dependencies': {'python': ['qrcode']},
     'data': [
         'security/ir.model.access.csv',
@@ -21,6 +21,7 @@
         'views/sms_sms_views.xml',
         'views/sms_gateway_send_wizard_views.xml',
         'views/sms_marketing_template_views.xml',
+        'views/res_partner_views.xml',
     ],
     'installable': True,
     'application': False,

@@ -6,3 +6,5 @@ from . import res_config_settings
 from . import sms_gateway_inbound
 from . import sms_marketing_segment
 from . import sms_marketing_template
+from . import res_partner_stats
+from . import res_partner
