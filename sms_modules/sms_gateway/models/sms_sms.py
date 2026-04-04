@@ -92,7 +92,7 @@ class SmsSms(models.Model):
                 trace_vals['trace_status'] = 'sent'
                 trace_vals['sent_datetime'] = fields.Datetime.now()
             elif vals['state'] == 'error':
-                trace_vals['trace_status'] = 'failed'
+                trace_vals['trace_status'] = 'error'
                 if sms.failure_type:
                     trace_vals['failure_type'] = sms.failure_type
             if trace_vals:

@@ -1172,8 +1172,8 @@ class SmsGatewayController(http.Controller):
                     ['trace_status'],
                 )
                 total = len(traces)
-                sent = sum(1 for t in traces if t['trace_status'] == 'sent')
-                pending = sum(1 for t in traces if t['trace_status'] in ('outgoing', 'pending', 'process'))
+                sent = sum(1 for t in traces if t['trace_status'] in ('pending', 'sent', 'open', 'reply'))
+                waiting = sum(1 for t in traces if t['trace_status'] in ('outgoing', 'process'))
                 error = sum(1 for t in traces if t['trace_status'] in ('error', 'cancel', 'bounce'))
 
                 # Revenue attributed via UTM campaign
@@ -1197,7 +1197,7 @@ class SmsGatewayController(http.Controller):
                     'date_created': m.create_date.isoformat() if m.create_date else '',
                     'total': total,
                     'sent': sent,
-                    'pending': pending,
+                    'pending': waiting,
                     'error': error,
                     'revenue': campaign_revenue,
                 })
@@ -1226,8 +1226,8 @@ class SmsGatewayController(http.Controller):
                 ['trace_status', 'links_click_datetime'],
             )
             total = len(traces)
-            sent = sum(1 for t in traces if t['trace_status'] == 'sent')
-            pending = sum(1 for t in traces if t['trace_status'] in ('outgoing', 'pending', 'process'))
+            sent = sum(1 for t in traces if t['trace_status'] in ('pending', 'sent', 'open', 'reply'))
+            waiting = sum(1 for t in traces if t['trace_status'] in ('outgoing', 'process'))
             error = sum(1 for t in traces if t['trace_status'] in ('error', 'cancel', 'bounce'))
             clicked = sum(1 for t in traces if t['links_click_datetime'])
 
@@ -1276,7 +1276,7 @@ class SmsGatewayController(http.Controller):
                 'state': mailing.state,
                 'total': total,
                 'sent': sent,
-                'pending': pending,
+                'pending': waiting,
                 'error': error,
                 'clicked': clicked,
                 'total_clicks': total_clicks,
