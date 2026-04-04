@@ -44,8 +44,10 @@ class SmsMarketingSegment(models.Model):
 
     def copy(self, default=None):
         default = dict(default or {})
+        if 'name' not in default:
+            default['name'] = '%s (kopie)' % self.name
         if 'code' not in default:
-            base = self._slugify(self.name)
+            base = self._slugify(default['name'])
             code = base
             suffix = 2
             while self.search_count([('code', '=', code)]):
