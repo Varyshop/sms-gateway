@@ -42,6 +42,18 @@ class SmsMarketingSegment(models.Model):
         text = re.sub(r'[^a-z0-9]+', '_', text)
         return text.strip('_')
 
+    def copy(self, default=None):
+        default = dict(default or {})
+        if 'code' not in default:
+            base = self._slugify(self.name)
+            code = base
+            suffix = 2
+            while self.search_count([('code', '=', code)]):
+                code = '%s_%d' % (base, suffix)
+                suffix += 1
+            default['code'] = code
+        return super().copy(default)
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
