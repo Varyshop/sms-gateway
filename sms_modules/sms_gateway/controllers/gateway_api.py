@@ -885,6 +885,7 @@ class SmsGatewayController(http.Controller):
             limit = data.get('limit', 100)
             custom_body = data.get('custom_body')
             send_now = data.get('send_now', True)
+            sms_allow_unsubscribe = data.get('sms_allow_unsubscribe', True)
 
             template = request.env['sms.marketing.template'].sudo().browse(template_id)
             if not template.exists() or template.phone_id.id not in phones.ids:
@@ -936,6 +937,7 @@ class SmsGatewayController(http.Controller):
                 'gateway_phone_forced_id': phone.id,
                 'recipient_limit': effective_limit,
                 'marketing_template_id': template.id,
+                'sms_allow_unsubscribe': bool(sms_allow_unsubscribe),
                 'created_from_app': True,
             })
 
