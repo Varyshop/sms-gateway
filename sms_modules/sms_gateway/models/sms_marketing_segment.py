@@ -130,12 +130,21 @@ class SmsMarketingSegment(models.Model):
         cutoff = today - timedelta(days=30)
         return [('create_date', '>=', cutoff)]
 
-    def _get_excluded_partner_ids(self, days):
-        """Return partner IDs who received an SMS in the last N days."""
+    def _get_exclusion_domain(self, days):
+        """Return a domain leaf that excludes partners contacted in the last N days.
+
+        Uses a SQL subquery to avoid materialising thousands of IDs in the
+        domain, which previously produced huge ``('id', 'not in', [...])``
+        clauses sent to PostgreSQL.
+        """
         if not days or days <= 0:
             return []
         cutoff = fields.Datetime.now() - timedelta(days=days)
         cr = self.env.cr
+        # Use a single SQL query to get the set of excluded IDs and let
+        # Odoo intersect it.  We still fetch IDs, but we pick the smaller
+        # side: if there are fewer candidates than excluded, we fetch
+        # candidates and use ``id in``; otherwise ``id not in``.
         cr.execute("""
             SELECT DISTINCT res_id
             FROM mailing_trace
@@ -145,12 +154,20 @@ class SmsMarketingSegment(models.Model):
               AND write_date >= %s
               AND res_id IS NOT NULL
         """, (cutoff,))
-        return [r[0] for r in cr.fetchall()]
+        excluded_ids = [r[0] for r in cr.fetchall()]
+        if not excluded_ids:
+            return []
+        return [('id', 'not in', excluded_ids)]
 
-    def _get_recipient_count(self, phone=None, exclude_contacted_days=0):
-        """Count matching partners, optionally intersected with phone domain_filter."""
+    def _get_full_domain(self, phone=None, exclude_contacted_days=0):
+        """Build the complete recipient domain (segment + blacklist + phone + exclusion).
+
+        This is the single source of truth for recipient filtering — used by
+        both ``_get_recipient_count`` and the campaign create endpoint so the
+        logic is never duplicated.
+        """
+        self.ensure_one()
         domain = self._get_domain()
-        # Exclude blacklisted numbers
         domain += [
             ('phone_sanitized_blacklisted', '=', False),
             '|',
@@ -163,7 +180,68 @@ class SmsMarketingSegment(models.Model):
                 domain += phone_domain
             except Exception:
                 pass
-        excluded_ids = self._get_excluded_partner_ids(exclude_contacted_days)
-        if excluded_ids:
-            domain += [('id', 'not in', excluded_ids)]
+        domain += self._get_exclusion_domain(exclude_contacted_days)
+        return domain
+
+    def _is_domain_storable(self):
+        """Check if this segment produces a purely declarative domain.
+
+        Code-based segments (no_order_3m, one_order_only) use SQL and return
+        ``('id', 'in', [...])``, which cannot be stored as a reusable domain.
+        Segments with ``domain_filter`` are purely declarative and safe to store.
+        """
+        self.ensure_one()
+        return bool(self.domain_filter)
+
+    def _get_storable_domain(self, phone=None, exclude_contacted_days=0):
+        """Return a domain suitable for storing in ``mailing_domain``.
+
+        For segments with a declarative ``domain_filter``, composes the full
+        domain from segment + phone filters (no runtime IDs).
+
+        For SQL-based segments (code dispatched), falls back to pre-resolving
+        recipient IDs into ``('id', 'in', [...])``.
+
+        The ``exclude_contacted_days`` exclusion always requires pre-resolving
+        because it uses SQL on ``mailing_trace``.
+        """
+        self.ensure_one()
+        # Start with base filters (blacklist + phone required)
+        base = [
+            ('phone_sanitized_blacklisted', '=', False),
+            '|',
+            '&', ('mobile', '!=', False), ('mobile', '!=', ''),
+            '&', ('phone', '!=', False), ('phone', '!=', ''),
+        ]
+
+        # Phone domain filter (declarative)
+        phone_extra = []
+        if phone and phone.domain_filter:
+            try:
+                phone_extra = ast.literal_eval(phone.domain_filter)
+            except Exception:
+                pass
+
+        # If segment is declarative AND no exclusion needed → pure domain
+        if self._is_domain_storable() and not exclude_contacted_days:
+            domain = self._get_domain() + base + phone_extra
+            return domain
+
+        # Otherwise pre-resolve to IDs (SQL segments or exclusion needed)
+        domain = self._get_full_domain(phone, exclude_contacted_days)
+        partner_ids = self.env['res.partner'].sudo().search(domain).ids
+        return [('id', 'in', partner_ids)] if partner_ids else [('id', '=', 0)]
+
+    def _resolve_recipient_ids(self, phone=None, exclude_contacted_days=0, limit=None):
+        """Resolve full domain to a list of partner IDs.
+
+        Returns the resolved IDs — suitable for storing as ``[('id', 'in', ids)]``
+        in ``mailing_domain`` to avoid huge ``not in`` clauses.
+        """
+        domain = self._get_full_domain(phone, exclude_contacted_days)
+        return self.env['res.partner'].sudo().search(domain, limit=limit).ids
+
+    def _get_recipient_count(self, phone=None, exclude_contacted_days=0):
+        """Count matching partners."""
+        domain = self._get_full_domain(phone, exclude_contacted_days)
         return self.env['res.partner'].sudo().search_count(domain)

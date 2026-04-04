@@ -847,19 +847,9 @@ class SmsGatewayController(http.Controller):
             # Render preview with a sample partner
             preview_text = template.body
             try:
-                import ast
-                domain = segment._get_domain()
-                domain += [
-                    ('phone_sanitized_blacklisted', '=', False),
-                    '|',
-                    '&', ('mobile', '!=', False), ('mobile', '!=', ''),
-                    '&', ('phone', '!=', False), ('phone', '!=', ''),
-                ]
-                if phone.domain_filter:
-                    domain += ast.literal_eval(phone.domain_filter)
-                excluded_ids = segment._get_excluded_partner_ids(exclude_days)
-                if excluded_ids:
-                    domain += [('id', 'not in', excluded_ids)]
+                domain = segment._get_full_domain(
+                    phone=phone, exclude_contacted_days=exclude_days,
+                )
                 sample = request.env['res.partner'].sudo().search(domain, limit=1)
                 if sample:
                     preview_text = preview_text.replace('{{object.name}}', sample.name or '')
@@ -889,8 +879,6 @@ class SmsGatewayController(http.Controller):
             return self._error_response('Invalid API key', 401)
 
         try:
-            import ast
-
             data = self._get_json_data()
             template_id = data.get('template_id')
             segment_id = data.get('segment_id')
@@ -912,23 +900,21 @@ class SmsGatewayController(http.Controller):
             # Use custom body from app if provided, otherwise template body
             sms_body = custom_body.strip() if custom_body else template.body
 
-            # Build combined domain
+            # Build storable domain via segment (single source of truth).
+            # For declarative segments this stores the actual domain filter;
+            # for SQL-based segments it pre-resolves to ('id', 'in', [...]).
             exclude_days = template.exclude_contacted_days or 0
-            domain = segment._get_domain()
-            domain += [
-                ('phone_sanitized_blacklisted', '=', False),
-                '|',
-                '&', ('mobile', '!=', False), ('mobile', '!=', ''),
-                '&', ('phone', '!=', False), ('phone', '!=', ''),
-            ]
-            if phone.domain_filter:
-                try:
-                    domain += ast.literal_eval(phone.domain_filter)
-                except Exception:
-                    pass
-            excluded_ids = segment._get_excluded_partner_ids(exclude_days)
-            if excluded_ids:
-                domain += [('id', 'not in', excluded_ids)]
+            stored_domain = segment._get_storable_domain(
+                phone=phone,
+                exclude_contacted_days=exclude_days,
+            )
+            # Check if any recipients match
+            count = request.env['res.partner'].sudo().search_count(stored_domain)
+            if not count:
+                return self._json_response({
+                    'success': False,
+                    'error': 'No recipients match the filter',
+                })
 
             # Create mailing
             partner_model = request.env['ir.model'].sudo().search([
@@ -946,7 +932,7 @@ class SmsGatewayController(http.Controller):
                 'email_from': email_from,
                 'sms_provider': 'gateway',
                 'mailing_model_id': partner_model.id,
-                'mailing_domain': repr(domain),
+                'mailing_domain': repr(stored_domain),
                 'gateway_phone_forced_id': phone.id,
                 'recipient_limit': effective_limit,
                 'marketing_template_id': template.id,
