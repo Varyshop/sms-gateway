@@ -100,11 +100,18 @@ class SmsSms(models.Model):
                 self._check_mailing_completion(traces)
 
     @staticmethod
-    def _replace_unsubscribe_url(body):
-        """Replace the full unsubscribe line with a short opt-out notice."""
+    def _replace_unsubscribe_url(body, allow_unsubscribe=True):
+        """Replace or strip the full unsubscribe line.
+
+        When *allow_unsubscribe* is True the long URL is replaced with
+        a short opt-out notice (``odhl. sms: STOP``).  When False the
+        entire unsubscribe line is removed to save SMS characters.
+        """
         if not body:
             return body
-        return UNSUBSCRIBE_LINE_PATTERN.sub('\nodhl. sms: STOP', body)
+        if allow_unsubscribe:
+            return UNSUBSCRIBE_LINE_PATTERN.sub('\nodhl. sms: STOP', body)
+        return UNSUBSCRIBE_LINE_PATTERN.sub('', body)
 
     def _phone_remaining_capacity(self, phone):
         """Return remaining segment capacity for a gateway phone.
@@ -159,7 +166,8 @@ class SmsSms(models.Model):
             sms_sudo = sms.sudo().with_context(sms_skip_msg_notification=True)
 
             # Calculate segments first (needed for limit check)
-            body = self._replace_unsubscribe_url(sms.body)
+            allow_unsub = not sms.mailing_id or sms.mailing_id.sms_allow_unsubscribe
+            body = self._replace_unsubscribe_url(sms.body, allow_unsubscribe=allow_unsub)
             segments = sms_segment_count(body)
 
             # Use pre-assigned phone, forced phone from mailing, or auto-assign

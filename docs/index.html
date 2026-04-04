@@ -430,6 +430,9 @@
           <a href="#prvni-kampan" data-section="prvni-kampan"
             >Vase prvni kampan</a
           >
+          <a href="#kampan-z-appky" data-section="kampan-z-appky"
+            >Kampan z mobilni appky</a
+          >
           <a href="#jak-se-odesilaji" data-section="jak-se-odesilaji"
             >Jak se odesilaji SMS</a
           >
@@ -484,11 +487,11 @@
         </div>
 
         <div class="highlight-box">
-          <strong>Novinka v1.2.0: Prichozi SMS</strong><br />
-          Aplikace nyne obsahuje novy tab <strong>Prichozi</strong>, kde vidite vsechny
-          prijate SMS zpravy. Muzete filtrovat na vsechny zpravy nebo jen STOP zpravy.
-          U kazde zpravy vidite jmeno partnera (pokud existuje v systemu) a stav blacklistu.
-          Vsechny prijate SMS se automaticky zasilaji na server a zobrazuji v chatteru partnera v Odoo.
+          <strong>Novinka v1.3.0: Kampane z mobilni appky</strong><br />
+          Novy tab <strong>Kampane</strong> umoznuje vytvaret a odesilat SMS kampane
+          primo z telefonu. Vyberte sablonu, segment zakazniku, upravte text
+          a odeslte &mdash; vcetne statistik (kliknuti, objednavky, prijem).
+          <a href="#kampan-z-appky">Vice informaci &darr;</a>
         </div>
 
         <!-- ==================== JAK TO FUNGUJE ==================== -->
@@ -857,6 +860,77 @@
           <code>{{ object.name }}</code> vlozite do textu jmeno kazdeho
           prijemce. Dalsi pole najdete pres tlacitko dynamickeho obsahu v
           editoru zpravy.
+        </div>
+
+        <!-- ==================== KAMPAN Z APPKY ==================== -->
+        <h2 id="kampan-z-appky">Kampan z mobilni appky</h2>
+
+        <p>
+          <strong>Novinka v1.3.0:</strong> Kampane muzete vytvaret primo
+          z mobilni aplikace bez pristupu do Odoo backendu. Staci otevrit
+          tab <strong>Kampane</strong> v appce.
+        </p>
+
+        <h3>Predpoklady</h3>
+        <ul>
+          <li>
+            V administraci musi byt vytvorena alespon jedna
+            <strong>SMS sablona</strong> prirazena k vasemu telefonu
+            (<span class="path">SMS Gateway &rarr; Marketing Templates</span>)
+          </li>
+          <li>
+            Sablona musi mit prirazene <strong>segmenty</strong>
+            (skupiny prijemcu)
+          </li>
+        </ul>
+
+        <h3>Wizard v appce (3 kroky)</h3>
+        <ol class="steps">
+          <li>
+            <strong>Vyber sablony</strong> &mdash; zobrazí se sablony prirazene
+            k vasemu telefonu. Vyberte jednu klepnutim.
+          </li>
+          <li>
+            <strong>Segment a pocet</strong> &mdash; vyberte segment
+            (napr. &bdquo;Neobjednali 3 mesice&ldquo;) a nastavte pocet
+            prijemcu. U kazdeho segmentu vidite kolik zakazniku odpovida filtru.
+          </li>
+          <li>
+            <strong>Nahled a potvrzeni</strong> &mdash; uvidite nahled SMS
+            s ukázkovym jmenem. Text muzete pred odeslanim upravit.
+            Zvolite <strong>Odeslat ihned</strong> nebo
+            <strong>Do fronty</strong>.
+          </li>
+        </ol>
+
+        <h3>Odeslani a sledovani</h3>
+        <p>
+          Po vytvoreni kampane se zobrazi karta stavu s realtime pocitadly
+          (odeslano / ceka / chyby). Pokud jste zvolili &bdquo;Do fronty&ldquo;,
+          muzete SMS pozdeji odeslat tlacitkem
+          <strong>Odeslat ihned</strong>.
+        </p>
+        <p>
+          U telefonu s dvema SIM kartami appka nabidne vyber:
+          odeslat pres jednu SIM, nebo rozdelit mezi obe.
+        </p>
+
+        <h3>Marketingove statistiky</h3>
+        <p>
+          Po odeslani kampane appka zobrazuje:
+        </p>
+        <ul>
+          <li><strong>Kliknuto</strong> &mdash; kolik prijemcu kliklo na odkaz</li>
+          <li><strong>Objednavky</strong> &mdash; pocet objednavek z kampane (UTM tracking)</li>
+          <li><strong>Prijem</strong> &mdash; celkovy prijem z objednavek v Kc</li>
+          <li><strong>Odhlaseno</strong> &mdash; pocet STOP odpovedi</li>
+          <li><strong>CTR, Konverze, Odhlaseni %</strong> &mdash; procentualni metriky</li>
+        </ul>
+
+        <div class="info">
+          <strong>Tip:</strong> Segmenty a sablony nastavuje admin v Odoo.
+          Operator v appce jen vybira a odesila &mdash; nemuze zmenit
+          filtry ani prijemce mimo nastavenych segmentu.
         </div>
 
         <!-- ==================== JAK SE ODESILAJI ==================== -->
@@ -1287,6 +1361,18 @@
             <td><strong>Bounced</strong></td>
             <td>Neplatna telefonni cisla</td>
           </tr>
+          <tr>
+            <td><strong>Objednavky (Orders)</strong></td>
+            <td>Pocet objednavek vytvorenych z kampane (UTM tracking)</td>
+          </tr>
+          <tr>
+            <td><strong>Prijem (Revenue)</strong></td>
+            <td>Celkovy prijem z objednavek prirazených kampani</td>
+          </tr>
+          <tr>
+            <td><strong>Odhlaseno (Opt-out)</strong></td>
+            <td>Pocet prijemcu, kteri odpovedeli STOP</td>
+          </tr>
         </table>
 
         <p>
@@ -1661,7 +1747,7 @@
             font-size: 0.9em;
           "
         >
-          Varyshop SMS v18.0.1.2.0 &bull; VaryShop &bull; 2026
+          Varyshop SMS v18.0.2.2.0 &bull; VaryShop &bull; 2026
         </p>
       </main>
     </div>

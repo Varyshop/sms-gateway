@@ -33,6 +33,7 @@ class Mailing(models.Model):
     marketing_template_id = fields.Many2one(
         'sms.marketing.template', string='Marketing Template',
     )
+    sms_allow_unsubscribe = fields.Boolean(default=True)
     created_from_app = fields.Boolean(default=False)
 
     def _get_recipients(self):

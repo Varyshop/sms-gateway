@@ -20,6 +20,11 @@
                        invisible="mailing_type != 'sms'"
                        placeholder="Default (IAP)"/>
             </xpath>
+            <!-- Add STOP message (opt-out) toggle -->
+            <xpath expr="//field[@name='sms_allow_unsubscribe']" position="attributes">
+                <attribute name="invisible">mailing_type != 'sms'</attribute>
+                <attribute name="string">Přidat STOP zprávu</attribute>
+            </xpath>
             <!-- Add Paused toggle -->
             <xpath expr="//field[@name='state']" position="before">
                 <field name="paused" widget="boolean_toggle"

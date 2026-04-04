@@ -191,9 +191,12 @@
         <li><a href="#12-limity">12. Limity a rate limiting</a></li>
         <li><a href="#13-dual-sim">13. Dual SIM podpora</a></li>
         <li><a href="#14-api">14. API reference</a></li>
+        <li><a href="#14b-marketing-modely">14b. Marketing modely (segmenty a sablony)</a></li>
+        <li><a href="#14c-campaign-api">14c. Campaign API (mobilni appka)</a></li>
         <li><a href="#15-troubleshooting">15. Reseni problemu</a></li>
         <li><a href="#16-fcm">16. FCM Push Notifications</a></li>
         <li><a href="#17-pozadi">17. Pozadi a spolehlivost (Android)</a></li>
+        <li><a href="#18-changelog">18. Changelog</a></li>
       </ul>
     </div>
 
@@ -1147,6 +1150,275 @@ STOP pro odhlaseni</code></pre>
     "processed": 3
 }</code></pre>
 
+    <!-- ==================== 14b. MARKETING MODELY ==================== -->
+    <h2 id="14b-marketing-modely">14b. Marketing modely (segmenty a sablony)</h2>
+
+    <p>
+      Od verze <strong>v18.0.2.2.0</strong> modul obsahuje modely pro SMS marketing
+      primo z mobilni aplikace. Admin definuje segmenty a sablony v Odoo,
+      operator je pouziva z appky bez pristupu do backendu.
+    </p>
+
+    <h3>Model: sms.marketing.segment</h3>
+    <p>Definuje skupinu prijemcu (napr. &bdquo;Neobjednali 3 mesice&ldquo;).</p>
+    <table>
+      <tr><th>Pole</th><th>Typ</th><th>Popis</th></tr>
+      <tr><td><code>name</code></td><td>Char</td><td>Nazev segmentu (prekladatelny)</td></tr>
+      <tr><td><code>code</code></td><td>Char, unique</td><td>Slug (<code>no_order_3m</code>, <code>one_order_only</code>, <code>new_customers_30d</code>)</td></tr>
+      <tr><td><code>domain_filter</code></td><td>Char</td><td>Deklarativni Odoo domena, napr. <code>[("country_id.code", "=", "CZ")]</code>. Pokud je nastavena, pouzije se misto code-based logiky.</td></tr>
+      <tr><td><code>sequence</code></td><td>Integer</td><td>Poradi v seznamu</td></tr>
+      <tr><td><code>active</code></td><td>Boolean</td><td>Aktivni/neaktivni</td></tr>
+      <tr><td><code>description</code></td><td>Text</td><td>Popis zobrazeny v appce</td></tr>
+    </table>
+
+    <h4>Vychozi segmenty (data)</h4>
+    <table>
+      <tr><th>Code</th><th>Nazev</th><th>Logika</th></tr>
+      <tr><td><code>no_order_3m</code></td><td>Neobjednali 3 mesice</td><td>SQL: partneri s objednavkou, ale zadnou za 90 dni</td></tr>
+      <tr><td><code>one_order_only</code></td><td>Jedina objednavka</td><td>SQL: partneri s presne 1 potvrzenou objednavkou</td></tr>
+      <tr><td><code>new_customers_30d</code></td><td>Novi zakaznici (30 dni)</td><td>Domain: <code>[("create_date", ">=", today - 30d)]</code></td></tr>
+    </table>
+
+    <h4>Klicove metody</h4>
+    <table>
+      <tr><th>Metoda</th><th>Popis</th></tr>
+      <tr>
+        <td><code>_get_domain()</code></td>
+        <td>Vrati zakladni Odoo domain segmentu. Pouzije <code>domain_filter</code> nebo dispatchuje na <code>_domain_{code}()</code>.</td>
+      </tr>
+      <tr>
+        <td><code>_get_full_domain(phone, exclude_contacted_days)</code></td>
+        <td>Single source of truth &mdash; sklada kompletni domain: segment + blacklist + phone filter + exclusion kontaktovanych.</td>
+      </tr>
+      <tr>
+        <td><code>_get_storable_domain(phone, exclude_contacted_days)</code></td>
+        <td>Vraci domain vhodnou pro ulozeni do <code>mailing_domain</code>. Deklarativni segmenty se ulozi jako citelna domena; SQL segmenty se pre-resolvi na <code>('id', 'in', [...])</code>.</td>
+      </tr>
+      <tr>
+        <td><code>_resolve_recipient_ids(phone, exclude_days, limit)</code></td>
+        <td>Resolvi domain na seznam partner ID. Pouziva se pro pocty a preview.</td>
+      </tr>
+      <tr>
+        <td><code>_get_recipient_count(phone, exclude_days)</code></td>
+        <td>Spocita pocet odpovidajicich partneru.</td>
+      </tr>
+      <tr>
+        <td><code>_get_exclusion_domain(days)</code></td>
+        <td>Vrati domain leaf vylucujici partnery kontaktovane v poslednich N dnech (SQL na <code>mailing_trace</code>).</td>
+      </tr>
+    </table>
+
+    <div class="note">
+      <strong>Domain compositing:</strong> Vsechny endpointy (filters, preview, create) deleguji
+      na segment model. Phone <code>domain_filter</code> se automaticky pridava v
+      <code>_get_full_domain()</code>, takze domena telefonu a segmentu se vzdy kombinuji.
+    </div>
+
+    <h3>Model: sms.marketing.template</h3>
+    <p>SMS sablona prirazena ke gateway telefonu.</p>
+    <table>
+      <tr><th>Pole</th><th>Typ</th><th>Popis</th></tr>
+      <tr><td><code>name</code></td><td>Char</td><td>Nazev sablony</td></tr>
+      <tr><td><code>body</code></td><td>Text</td><td>Text SMS (muze obsahovat <code>{{object.name}}</code>)</td></tr>
+      <tr><td><code>phone_id</code></td><td>Many2one &rarr; sms.gateway.phone</td><td>Prirazeny telefon</td></tr>
+      <tr><td><code>segment_ids</code></td><td>Many2many &rarr; sms.marketing.segment</td><td>Povolene segmenty</td></tr>
+      <tr><td><code>default_limit</code></td><td>Integer (100)</td><td>Vychozi navrh poctu prijemcu</td></tr>
+      <tr><td><code>max_limit</code></td><td>Integer (500)</td><td>Hard cap na pocet prijemcu</td></tr>
+      <tr><td><code>exclude_contacted_days</code></td><td>Integer (0)</td><td>Vyloucit partnery kontaktovane v poslednich N dnech</td></tr>
+    </table>
+
+    <h3>Nova pole na mailing.mailing</h3>
+    <table>
+      <tr><th>Pole</th><th>Typ</th><th>Popis</th></tr>
+      <tr><td><code>gateway_phone_forced_id</code></td><td>Many2one &rarr; sms.gateway.phone</td><td>Vynuceny telefon pro vsechny SMS v kampani</td></tr>
+      <tr><td><code>recipient_limit</code></td><td>Integer</td><td>Max pocet prijemcu</td></tr>
+      <tr><td><code>marketing_template_id</code></td><td>Many2one &rarr; sms.marketing.template</td><td>Zpetny odkaz na sablonu</td></tr>
+      <tr><td><code>created_from_app</code></td><td>Boolean</td><td>Vytvoreno z mobilni appky</td></tr>
+      <tr><td><code>paused</code></td><td>Boolean</td><td>Pozastavena kampan (neodesila se, ale SMS jsou ve fronte)</td></tr>
+    </table>
+
+    <!-- ==================== 14c. CAMPAIGN API ==================== -->
+    <h2 id="14c-campaign-api">14c. Campaign API (mobilni appka)</h2>
+
+    <p>
+      Endpointy pro mobilni appku umoznujici vytvorit a sledovat SMS kampane
+      bez pristupu do Odoo backendu. Vsechny endpointy: <strong>POST</strong>,
+      auth pres <code>X-API-Key</code>, JSON body/response.
+    </p>
+
+    <h3>POST /sms-gateway/campaign/templates</h3>
+    <p>Vrati sablony prirazene k telefonu identifikovanemu API klicem.</p>
+    <pre><code>// Response
+{
+    "success": true,
+    "templates": [
+        {
+            "id": 1,
+            "name": "Akce tento tyden",
+            "body": "Ahoj {{object.name}}! Mate slevu 20%...",
+            "segments": [
+                {"id": 1, "name": "Neobjednali 3 mesice", "code": "no_order_3m"},
+                {"id": 2, "name": "Jedina objednavka", "code": "one_order_only"}
+            ],
+            "default_limit": 100,
+            "max_limit": 500,
+            "exclude_contacted_days": 14
+        }
+    ]
+}</code></pre>
+
+    <h3>POST /sms-gateway/campaign/filters</h3>
+    <p>Pro kazdý segment spocita pocet odpovidajicich prijemcu (vcetne phone domain filtru a exclusion).</p>
+    <pre><code>// Request
+{"template_id": 1}
+
+// Response
+{
+    "success": true,
+    "filters": [
+        {
+            "id": 1,
+            "code": "no_order_3m",
+            "name": "Neobjednali 3 mesice",
+            "description": "Partneri s objednavkou ale zadnou za 90 dni",
+            "recipient_count": 342
+        }
+    ]
+}</code></pre>
+
+    <h3>POST /sms-gateway/campaign/preview</h3>
+    <p>Nahled kampane &mdash; pocet prijemcu a renderovany text s ukázkovym partnerem.</p>
+    <pre><code>// Request
+{"template_id": 1, "segment_id": 1, "limit": 200}
+
+// Response
+{
+    "success": true,
+    "recipient_count": 200,
+    "preview_text": "Ahoj Jan Novak! Mate slevu 20%...",
+    "template_name": "Akce tento tyden",
+    "segment_name": "Neobjednali 3 mesice"
+}</code></pre>
+
+    <h3>POST /sms-gateway/campaign/create</h3>
+    <p>Vytvori <code>mailing.mailing</code> s plnym trackingem. Prijima volitelny <code>custom_body</code> (uprava textu z appky) a <code>send_now</code> prepinac.</p>
+    <pre><code>// Request
+{
+    "template_id": 1,
+    "segment_id": 1,
+    "limit": 200,
+    "custom_body": "Upraveny text SMS...",
+    "send_now": true
+}
+
+// Response
+{
+    "success": true,
+    "campaign_id": 42,
+    "recipient_count": 200,
+    "state": "sending"
+}</code></pre>
+
+    <div class="note">
+      <strong>send_now:</strong> Pokud <code>send_now=false</code>, kampan se vytvori ve stavu
+      <code>in_queue</code> s <code>paused=true</code>. SMS jsou ve fronte, ale neodesílají se
+      dokud operator nestiskne &bdquo;Odeslat ihned&ldquo; v appce (endpoint <code>assign-sim</code>).
+    </div>
+
+    <div class="note">
+      <strong>Domain storage:</strong> Pro segmenty s deklarativnim <code>domain_filter</code>
+      se do <code>mailing_domain</code> ulozi citelna domena (napr. <code>[("country_id.code", "=", "CZ"), ...]</code>).
+      Pro SQL segmenty se pre-resolvi na kompaktni <code>[("id", "in", [1, 2, 3, ...])]</code>.
+    </div>
+
+    <h3>POST /sms-gateway/campaign/assign-sim</h3>
+    <p>Priradi gateway telefon a SIM k SMS v kampani. Pouziva stejnou logiku jako akce &bdquo;Send via Gateway&ldquo; v Odoo.</p>
+    <pre><code>// Request — jedina SIM (nebo auto-prirazeni bez SIM cisla)
+{
+    "campaign_id": 42,
+    "mode": "single",
+    "sim_number": "+420777123456"
+}
+
+// Request — rozdeleni mezi vice SIM
+{
+    "campaign_id": 42,
+    "mode": "split",
+    "sim_numbers": ["+420777123456", "+420608987654"]
+}
+
+// Response
+{
+    "success": true,
+    "assigned": 200,
+    "message": "Assigned 200 SMS to phone"
+}</code></pre>
+
+    <div class="note">
+      <strong>Co assign-sim dela:</strong>
+      <ul>
+        <li>Najde SMS ve stavu <code>outgoing</code>/<code>error</code> (neprirazene) a <code>pending</code> bez SIM</li>
+        <li>Nastavi <code>sms_provider='gateway'</code>, <code>gateway_phone_id</code>, <code>gateway_sim_number</code></li>
+        <li>V rezimu <code>split</code> rozdeluje SMS round-robin mezi vsechny SIM</li>
+        <li>Unpausne kampan: <code>state='sending', paused=False</code></li>
+        <li>Odesle FCM wake pro okamzite odeslani</li>
+      </ul>
+    </div>
+
+    <h3>POST /sms-gateway/campaign/list</h3>
+    <p>Seznam kampani vytvorených z appky pro dany telefon.</p>
+    <pre><code>// Response
+{
+    "success": true,
+    "campaigns": [
+        {
+            "id": 42,
+            "name": "Akce tento tyden - 04.04.2026 10:30",
+            "state": "done",
+            "date_created": "2026-04-04 10:30:00",
+            "total": 200,
+            "sent": 195,
+            "pending": 0,
+            "error": 5,
+            "clicked": 42,
+            "total_clicks": 67,
+            "order_count": 8,
+            "revenue": 12400.0,
+            "optout": 3
+        }
+    ]
+}</code></pre>
+
+    <h3>POST /sms-gateway/campaign/status/{mailing_id}</h3>
+    <p>Detail kampane s marketingovymi statistikami.</p>
+    <pre><code>// Response
+{
+    "success": true,
+    "id": 42,
+    "name": "Akce tento tyden - 04.04.2026 10:30",
+    "state": "done",
+    "total": 200,
+    "sent": 195,
+    "pending": 0,
+    "error": 5,
+    "clicked": 42,
+    "total_clicks": 67,
+    "order_count": 8,
+    "revenue": 12400.0,
+    "optout": 3,
+    "created_at": "2026-04-04 10:30:00"
+}</code></pre>
+
+    <h4>Vysvetleni statistik</h4>
+    <table>
+      <tr><th>Pole</th><th>Popis</th><th>Zdroj</th></tr>
+      <tr><td><code>clicked</code></td><td>Unikatni prijemci co klikli</td><td><code>mailing.trace</code> s <code>links_click_datetime</code></td></tr>
+      <tr><td><code>total_clicks</code></td><td>Celkovy pocet kliknuti (vcetne opakovanych)</td><td><code>link.tracker.click</code> pres UTM campaign</td></tr>
+      <tr><td><code>order_count</code></td><td>Pocet objednavek z kampane</td><td><code>sale.order</code> s <code>campaign_id</code> = UTM kampan</td></tr>
+      <tr><td><code>revenue</code></td><td>Celkovy prijem z objednavek</td><td>Soucet <code>amount_total</code> z matchujicich objednavek</td></tr>
+      <tr><td><code>optout</code></td><td>Pocet odhlasenych (STOP)</td><td><code>mailing.trace</code> ve stavu <code>cancel</code></td></tr>
+    </table>
+
     <!-- ==================== 15. TROUBLESHOOTING ==================== -->
     <h2 id="15-troubleshooting">15. Reseni problemu</h2>
 
@@ -1565,10 +1837,40 @@ Heartbeat (60s)      ──▶  pending_count > 0?  ──▶  Poll + Send
       <a href="mailto:info@michalvarys.eu">info@michalvarys.eu</a>
     </div>
 
+    <!-- ==================== 18. CHANGELOG ==================== -->
+    <h2 id="18-changelog">18. Changelog</h2>
+
+    <h3>v18.0.2.2.0 / App v1.3.0 (2026-04-04)</h3>
+    <ul>
+      <li><strong>Campaign Wizard v appce:</strong> Novy tab &bdquo;Kampane&ldquo; &mdash; operator vybere sablonu, segment, pocet prijemcu a odesle kampan primo z telefonu</li>
+      <li><strong>Marketing segmenty:</strong> <code>sms.marketing.segment</code> s deklarativnimi i SQL-based domenami (3 vychozi segmenty)</li>
+      <li><strong>Marketing sablony:</strong> <code>sms.marketing.template</code> prirazene ke gateway telefonum</li>
+      <li><strong>Campaign API:</strong> 7 novych endpointu (templates, filters, preview, create, assign-sim, list, status)</li>
+      <li><strong>Uprava textu SMS:</strong> Operator muze pred odeslanim upravit text sablony primo v nahledu</li>
+      <li><strong>Volba odeslani:</strong> &bdquo;Odeslat ihned&ldquo; vs &bdquo;Do fronty&ldquo; pri vytvareni kampane</li>
+      <li><strong>SIM vyber:</strong> Automaticke prirazeni pro jednu SIM, vyber/rozdeleni pro dual SIM</li>
+      <li><strong>Marketing statistiky:</strong> Kliknuti, objednavky, prijem z kampane, odhlaseni &mdash; v appce i API</li>
+      <li><strong>Domain optimalizace:</strong> Deklarativni segmenty se ukladaji jako citelna domena; SQL segmenty se pre-resolvi na kompaktni <code>('id', 'in', [...])</code></li>
+      <li><strong>Phone domain compositing:</strong> <code>sms.gateway.phone.domain_filter</code> se automaticky kombinuje s doménou segmentu v <code>_get_full_domain()</code></li>
+      <li><strong>Exclusion:</strong> Partneri kontaktovani v poslednich N dnech se vylucuji pres <code>mailing_trace</code></li>
+      <li><strong>Fix:</strong> <code>email_from</code> NOT NULL chyba pri vytvareni SMS kampane</li>
+      <li><strong>Fix:</strong> Filtrovani prazdnych telefonnich cisel (prazdny string nebyl odfiltrovany)</li>
+      <li><strong>Fix:</strong> <code>gateway_phone_forced_id</code> jako fallback v <code>sms.sms._send()</code></li>
+    </ul>
+
+    <h3>v18.0.2.1.0 / App v1.2.0</h3>
+    <ul>
+      <li>Prichozi SMS tab a inbound historie</li>
+      <li>Rescan inbox (nativni metoda)</li>
+      <li>Batch inbound endpoint s deduplikaci</li>
+      <li>FCM push notifikace</li>
+      <li>Dual SIM podpora</li>
+    </ul>
+
     <hr />
 
     <p style="color: #6b7280; text-align: center; margin-top: 40px">
-      SMS Gateway v18.0.2.1.0 &bull; VaryShop &bull; 2026
+      SMS Gateway v18.0.2.2.0 &bull; VaryShop &bull; 2026
     </p>
   </body>
 </html>
