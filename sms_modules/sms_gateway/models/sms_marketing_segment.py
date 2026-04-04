@@ -197,13 +197,14 @@ class SmsMarketingSegment(models.Model):
         """Return a domain suitable for storing in ``mailing_domain``.
 
         For segments with a declarative ``domain_filter``, composes the full
-        domain from segment + phone filters (no runtime IDs).
+        domain from segment + phone filters (no runtime IDs).  The
+        ``exclude_contacted_days`` exclusion is **not** baked into the stored
+        domain — it is applied at send time by ``mailing.mailing._get_recipients()``
+        via the ``exclude_contacted_days`` field on the mailing record.  This
+        keeps the stored domain clean and readable.
 
         For SQL-based segments (code dispatched), falls back to pre-resolving
         recipient IDs into ``('id', 'in', [...])``.
-
-        The ``exclude_contacted_days`` exclusion always requires pre-resolving
-        because it uses SQL on ``mailing_trace``.
         """
         self.ensure_one()
         # Start with base filters (blacklist + phone required)
@@ -222,12 +223,14 @@ class SmsMarketingSegment(models.Model):
             except Exception:
                 pass
 
-        # If segment is declarative AND no exclusion needed → pure domain
-        if self._is_domain_storable() and not exclude_contacted_days:
+        # Declarative segments → always store the pure domain (exclusion
+        # is handled at send time, not stored in the domain)
+        if self._is_domain_storable():
             domain = self._get_domain() + base + phone_extra
             return domain
 
-        # Otherwise pre-resolve to IDs (SQL segments or exclusion needed)
+        # SQL-based segments → pre-resolve to IDs (exclude_contacted_days
+        # is still applied here for accurate recipient set)
         domain = self._get_full_domain(phone, exclude_contacted_days)
         partner_ids = self.env['res.partner'].sudo().search(domain).ids
         return [('id', 'in', partner_ids)] if partner_ids else [('id', '=', 0)]

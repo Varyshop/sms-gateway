@@ -25,6 +25,12 @@
                 <attribute name="invisible">mailing_type != 'sms'</attribute>
                 <attribute name="string">Přidat STOP zprávu</attribute>
             </xpath>
+            <!-- Add Exclude Contacted Days -->
+            <xpath expr="//field[@name='sms_allow_unsubscribe']" position="after">
+                <field name="exclude_contacted_days"
+                       invisible="mailing_type != 'sms'"
+                       readonly="state in ('sending', 'done')"/>
+            </xpath>
             <!-- Add Paused toggle -->
             <xpath expr="//field[@name='state']" position="before">
                 <field name="paused" widget="boolean_toggle"

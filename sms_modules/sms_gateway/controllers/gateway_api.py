@@ -904,6 +904,8 @@ class SmsGatewayController(http.Controller):
             # Build storable domain via segment (single source of truth).
             # For declarative segments this stores the actual domain filter;
             # for SQL-based segments it pre-resolves to ('id', 'in', [...]).
+            # The exclude_contacted_days filter uses stats_last_sms_sent
+            # from res.partner.stats, so it stays declarative in the domain.
             exclude_days = template.exclude_contacted_days or 0
             stored_domain = segment._get_storable_domain(
                 phone=phone,
@@ -938,6 +940,7 @@ class SmsGatewayController(http.Controller):
                 'recipient_limit': effective_limit,
                 'marketing_template_id': template.id,
                 'sms_allow_unsubscribe': bool(sms_allow_unsubscribe),
+                'exclude_contacted_days': exclude_days,
                 'created_from_app': True,
             })
 

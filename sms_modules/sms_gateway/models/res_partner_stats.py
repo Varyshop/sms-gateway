@@ -38,6 +38,10 @@ class ResPartnerStats(models.Model):
         help='Bought >1 year ago, had a gap of 6+ months, then bought again in last 3 months.',
         default=False,
     )
+    last_sms_sent_date = fields.Date(
+        string='Last SMS Sent',
+        help='Date of the last successfully sent SMS to this partner.',
+    )
 
     _sql_constraints = [
         ('partner_unique', 'UNIQUE(partner_id)', 'Only one stats record per partner.'),
@@ -140,4 +144,49 @@ class ResPartnerStats(models.Model):
         _logger.info(
             'res.partner.stats: recomputed %d partners (%d created, %d updated, %d removed)',
             len(rows), len(to_create), len(rows) - len(to_create), len(stale),
+        )
+
+        # Update last_sms_sent_date from mailing_trace
+        self._update_last_sms_sent()
+
+    @api.model
+    def _update_last_sms_sent(self):
+        """Update last_sms_sent_date for all partners with SMS traces."""
+        cr = self.env.cr
+        cr.execute("""
+            SELECT res_id, MAX(write_date)::date
+            FROM mailing_trace
+            WHERE model = 'res.partner'
+              AND trace_type = 'sms'
+              AND trace_status = 'sent'
+              AND res_id IS NOT NULL
+            GROUP BY res_id
+        """)
+        sms_dates = dict(cr.fetchall())
+        if not sms_dates:
+            return
+
+        # Update existing stats records
+        existing = {
+            s.partner_id.id: s
+            for s in self.sudo().search([
+                ('partner_id', 'in', list(sms_dates.keys())),
+            ])
+        }
+        to_create = []
+        for pid, last_date in sms_dates.items():
+            if pid in existing:
+                if existing[pid].last_sms_sent_date != last_date:
+                    existing[pid].sudo().write({'last_sms_sent_date': last_date})
+            else:
+                to_create.append({
+                    'partner_id': pid,
+                    'last_sms_sent_date': last_date,
+                })
+        if to_create:
+            self.sudo().create(to_create)
+
+        _logger.info(
+            'res.partner.stats: updated last_sms_sent_date for %d partners',
+            len(sms_dates),
         )

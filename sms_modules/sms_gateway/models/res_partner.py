@@ -30,3 +30,6 @@ class ResPartner(models.Model):
     stats_returning = fields.Boolean(
         related='stats_id.is_returning_customer', string='Returning Customer', readonly=True,
     )
+    stats_last_sms_sent = fields.Date(
+        related='stats_id.last_sms_sent_date', string='Last SMS Sent', readonly=True,
+    )
