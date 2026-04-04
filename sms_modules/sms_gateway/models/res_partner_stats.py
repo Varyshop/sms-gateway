@@ -42,6 +42,56 @@ class ResPartnerStats(models.Model):
         string='Last SMS Sent',
         help='Date of the last successfully sent SMS to this partner.',
     )
+    last_order_days = fields.Integer(
+        string='Days Since Last Order',
+        compute='_compute_order_days', search='_search_last_order_days',
+    )
+    first_order_days = fields.Integer(
+        string='Days Since First Order',
+        compute='_compute_order_days', search='_search_first_order_days',
+    )
+    last_sms_sent_days = fields.Integer(
+        string='Days Since Last SMS',
+        compute='_compute_sms_days', search='_search_last_sms_sent_days',
+    )
+
+    @api.depends('last_order_date', 'first_order_date')
+    def _compute_order_days(self):
+        today = fields.Date.today()
+        for rec in self:
+            rec.last_order_days = (today - rec.last_order_date).days if rec.last_order_date else 0
+            rec.first_order_days = (today - rec.first_order_date).days if rec.first_order_date else 0
+
+    @api.depends('last_sms_sent_date')
+    def _compute_sms_days(self):
+        today = fields.Date.today()
+        for rec in self:
+            rec.last_sms_sent_days = (today - rec.last_sms_sent_date).days if rec.last_sms_sent_date else 0
+
+    @staticmethod
+    def _days_to_date(operator, value):
+        """Convert a 'days ago' comparison to a date comparison.
+
+        ``("last_order_days", ">", 10)``  means last order was MORE than
+        10 days ago → ``last_order_date < today - 10``.
+
+        The operator is inverted because more days ago = earlier date.
+        """
+        ref_date = fields.Date.today() - timedelta(days=int(value))
+        op_map = {'>': '<', '>=': '<=', '<': '>', '<=': '>=', '=': '=', '!=': '!='}
+        return ref_date, op_map.get(operator, operator)
+
+    def _search_last_order_days(self, operator, value):
+        ref_date, date_op = self._days_to_date(operator, value)
+        return [('last_order_date', date_op, ref_date)]
+
+    def _search_first_order_days(self, operator, value):
+        ref_date, date_op = self._days_to_date(operator, value)
+        return [('first_order_date', date_op, ref_date)]
+
+    def _search_last_sms_sent_days(self, operator, value):
+        ref_date, date_op = self._days_to_date(operator, value)
+        return [('last_sms_sent_date', date_op, ref_date)]
 
     _sql_constraints = [
         ('partner_unique', 'UNIQUE(partner_id)', 'Only one stats record per partner.'),

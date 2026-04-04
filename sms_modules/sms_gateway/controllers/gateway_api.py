@@ -1096,6 +1096,20 @@ class SmsGatewayController(http.Controller):
                 pending = sum(1 for t in traces if t['trace_status'] in ('outgoing', 'pending', 'process'))
                 error = sum(1 for t in traces if t['trace_status'] in ('error', 'cancel', 'bounce'))
 
+                # Revenue attributed via UTM campaign
+                campaign_revenue = 0.0
+                if m.campaign_id:
+                    order_domain = [
+                        ('campaign_id', '=', m.campaign_id.id),
+                        ('state', '=', 'sale'),
+                    ]
+                    if m.sent_date:
+                        order_domain.append(('date_order', '>=', m.sent_date))
+                    campaign_revenue = sum(
+                        o.amount_total for o in
+                        request.env['sale.order'].sudo().search(order_domain)
+                    )
+
                 result.append({
                     'id': m.id,
                     'name': m.subject or m.name,
@@ -1105,6 +1119,7 @@ class SmsGatewayController(http.Controller):
                     'sent': sent,
                     'pending': pending,
                     'error': error,
+                    'revenue': campaign_revenue,
                 })
 
             return self._json_response({'success': True, 'campaigns': result})

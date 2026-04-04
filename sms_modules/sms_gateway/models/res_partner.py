@@ -33,3 +33,12 @@ class ResPartner(models.Model):
     stats_last_sms_sent = fields.Date(
         related='stats_id.last_sms_sent_date', string='Last SMS Sent', readonly=True,
     )
+    stats_last_order_days = fields.Integer(
+        related='stats_id.last_order_days', string='Days Since Last Order', readonly=True,
+    )
+    stats_first_order_days = fields.Integer(
+        related='stats_id.first_order_days', string='Days Since First Order', readonly=True,
+    )
+    stats_last_sms_days = fields.Integer(
+        related='stats_id.last_sms_sent_days', string='Days Since Last SMS', readonly=True,
+    )
