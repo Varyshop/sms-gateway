@@ -78,11 +78,18 @@ class SmsGatewayController(http.Controller):
             data = self._get_json_data()
             battery_level = data.get('battery_level')
             signal_strength = data.get('signal_strength')
+            unsynced_count = data.get('unsynced_count', 0)
 
             phones._update_heartbeat(
                 battery_level=battery_level,
                 signal_strength=signal_strength,
             )
+
+            if unsynced_count and unsynced_count > 10:
+                _logger.warning(
+                    'Gateway phone %s has %d unsynced SMS statuses on device',
+                    phones[0].name if phones else '?', unsynced_count,
+                )
 
             pending_count = {}
             for phone in phones:
@@ -254,6 +261,7 @@ class SmsGatewayController(http.Controller):
 
             phone_ids = set(phones.ids)
             processed = 0
+            ack_ids = []
             errors = []
 
             for item in results:
@@ -273,16 +281,18 @@ class SmsGatewayController(http.Controller):
                 ok = request.env['sms.sms']._update_gateway_status(sms_id, status, error_message)
                 if ok:
                     processed += 1
+                    ack_ids.append(sms_id)
                 else:
                     errors.append({'id': sms_id, 'error': 'Update failed'})
 
             if processed > 0:
                 request.env.cr.commit()
 
-            # Return fresh counters
+            # Return fresh counters + acknowledged IDs
             response_data = {
                 'success': True,
                 'processed': processed,
+                'ack_ids': ack_ids,
             }
             if errors:
                 response_data['errors'] = errors
@@ -299,6 +309,76 @@ class SmsGatewayController(http.Controller):
         except Exception as e:
             _logger.exception('SMS Gateway confirm-batch error')
             request.env.cr.rollback()
+            return self._error_response(str(e), 500)
+
+    # ---- Reconcile (startup sync) ----
+
+    @http.route('/sms-gateway/reconcile', type='http', auth='public',
+                methods=['POST'], csrf=False, cors='*')
+    def reconcile(self, **kwargs):
+        """Reconcile device-side unsynced SMS IDs with server state.
+
+        Called by the mobile app on startup to identify:
+        - already_confirmed_ids: SMS that the server already processed
+          (device can mark these as synced in SQLite)
+        - stuck_ids: SMS still in processing/sending state on server
+          (device should re-send their final status)
+
+        Expects JSON body:
+        {
+            "known_ids": [123, 124, 125, ...]
+        }
+        """
+        try:
+            api_key = self._get_api_key()
+            phones = self._validate_api_key(api_key)
+            if not phones:
+                return self._error_response('Invalid API key', 401)
+
+            data = self._get_json_data()
+            known_ids = data.get('known_ids', [])
+            if not isinstance(known_ids, list):
+                return self._error_response('known_ids must be a list')
+
+            if not known_ids:
+                return self._json_response({
+                    'success': True,
+                    'already_confirmed_ids': [],
+                    'stuck_ids': [],
+                })
+
+            phone_ids = set(phones.ids)
+
+            already_confirmed = []
+            stuck = []
+            found_ids = set()
+
+            # Process in chunks to avoid huge IN queries
+            chunk_size = 200
+            for i in range(0, len(known_ids), chunk_size):
+                chunk = known_ids[i:i + chunk_size]
+                sms_records = request.env['sms.sms'].sudo().search([
+                    ('id', 'in', chunk),
+                    ('gateway_phone_id', 'in', list(phone_ids)),
+                ])
+                for sms in sms_records:
+                    found_ids.add(sms.id)
+                    if sms.state == 'sent' or (sms.state == 'error' and sms.gateway_state in ('sent', 'error')):
+                        already_confirmed.append(sms.id)
+                    elif sms.gateway_state in ('processing', 'sending'):
+                        stuck.append(sms.id)
+
+            # IDs not found on server (deleted or wrong phone) — device should discard them
+            not_found_ids = [sid for sid in known_ids if sid not in found_ids]
+
+            return self._json_response({
+                'success': True,
+                'already_confirmed_ids': already_confirmed,
+                'stuck_ids': stuck,
+                'not_found_ids': not_found_ids,
+            })
+        except Exception as e:
+            _logger.exception('SMS Gateway reconcile error')
             return self._error_response(str(e), 500)
 
     # ---- Inbound SMS (STOP detection) ----

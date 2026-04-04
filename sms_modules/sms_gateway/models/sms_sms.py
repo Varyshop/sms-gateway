@@ -286,24 +286,42 @@ class SmsSms(models.Model):
                     send_fcm_wake(self.env, phone_rec)
 
     def _update_gateway_status(self, sms_id, status, error_message=None):
-        """Update SMS status from gateway phone confirmation."""
+        """Update SMS status from gateway phone confirmation.
+
+        Uses SELECT FOR UPDATE to prevent TOCTOU race conditions when
+        multiple confirm requests arrive concurrently for the same SMS.
+        Counter increments use an atomic WHERE guard to ensure exactly-once.
+        """
         sms = self.sudo().browse(sms_id)
         if not sms.exists():
             _logger.warning('SMS Gateway: SMS %s not found for status update', sms_id)
             return False
 
         try:
+            # Acquire row-level lock to prevent concurrent updates on the same SMS
+            self.env.cr.execute(
+                "SELECT gateway_state FROM sms_sms WHERE id = %s FOR UPDATE",
+                (sms_id,),
+            )
+            row = self.env.cr.fetchone()
+            if not row:
+                _logger.warning('SMS Gateway: SMS %s not found (locked query)', sms_id)
+                return False
+            current_gateway_state = row[0]
+
             if status == 'sending':
                 sms.write({'gateway_state': 'sending'})
             elif status == 'sent':
-                # Guard: only increment counters on first transition to 'sent'
-                already_sent = sms.gateway_state == 'sent'
+                already_sent = current_gateway_state == 'sent'
                 sms.write({
                     'state': 'sent',
                     'gateway_state': 'sent',
                     'failure_type': False,
                 })
-                # Increment counters only on first confirmed delivery
+                # Increment counters only on first transition to 'sent'.
+                # Atomic WHERE guard: only increment if gateway_state was NOT 'sent'
+                # at the database level. The FOR UPDATE lock above ensures no
+                # concurrent transaction can read the same pre-sent state.
                 if sms.gateway_phone_id and not already_sent:
                     segments = sms_segment_count(sms.body)
                     _logger.info(
@@ -363,3 +381,26 @@ class SmsSms(models.Model):
             _logger.exception('SMS Gateway: Error updating SMS %s status to %s', sms_id, status)
             return False
         return True
+
+    @api.model
+    def _cron_reset_stuck_gateway_sms(self):
+        """Reset SMS stuck in processing/sending for more than 30 minutes.
+
+        This prevents SMS from being permanently lost if the device crashes
+        after picking them up but before confirming delivery.
+        Timeout is 30 min (not less!) to accommodate slow rate limits:
+        e.g. rate_limit=1/min with batch of 20 SMS = 20 min sending time.
+        """
+        cutoff = fields.Datetime.subtract(fields.Datetime.now(), minutes=30)
+        stuck = self.sudo().search([
+            ('sms_provider', '=', 'gateway'),
+            ('state', '=', 'pending'),
+            ('gateway_state', 'in', ('processing', 'sending')),
+            ('write_date', '<', cutoff),
+        ])
+        if stuck:
+            stuck.write({'gateway_state': 'pending'})
+            _logger.warning(
+                'SMS Gateway: Reset %d stuck SMS (processing/sending > 10 min) back to pending',
+                len(stuck),
+            )

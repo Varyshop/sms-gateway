@@ -49,5 +49,16 @@
             <field name="active">True</field>
         </record>
 
+        <!-- Reset stuck SMS (processing/sending > 10 min) back to pending -->
+        <record id="ir_cron_sms_gateway_reset_stuck" model="ir.cron">
+            <field name="name">SMS Gateway: Reset Stuck SMS</field>
+            <field name="model_id" ref="sms.model_sms_sms"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_reset_stuck_gateway_sms()</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="active">True</field>
+        </record>
+
     </data>
 </odoo>
