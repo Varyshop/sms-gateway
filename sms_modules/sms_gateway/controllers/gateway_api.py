@@ -1189,6 +1189,10 @@ class SmsGatewayController(http.Controller):
                 'revenue': revenue,
                 'optout': optout,
                 'created_at': mailing.create_date.isoformat() if mailing.create_date else '',
+                'sent_date': mailing.sent_date.isoformat() if mailing.sent_date else '',
+                'body_plaintext': mailing.body_plaintext or '',
+                'sms_allow_unsubscribe': mailing.sms_allow_unsubscribe,
+                'exclude_contacted_days': mailing.exclude_contacted_days or 0,
             })
         except Exception as e:
             _logger.exception('SMS Gateway campaign/status error')
