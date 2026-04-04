@@ -60,6 +60,9 @@ class SmsGatewayPhone(models.Model):
                                 help='Maximum SMS per minute (controls queue timing)')
 
     # Domain filter
+    res_model_name = fields.Char(
+        default='res.partner', store=False, readonly=True,
+    )
     domain_filter = fields.Char(
         string='Partner Domain Filter',
         help='Optional Odoo domain filter for partner matching. '
