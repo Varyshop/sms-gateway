@@ -141,6 +141,81 @@ class SmsGatewayController(http.Controller):
             limit = min(data.get('limit', 20), 100)
 
             phone_ids = tuple(phones.ids)
+
+            # Just-in-time exclusion: cancel SMS whose partner was contacted
+            # by ANOTHER campaign after this SMS's mailing was created, within
+            # that mailing's exclude_contacted_days window.
+            #
+            # Scenario: campaign A is created at 10:00 with 10 000 recipients.
+            # Before A finishes sending, campaign B sends SMS to some of the
+            # same partners at 11:00. When A finally reaches those rows, the
+            # partner has already received SMS from B — we must not spam them.
+            #
+            # Performance design (100k partners, 10k pending per campaign):
+            #
+            #   * We only look at the NEXT batch of ``limit`` SMS that the
+            #     pickup query is about to grab — not the whole pending set.
+            #     This bounds the EXISTS correlated subquery to ``limit`` rows
+            #     (default 20, max 100), not the full campaign queue.
+            #   * The pre-check SELECT uses ORDER BY id ASC LIMIT to match the
+            #     pickup query exactly, so we pre-cancel only rows that would
+            #     have been picked up in this cycle. No wasted work on rows
+            #     far down the queue.
+            #   * Parciální index on mailing_trace (res_id, write_date) WHERE
+            #     trace_type='sms' AND trace_status IN (...) is created by
+            #     post_init_hook so the EXISTS lookup is an index-only scan.
+            #
+            # Net cost per poll: ~limit index lookups on mailing_trace. At
+            # default limit=20 that's negligible (<1 ms total) even with
+            # millions of trace rows.
+            request.env.cr.execute("""
+                WITH candidates AS (
+                    SELECT s.id
+                    FROM sms_sms s
+                    JOIN mailing_mailing m ON m.id = s.mailing_id
+                    WHERE s.gateway_phone_id IN %(phone_ids)s
+                      AND s.state = 'pending'
+                      AND s.gateway_state = 'pending'
+                      AND s.sms_provider = 'gateway'
+                      AND s.partner_id IS NOT NULL
+                      AND m.exclude_contacted_days > 0
+                    ORDER BY s.id ASC
+                    LIMIT %(limit)s
+                ),
+                duplicates AS (
+                    SELECT s.id
+                    FROM sms_sms s
+                    JOIN candidates c ON c.id = s.id
+                    JOIN mailing_mailing m ON m.id = s.mailing_id
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM mailing_trace mt
+                        WHERE mt.model = 'res.partner'
+                          AND mt.trace_type = 'sms'
+                          AND mt.trace_status IN ('pending', 'sent', 'open', 'reply')
+                          AND mt.res_id = s.partner_id
+                          AND mt.mass_mailing_id != s.mailing_id
+                          AND mt.write_date >= (NOW() - (m.exclude_contacted_days || ' days')::interval)
+                    )
+                )
+                UPDATE sms_sms
+                SET state = 'canceled',
+                    gateway_state = 'error',
+                    failure_type = 'sms_duplicate'
+                WHERE id IN (SELECT id FROM duplicates)
+            """, {'phone_ids': phone_ids, 'limit': limit})
+            canceled = request.env.cr.rowcount
+            if canceled:
+                _logger.info(
+                    'SMS Gateway pending: pre-cancelled %d SMS for phone(s) %s '
+                    '(recipients already contacted by other campaigns within exclude window)',
+                    canceled, phone_ids,
+                )
+
+            # Now pick up the next batch. Rows cancelled above are no longer
+            # state='pending' so they are naturally excluded. If the pre-check
+            # cancelled some rows the pickup may return fewer than ``limit``
+            # — the phone will just ask again on its next poll cycle.
             request.env.cr.execute("""
                 UPDATE sms_sms
                 SET gateway_state = 'processing'

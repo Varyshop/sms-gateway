@@ -318,6 +318,21 @@ class SmsSms(models.Model):
                     'gateway_state': 'sent',
                     'failure_type': False,
                 })
+                # Real-time update of res.partner.stats.last_sms_sent_date so
+                # the campaign exclusion filter (stats_last_sms_days > N) sees
+                # today's sends immediately — without waiting for the nightly
+                # _cron_recompute_all cron.
+                if not already_sent and sms.partner_id:
+                    try:
+                        self.env['res.partner.stats'].sudo()._touch_last_sms_sent(
+                            sms.partner_id.id,
+                        )
+                    except Exception:
+                        _logger.exception(
+                            'SMS Gateway: Failed to update last_sms_sent_date '
+                            'for partner %s (SMS %s)',
+                            sms.partner_id.id, sms_id,
+                        )
                 # Increment counters only on first transition to 'sent'.
                 # Atomic WHERE guard: only increment if gateway_state was NOT 'sent'
                 # at the database level. The FOR UPDATE lock above ensures no

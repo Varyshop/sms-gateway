@@ -1204,14 +1204,30 @@ STOP pro odhlaseni</code></pre>
       </tr>
       <tr>
         <td><code>_get_exclusion_domain(days)</code></td>
-        <td>Vrati domain leaf vylucujici partnery kontaktovane v poslednich N dnech (SQL na <code>mailing_trace</code>).</td>
+        <td>Vrati deklarativni domain leaf <code>('stats_last_sms_days', '&gt;', days)</code> vylucujici partnery kontaktovane v poslednich N dnech. Pokud je <code>days &lt;= 0</code>, vraci prazdny seznam (filtr ignorovan). Od v18.0.2.3.0 je plne deklarativni &mdash; zadny SQL na <code>mailing_trace</code>.</td>
       </tr>
     </table>
 
     <div class="note">
-      <strong>Domain compositing:</strong> Vsechny endpointy (filters, preview, create) deleguji
-      na segment model. Phone <code>domain_filter</code> se automaticky pridava v
-      <code>_get_full_domain()</code>, takze domena telefonu a segmentu se vzdy kombinuji.
+      <strong>Domain compositing (v18.0.2.3.0+):</strong> <code>_get_storable_domain()</code>
+      kombinuje 3 deklarativni filtry do jedne ulozene domeny:
+      <ol>
+        <li>segment <code>domain_filter</code></li>
+        <li>phone <code>domain_filter</code> z <code>sms.gateway.phone</code></li>
+        <li><code>('stats_last_sms_days', '&gt;', exclude_contacted_days)</code> ze sablony</li>
+      </ol>
+      Vsechny 3 podminky musi prijemce splnit soucasne. Domena je ulozena v
+      <code>mailing.mailing.mailing_domain</code> jako pure declarative Odoo domain &mdash;
+      Odoo ji znovu vyhodnocuje pri kazdem odeslani, bez runtime SQL dotazu.
+      Exclusion leaf vyuziva computed field <code>res.partner.stats_last_sms_days</code>
+      s vlastnim <code>_search_stats_last_sms_days()</code> handlerem (v18.0.2.4.0+),
+      ktery pro operatory <code>&gt;</code>/<code>&gt;=</code> vraci OR vetev:
+      partneri se stats row splnujici datum <em>nebo</em> partneri bez stats row
+      (<code>('stats_id', '=', False)</code>). Tim je zajisteno, ze brand-new partneri
+      bez jakekoliv SMS historie splnuji podminku &bdquo;nekontaktovan v poslednich N dnech&ldquo;.
+      Predchozi <code>fields.Integer(related='stats_id.last_sms_sent_days')</code> varianta
+      NEfungovala, protoze Odoo prevadel search na LEFT JOIN pres O2m, ktery NULL radky
+      filtroval ven (viz changelog v18.0.2.4.0).
     </div>
 
     <h3>Model: sms.marketing.template</h3>
@@ -1840,6 +1856,72 @@ Heartbeat (60s)      ──▶  pending_count > 0?  ──▶  Poll + Send
     <!-- ==================== 18. CHANGELOG ==================== -->
     <h2 id="18-changelog">18. Changelog</h2>
 
+    <h3>v18.0.2.4.0 (2026-04-05)</h3>
+    <ul>
+      <li><strong>Critical fix &mdash; NULL-aware exclusion filter:</strong> <code>res.partner.stats_last_sms_days</code> byla <code>related</code> field pres O2m <code>stats_id</code>, takze Odoo pri search prevadel domenu na <code>LEFT JOIN res_partner_stats</code> a NULL radky (partneri bez stats row) <em>vypadavali</em>. Kampan s <code>exclude_contacted_days=30</code> tak nedostala ani jedno nikdy-nekontaktovaneho partnera &mdash; presny opak zamysleneho chovani.
+        <ul>
+          <li>Pole je ted computed + ma vlastni <code>_search_stats_last_sms_days</code> handler</li>
+          <li>Pro operatory <code>&gt;</code>/<code>&gt;=</code> vraci <code>OR</code> vetev: partneri se stats row splnujici datum <em>nebo</em> partneri bez stats row (<code>('stats_id', '=', False)</code>)</li>
+          <li>Overeno na kopii produkcni DB (24&nbsp;974 partneru): pred fixem <code>('stats_last_sms_days','&gt;',30)</code> vratilo 5&nbsp;026 partneru, po fixu 14&nbsp;467 (9&nbsp;441 nikdy kontaktovanych + 5&nbsp;026 starych)</li>
+        </ul>
+      </li>
+      <li><strong>Perf test @ scale:</strong> Pending endpoint CTE query otestovan na 10&nbsp;000 pending SMS + 41&nbsp;456 SMS traces na kopii produkcni DB. <code>EXPLAIN ANALYZE</code>: 8.98 ms execution (limit=20), parcialni index <code>mailing_trace_sms_res_id_write_date_idx</code> je index-only scan, 20 lookupu misto sekvencniho skenu &mdash; potvrzuje proveditelnost na cilovych 100k+/10k+ scale targetech.</li>
+      <li><strong>Bulk recompute test:</strong> <code>_update_last_sms_sent</code> zpracoval 14&nbsp;750 partneru za 1.19 s pres <code>execute_values</code> bulk UPDATE.</li>
+    </ul>
+
+    <h3>v18.0.2.3.0 / App v1.4.0 (2026-04-05)</h3>
+    <ul>
+      <li><strong>SQLite-based SMS status persistence:</strong> Nahrazena in-memory batch fronta perzistentni SQLite WAL &mdash; status SMS se zapisuje <em>pred</em> HTTP syncem, takze pady appky nezpusobi ztratu dat</li>
+      <li><strong>Sync s exponential backoff:</strong> Retry podle <code>sync_attempts</code> (0&ndash;2 vzdy, 3&ndash;5 ~30s, 6&ndash;9 ~5min, 10+ ~30min)</li>
+      <li><strong>Reconcile endpoint:</strong> Novy <code>POST /sms-gateway/reconcile</code> &mdash; vraci <code>already_confirmed_ids</code>, <code>stuck_ids</code>, <code>not_found_ids</code> pro synchronizaci pri startu appky</li>
+      <li><strong>Hourly housekeeping:</strong> Automaticke mazani starych zaznamu z lokalni DB (max 1&times; za hodinu)</li>
+      <li><strong>Heartbeat <code>unsynced_count</code>:</strong> Server loguje varovani pokud nesynchronizovanych SMS &gt; 10</li>
+      <li><strong>Zadne duplicitni SMS &mdash; 6 race conditions opraveno:</strong>
+        <ul>
+          <li><code>AtomicBoolean isPollingActive</code> chrani pred prekryvajicimi se poll cykly</li>
+          <li><code>SELECT ... FOR UPDATE</code> v <code>_update_gateway_status</code> zabranuje TOCTOU race</li>
+          <li><code>sentReceiver</code>: <code>getOrPut</code> &rarr; null-check (ignoruje pozdni callbacky po sweepu)</li>
+          <li><code>sweepStaleTrackers</code> vyzaduje striktni rovnost <code>sentParts == totalParts &amp;&amp; failedParts == 0</code></li>
+          <li>Cron <code>_cron_reset_stuck_gateway_sms</code> resetuje SMS uvizle &gt; 30 min zpet na <code>pending</code></li>
+          <li>Opraveny trace_status hodnoty <code>'failed'</code> &rarr; <code>'error'</code> (valid Odoo selection)</li>
+        </ul>
+      </li>
+      <li><strong>Simple Mode v appce:</strong> Novy prepinac v nastaveni pro netechnicke zamestnance &mdash; skryva:
+        <ul>
+          <li>Tab &bdquo;Zpravy&ldquo; (Messages)</li>
+          <li>Dashboard: FCM/Poll badge, mesicni limit, month/total/rate statistiky</li>
+          <li>Settings: polling/heartbeat intervaly, SMS limity, URL/API klic, odpojit tlacitko, build cislo</li>
+          <li>Campaigns: cela sekce &bdquo;Vysledky kampane&ldquo; (CTR, prijem, kliknuti, objednavky, odhlaseni)</li>
+        </ul>
+      </li>
+      <li><strong>Deklarativni exclusion filter:</strong> <code>_get_exclusion_domain()</code> nyni vraci
+        <code>('stats_last_sms_days', '&gt;', days)</code> misto SQL dotazu nad <code>mailing_trace</code>.
+        Exclusion je soucasti ulozeneho <code>mailing_domain</code> a Odoo ho aplikuje v jednom search dotazu
+        spolu se segmentem a phone filtrem &mdash; odpadaji obri <code>('id', 'not in', [...])</code> klauzule
+        a runtime SQL v <code>mailing.mailing._get_recipients()</code>
+      </li>
+      <li><strong>Odfiltrovane counts v segmentech:</strong> Endpoint <code>/campaign/filters</code> nyni pro kazdy segment zobrazuje
+        pocet prijemcu uz po odecteni <code>exclude_contacted_days</code> (diky deklarativni leaf se propaguje automaticky)
+      </li>
+      <li><strong>Fix:</strong> <code>_search_last_sms_sent_days</code> pro operatory <code>&gt;</code>/<code>&gt;=</code> nyni zahrnuje partnery bez SMS historie (<code>last_sms_sent_date IS NULL</code>)</li>
+      <li><strong>Fix:</strong> <code>res.partner.stats.last_sms_sent_date</code> se nyni aktualizuje v realnem case pri kazdem uspesnem odeslani SMS (<code>_touch_last_sms_sent</code> volany z <code>sms.sms._update_gateway_status</code>). Driv se pole aktualizovalo jen nocnim cronem, coz zpusobovalo duplicitni SMS stejnym prijemcum v ramci jednoho dne &mdash; exclusion filtr videl zastarale hodnoty</li>
+      <li><strong>Fix:</strong> Nocni cron <code>_update_last_sms_sent</code> nyni citi z <code>mailing_trace</code> stavy <code>('pending', 'sent', 'open', 'reply')</code> misto pouze <code>'sent'</code> (v Odoo 18 <code>'sent'</code> znamena &bdquo;doruceno&ldquo;, nikoliv &bdquo;odeslano&ldquo;)</li>
+      <li><strong>Just-in-time exclusion pri pickup:</strong> Endpoint <code>/sms-gateway/pending</code> nyni <em>tesne pred</em> vydanim SMS telefonu canceluje zaznamy, jejichz prijemce byl mezitim kontaktovan jinou kampani v ramci <code>exclude_contacted_days</code> okna. Resi race condition: kampan A vytvorena v 10:00 s 10&nbsp;000 prijemci, pred dokoncenim odeslani B posle SMS nekterym z tychz prijemcu v 11:00. Kontrola je optimalizovana pro velke databaze (100k+ kontaktu, 10k+ na kampan):
+        <ul>
+          <li>Pre-check CTE omezuje kandidatni sadu na <em>prvnich <code>limit</code> SMS</em> (typicky 20) serazenych <code>ORDER BY id ASC</code> &mdash; stejne jako pickup query. Nekontroluje celou kampan, pouze dalsi batch</li>
+          <li>EXISTS poddotaz nad <code>mailing_trace</code> s filtrem <code>mt.mass_mailing_id != s.mailing_id</code> (ne self)</li>
+          <li>Parcialni index <code>mailing_trace_sms_res_id_write_date_idx</code> vytvoreny v <code>post_init_hook</code> na sloupcich <code>(res_id, write_date)</code> s WHERE klauzuli <code>trace_type='sms' AND trace_status IN ('pending','sent','open','reply')</code> &mdash; EXISTS je index-only scan</li>
+          <li>Cena na poll: ~<code>limit</code> index lookups (<code>&lt;1 ms</code>) misto sekvencniho skenu celeho <code>mailing_trace</code></li>
+          <li>Zrusene SMS dostanou <code>failure_type='sms_duplicate'</code> &mdash; viditelne v Odoo UI</li>
+        </ul>
+      </li>
+      <li><strong>Nova serverova akce:</strong> <code>Recompute Last SMS Sent</code> na modelu <code>res.partner</code> (dostupna z list/form view) &mdash; manualni prepocet <code>last_sms_sent_date</code> z <code>mailing_trace</code>. Paralelne k existujici akci <code>Recompute Order Stats</code></li>
+      <li><strong>Form partnera:</strong> Order Stats tab nyni zobrazuje pole <code>stats_last_sms_sent</code> a <code>stats_last_sms_days</code>, takze je videt proc je partner v/mimo exclusion filtr</li>
+      <li><strong>Fix:</strong> Campaign sent count mismatch (Odoo 593 vs phone 334) &mdash; endpoint <code>campaign/status</code>/<code>campaign/list</code> nyni pocita <code>trace_status IN ('pending', 'sent', 'open', 'reply')</code> stejne jako Odoo UI</li>
+      <li><strong>Fix:</strong> Redundantni tlacitko &bdquo;Odeslat ihned&ldquo; se po uspesnem <code>send_now=true</code> uz nezobrazuje</li>
+      <li><strong>Stuck SMS cron:</strong> Timeout posunut z 10 na 30 minut pro backwards compatibility s pomalymi rate limity stare appky</li>
+    </ul>
+
     <h3>v18.0.2.2.0 / App v1.3.0 (2026-04-04)</h3>
     <ul>
       <li><strong>Campaign Wizard v appce:</strong> Novy tab &bdquo;Kampane&ldquo; &mdash; operator vybere sablonu, segment, pocet prijemcu a odesle kampan primo z telefonu</li>
@@ -1870,7 +1952,7 @@ Heartbeat (60s)      ──▶  pending_count > 0?  ──▶  Poll + Send
     <hr />
 
     <p style="color: #6b7280; text-align: center; margin-top: 40px">
-      SMS Gateway v18.0.2.2.0 &bull; VaryShop &bull; 2026
+      SMS Gateway v18.0.2.4.0 &bull; VaryShop &bull; 2026
     </p>
   </body>
 </html>

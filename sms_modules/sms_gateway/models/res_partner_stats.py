@@ -207,43 +207,105 @@ class ResPartnerStats(models.Model):
         self._update_last_sms_sent()
 
     @api.model
+    def _touch_last_sms_sent(self, partner_id, sent_date=None):
+        """Upsert ``last_sms_sent_date`` for a single partner in real time.
+
+        Called from ``sms.sms._update_gateway_status`` on every successful
+        send so the exclusion filter (``stats_last_sms_days``) reflects
+        today's sends immediately, without waiting for the nightly cron.
+
+        Creates the stats row if missing — partners without orders would
+        otherwise have no row and the filter could miss them.
+        """
+        if not partner_id:
+            return
+        sent_date = sent_date or fields.Date.today()
+        rec = self.sudo().search([('partner_id', '=', partner_id)], limit=1)
+        if rec:
+            if not rec.last_sms_sent_date or rec.last_sms_sent_date < sent_date:
+                rec.write({'last_sms_sent_date': sent_date})
+        else:
+            self.sudo().create({
+                'partner_id': partner_id,
+                'last_sms_sent_date': sent_date,
+            })
+
+    @api.model
     def _update_last_sms_sent(self):
-        """Update last_sms_sent_date for all partners with SMS traces."""
+        """Recompute ``last_sms_sent_date`` only for partners that actually
+        have SMS traces — never touches the millions of partners who never
+        received an SMS.
+
+        Uses bulk SQL operations (INSERT ... ON CONFLICT DO UPDATE) to stay
+        fast even for tens of thousands of SMS recipients. Falls back to
+        ORM ``create`` for new stats rows so _sql_constraints and hooks
+        still fire.
+        """
         cr = self.env.cr
+        # NOTE: In Odoo 18 mailing.trace.trace_status:
+        #   'pending' = Sent (provider accepted, delivery unconfirmed)
+        #   'sent'    = Delivered (confirmed by provider/gateway)
+        #   'open'    = Clicked
+        #   'reply'   = Replied
+        # All of these count as "SMS has been sent to this partner" for
+        # exclusion purposes — we must NOT re-contact them.
         cr.execute("""
             SELECT res_id, MAX(write_date)::date
             FROM mailing_trace
             WHERE model = 'res.partner'
               AND trace_type = 'sms'
-              AND trace_status = 'sent'
+              AND trace_status IN ('pending', 'sent', 'open', 'reply')
               AND res_id IS NOT NULL
             GROUP BY res_id
         """)
-        sms_dates = dict(cr.fetchall())
+        sms_dates = cr.fetchall()
         if not sms_dates:
+            _logger.info('res.partner.stats: no SMS traces to process')
             return
 
-        # Update existing stats records
-        existing = {
-            s.partner_id.id: s
-            for s in self.sudo().search([
-                ('partner_id', 'in', list(sms_dates.keys())),
-            ])
-        }
-        to_create = []
-        for pid, last_date in sms_dates.items():
+        partner_ids = [row[0] for row in sms_dates]
+
+        # Bulk fetch existing stats rows keyed by partner_id
+        cr.execute("""
+            SELECT partner_id, last_sms_sent_date
+            FROM res_partner_stats
+            WHERE partner_id = ANY(%s)
+        """, (partner_ids,))
+        existing = {pid: last for pid, last in cr.fetchall()}
+
+        # Split into updates (row exists, date differs) and creates (no row)
+        to_update = []  # list of (partner_id, last_date)
+        to_create = []  # list of vals dicts
+        for pid, last_date in sms_dates:
             if pid in existing:
-                if existing[pid].last_sms_sent_date != last_date:
-                    existing[pid].sudo().write({'last_sms_sent_date': last_date})
+                if existing[pid] != last_date:
+                    to_update.append((last_date, pid))
             else:
                 to_create.append({
                     'partner_id': pid,
                     'last_sms_sent_date': last_date,
                 })
+
+        # Bulk UPDATE via execute_values — one round-trip for all changes
+        if to_update:
+            from psycopg2.extras import execute_values
+            execute_values(
+                cr,
+                """
+                UPDATE res_partner_stats AS s
+                SET last_sms_sent_date = v.last_date
+                FROM (VALUES %s) AS v(last_date, partner_id)
+                WHERE s.partner_id = v.partner_id
+                """,
+                to_update,
+                template='(%s::date, %s)',
+            )
+
         if to_create:
             self.sudo().create(to_create)
 
         _logger.info(
-            'res.partner.stats: updated last_sms_sent_date for %d partners',
-            len(sms_dates),
+            'res.partner.stats: last_sms_sent_date — %d updated, %d created '
+            '(total SMS recipients: %d)',
+            len(to_update), len(to_create), len(sms_dates),
         )

@@ -11,6 +11,16 @@
         <field name="code">env['res.partner.stats']._cron_recompute_all()</field>
     </record>
 
+    <!-- Server action: Recompute Last SMS Sent (from mailing_trace) -->
+    <record id="action_recompute_last_sms_sent" model="ir.actions.server">
+        <field name="name">Recompute Last SMS Sent</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">env['res.partner.stats']._update_last_sms_sent()</field>
+    </record>
+
     <!-- Extend partner form: show stats as a page tab -->
     <record id="res_partner_view_form_stats" model="ir.ui.view">
         <field name="name">res.partner.form.stats</field>
@@ -25,6 +35,8 @@
                             <field name="stats_order_count"/>
                             <field name="stats_first_order"/>
                             <field name="stats_last_order"/>
+                            <field name="stats_last_sms_sent"/>
+                            <field name="stats_last_sms_days"/>
                         </group>
                         <group string="Segments">
                             <field name="stats_bought_last_3m"/>

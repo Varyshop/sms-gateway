@@ -1,6 +1,6 @@
 {
     'name': 'SMS Gateway',
-    'version': '18.0.2.2.0',
+    'version': '18.0.2.4.0',
     'category': 'Marketing/SMS',
     'summary': 'Send SMS via physical Android phones as gateway devices',
     'description': """
@@ -27,4 +27,5 @@
     'application': False,
     'auto_install': False,
     'license': 'LGPL-3',
+    'post_init_hook': 'post_init_hook',
 }
