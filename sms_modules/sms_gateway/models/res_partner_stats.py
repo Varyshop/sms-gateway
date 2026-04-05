@@ -91,6 +91,13 @@ class ResPartnerStats(models.Model):
 
     def _search_last_sms_sent_days(self, operator, value):
         ref_date, date_op = self._days_to_date(operator, value)
+        # "More than N days ago" must also include partners that have never
+        # received an SMS (last_sms_sent_date IS NULL) — they trivially
+        # satisfy "not contacted in the last N days".
+        if operator in ('>', '>='):
+            return ['|',
+                    ('last_sms_sent_date', '=', False),
+                    ('last_sms_sent_date', date_op, ref_date)]
         return [('last_sms_sent_date', date_op, ref_date)]
 
     _sql_constraints = [

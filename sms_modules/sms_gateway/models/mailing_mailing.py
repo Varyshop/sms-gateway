@@ -3,8 +3,6 @@
 import logging
 import random
 
-from datetime import timedelta
-
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
@@ -39,27 +37,14 @@ class Mailing(models.Model):
     exclude_contacted_days = fields.Integer(
         default=0, string='Exclude Contacted (days)',
         help='Exclude partners who received an SMS in the last N days. '
-             'Applied at send time, not stored in the domain filter.',
+             'Baked into the stored mailing_domain as '
+             '("stats_last_sms_days", ">", N), so it is applied together '
+             'with the segment and phone filters in a single search.',
     )
     created_from_app = fields.Boolean(default=False)
 
     def _get_recipients(self):
         res_ids = super()._get_recipients()
-        # Exclude partners contacted by any SMS campaign in the last N days
-        if self.exclude_contacted_days and self.exclude_contacted_days > 0:
-            cutoff = fields.Datetime.now() - timedelta(days=self.exclude_contacted_days)
-            self.env.cr.execute("""
-                SELECT DISTINCT res_id
-                FROM mailing_trace
-                WHERE model = 'res.partner'
-                  AND trace_type = 'sms'
-                  AND trace_status = 'sent'
-                  AND write_date >= %s
-                  AND res_id IS NOT NULL
-            """, (cutoff,))
-            excluded = {r[0] for r in self.env.cr.fetchall()}
-            if excluded:
-                res_ids = [rid for rid in res_ids if rid not in excluded]
         if self.recipient_limit and 0 < self.recipient_limit < len(res_ids):
             res_ids = random.sample(res_ids, self.recipient_limit)
         return res_ids

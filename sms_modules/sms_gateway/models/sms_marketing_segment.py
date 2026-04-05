@@ -145,33 +145,22 @@ class SmsMarketingSegment(models.Model):
         return [('create_date', '>=', cutoff)]
 
     def _get_exclusion_domain(self, days):
-        """Return a domain leaf that excludes partners contacted in the last N days.
+        """Return a declarative domain leaf excluding partners contacted
+        in the last N days.
 
-        Uses a SQL subquery to avoid materialising thousands of IDs in the
-        domain, which previously produced huge ``('id', 'not in', [...])``
-        clauses sent to PostgreSQL.
+        Uses the searchable related field ``stats_last_sms_days`` on
+        ``res.partner`` (backed by ``res.partner.stats.last_sms_sent_days``
+        with a custom ``_search`` method).  The leaf matches partners with
+        no SMS at all (``last_sms_sent_date IS NULL``) or whose last SMS
+        was more than N days ago — i.e. ``stats_last_sms_days > N``.
+
+        Being fully declarative means this leaf can be stored in
+        ``mailing.mailing.mailing_domain`` and applied together with the
+        segment and phone domains in a single query.
         """
         if not days or days <= 0:
             return []
-        cutoff = fields.Datetime.now() - timedelta(days=days)
-        cr = self.env.cr
-        # Use a single SQL query to get the set of excluded IDs and let
-        # Odoo intersect it.  We still fetch IDs, but we pick the smaller
-        # side: if there are fewer candidates than excluded, we fetch
-        # candidates and use ``id in``; otherwise ``id not in``.
-        cr.execute("""
-            SELECT DISTINCT res_id
-            FROM mailing_trace
-            WHERE model = 'res.partner'
-              AND trace_type = 'sms'
-              AND trace_status = 'sent'
-              AND write_date >= %s
-              AND res_id IS NOT NULL
-        """, (cutoff,))
-        excluded_ids = [r[0] for r in cr.fetchall()]
-        if not excluded_ids:
-            return []
-        return [('id', 'not in', excluded_ids)]
+        return [('stats_last_sms_days', '>', days)]
 
     def _get_full_domain(self, phone=None, exclude_contacted_days=0):
         """Build the complete recipient domain (segment + blacklist + phone + exclusion).
@@ -211,11 +200,15 @@ class SmsMarketingSegment(models.Model):
         """Return a domain suitable for storing in ``mailing_domain``.
 
         For segments with a declarative ``domain_filter``, composes the full
-        domain from segment + phone filters (no runtime IDs).  The
-        ``exclude_contacted_days`` exclusion is **not** baked into the stored
-        domain — it is applied at send time by ``mailing.mailing._get_recipients()``
-        via the ``exclude_contacted_days`` field on the mailing record.  This
-        keeps the stored domain clean and readable.
+        domain from three declarative parts:
+
+        1. segment ``domain_filter``
+        2. phone ``domain_filter``
+        3. ``('stats_last_sms_days', '>', exclude_contacted_days)``
+
+        All three parts are combined with the base blacklist/phone-required
+        filters, producing a single stored domain that Odoo can re-evaluate
+        at send time.
 
         For SQL-based segments (code dispatched), falls back to pre-resolving
         recipient IDs into ``('id', 'in', [...])``.
@@ -237,10 +230,15 @@ class SmsMarketingSegment(models.Model):
             except Exception:
                 pass
 
-        # Declarative segments → always store the pure domain (exclusion
-        # is handled at send time, not stored in the domain)
+        # Declarative segments → store all three filters (segment + phone +
+        # contacted-days exclusion) as a pure, re-evaluable domain.
         if self._is_domain_storable():
-            domain = self._get_domain() + base + phone_extra
+            domain = (
+                self._get_domain()
+                + base
+                + phone_extra
+                + self._get_exclusion_domain(exclude_contacted_days)
+            )
             return domain
 
         # SQL-based segments → pre-resolve to IDs (exclude_contacted_days
