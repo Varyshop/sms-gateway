@@ -66,7 +66,11 @@ class ResPartnerStats(models.Model):
     def _compute_sms_days(self):
         today = fields.Date.today()
         for rec in self:
-            rec.last_sms_sent_days = (today - rec.last_sms_sent_date).days if rec.last_sms_sent_date else 0
+            # -1 sentinel = never contacted; distinguishes UI from "today" (0).
+            rec.last_sms_sent_days = (
+                (today - rec.last_sms_sent_date).days
+                if rec.last_sms_sent_date else -1
+            )
 
     @staticmethod
     def _days_to_date(operator, value):

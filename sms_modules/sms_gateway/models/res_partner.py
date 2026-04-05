@@ -45,10 +45,12 @@ class ResPartner(models.Model):
         string='Days Since Last SMS', readonly=True,
         compute='_compute_stats_last_sms_days',
         search='_search_stats_last_sms_days',
-        help='Days since last SMS — 0 if never contacted. Search operator '
-             '> N matches partners with no stats row OR with last SMS older '
-             'than N days, so campaigns can exclude recently-contacted '
-             'partners without filtering out never-contacted ones.',
+        help='Days since last SMS: 0 = contacted today, N = contacted N days '
+             'ago, -1 = never contacted. The -1 sentinel distinguishes '
+             '"never" from "today" in the UI. Search operator > N matches '
+             'partners with no stats row OR with last SMS older than N days, '
+             'so campaigns can exclude recently-contacted partners without '
+             'filtering out never-contacted ones.',
     )
 
     def _compute_stats_last_sms_days(self):
@@ -58,7 +60,9 @@ class ResPartner(models.Model):
             if stats and stats.last_sms_sent_date:
                 rec.stats_last_sms_days = (today - stats.last_sms_sent_date).days
             else:
-                rec.stats_last_sms_days = 0
+                # -1 sentinel = never contacted; distinguishes UI display
+                # from "contacted today" (which is 0).
+                rec.stats_last_sms_days = -1
 
     @api.model
     def _search_stats_last_sms_days(self, operator, value):

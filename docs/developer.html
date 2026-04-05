@@ -1856,6 +1856,12 @@ Heartbeat (60s)      ──▶  pending_count > 0?  ──▶  Poll + Send
     <!-- ==================== 18. CHANGELOG ==================== -->
     <h2 id="18-changelog">18. Changelog</h2>
 
+    <h3>v18.0.2.5.0 (2026-04-05)</h3>
+    <ul>
+      <li><strong>Sentinel -1 pro &bdquo;nikdy kontaktovane&ldquo;:</strong> <code>stats_last_sms_days</code> (na <code>res.partner</code> i <code>res.partner.stats</code>) nyni vraci <code>-1</code> pokud partner nema <code>last_sms_sent_date</code>. Driv vracelo <code>0</code>, coz UI nerozlisovalo od &bdquo;kontaktovan dnes&ldquo; &mdash; operator nevedel ktery je ktery. Hodnota <code>-1</code> dava jednoznacny signal v form view i v exportech. Search sémantika zustava identicka (<code>&gt; N</code> stale zahrnuje nikdy kontaktovane partnery pres OR vetev, takze kampane s <code>exclude_contacted_days &gt; 0</code> zahrnou brand-new partnery a vyloucí jen ty kontaktovane v poslednich N dnech).</li>
+      <li><strong>Edge test na kopii produkcni DB:</strong> Overeno ze vsechny 3 scenare chovaji korektne: dnes kontaktovan &rarr; <code>days=0</code>, nikdy kontaktovan &rarr; <code>days=-1</code>, pred 3 dny kontaktovan &rarr; <code>days=3</code>. Search leaf <code>('stats_last_sms_days', '&gt;', 30)</code>: today <code>match=0</code>, never <code>match=1</code>, 3d_ago <code>match=0</code> &mdash; presne podle zameru (kampan zahrne nikdy-kontaktovane + stare, vyloucí dnes + nedavne).</li>
+    </ul>
+
     <h3>v18.0.2.4.0 (2026-04-05)</h3>
     <ul>
       <li><strong>Critical fix &mdash; NULL-aware exclusion filter:</strong> <code>res.partner.stats_last_sms_days</code> byla <code>related</code> field pres O2m <code>stats_id</code>, takze Odoo pri search prevadel domenu na <code>LEFT JOIN res_partner_stats</code> a NULL radky (partneri bez stats row) <em>vypadavali</em>. Kampan s <code>exclude_contacted_days=30</code> tak nedostala ani jedno nikdy-nekontaktovaneho partnera &mdash; presny opak zamysleneho chovani.
@@ -1952,7 +1958,7 @@ Heartbeat (60s)      ──▶  pending_count > 0?  ──▶  Poll + Send
     <hr />
 
     <p style="color: #6b7280; text-align: center; margin-top: 40px">
-      SMS Gateway v18.0.2.4.0 &bull; VaryShop &bull; 2026
+      SMS Gateway v18.0.2.5.0 &bull; VaryShop &bull; 2026
     </p>
   </body>
 </html>
