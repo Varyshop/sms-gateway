@@ -1856,6 +1856,16 @@ Heartbeat (60s)      ──▶  pending_count > 0?  ──▶  Poll + Send
     <!-- ==================== 18. CHANGELOG ==================== -->
     <h2 id="18-changelog">18. Changelog</h2>
 
+    <h3>v18.0.2.6.0 / App v1.5.0 (2026-04-06)</h3>
+    <ul>
+      <li><strong>SMS limit enforcement:</strong> Endpoint <code>/sms-gateway/pending</code> nyni kontroluje zbyvajici denni/mesicni kapacitu telefonu pred vydanim SMS. Pokud je limit vyčerpan, aktivni kampane se automaticky pausnou a odpoved obsahuje <code>limit_reached: true</code></li>
+      <li><strong>Pause/Resume kampane:</strong> Nove endpointy <code>POST /campaign/pause/&lt;id&gt;</code> a <code>POST /campaign/resume/&lt;id&gt;</code>. Paused kampan zustavá ve stavu <code>sending</code> s <code>paused=True</code> &mdash; jeji SMS se nevyzvedavaji v pending endpointu (filtr <code>m.paused = false</code> v pickup query). Resume nastavi <code>paused=False</code> a kampan pokracuje</li>
+      <li><strong>Archivace kampane:</strong> Novy endpoint <code>POST /campaign/archive/&lt;id&gt;</code> nastavi <code>active=False</code>. V appce dostupne pouze v pokrocilem modu pro dokoncene kampane</li>
+      <li><strong>Filtry v seznamu kampani:</strong> Vychozi pohled zobrazuje pouze <code>in_queue</code>, <code>sending</code> a <code>paused</code> kampane. Pridány přepinace &bdquo;Dokoncene&ldquo; a &bdquo;Archivovane&ldquo; (archivovane jen v pokrocilem modu). API parametry <code>include_done</code> a <code>include_archived</code> v <code>/campaign/list</code></li>
+      <li><strong>Fix:</strong> Tlacitko &bdquo;Odeslat ihned&ldquo; se nyni zobrazuje <em>pouze</em> pokud je kampan ve stavu <code>in_queue</code> &mdash; driv se znovu objevovalo po opusteni a navratu na obrazovku</li>
+      <li><strong>App UI:</strong> Cervene tlacitko &bdquo;Pozastavit odesilani&ldquo; pri aktivnim odesilani, zlute &bdquo;Pokracovat v odesilani&ldquo; pri paused stavu. Status badge zobrazuje &bdquo;Pozastaveno&ldquo; s amber barvou</li>
+    </ul>
+
     <h3>v18.0.2.5.0 (2026-04-05)</h3>
     <ul>
       <li><strong>Sentinel -1 pro &bdquo;nikdy kontaktovane&ldquo;:</strong> <code>stats_last_sms_days</code> (na <code>res.partner</code> i <code>res.partner.stats</code>) nyni vraci <code>-1</code> pokud partner nema <code>last_sms_sent_date</code>. Driv vracelo <code>0</code>, coz UI nerozlisovalo od &bdquo;kontaktovan dnes&ldquo; &mdash; operator nevedel ktery je ktery. Hodnota <code>-1</code> dava jednoznacny signal v form view i v exportech. Search sémantika zustava identicka (<code>&gt; N</code> stale zahrnuje nikdy kontaktovane partnery pres OR vetev, takze kampane s <code>exclude_contacted_days &gt; 0</code> zahrnou brand-new partnery a vyloucí jen ty kontaktovane v poslednich N dnech).</li>
@@ -1958,7 +1968,7 @@ Heartbeat (60s)      ──▶  pending_count > 0?  ──▶  Poll + Send
     <hr />
 
     <p style="color: #6b7280; text-align: center; margin-top: 40px">
-      SMS Gateway v18.0.2.5.0 &bull; VaryShop &bull; 2026
+      SMS Gateway v18.0.2.6.0 &bull; VaryShop &bull; 2026
     </p>
   </body>
 </html>

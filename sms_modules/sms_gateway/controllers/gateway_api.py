@@ -212,6 +212,36 @@ class SmsGatewayController(http.Controller):
                     canceled, phone_ids,
                 )
 
+            # ── Daily / monthly limit enforcement ──────────────
+            # Check remaining capacity for the first phone (primary).
+            # If the limit is exhausted, pause all sending mailings that
+            # are queued on this phone and return an empty batch so the
+            # app stops polling until the next period.
+            phone = phones[0]
+            remaining = request.env['sms.sms'].sudo()._get_remaining_capacity(phone)
+            if remaining <= 0:
+                # Pause all active mailings for this phone
+                active_mailings = request.env['mailing.mailing'].sudo().search([
+                    ('gateway_phone_forced_id', 'in', phones.ids),
+                    ('state', '=', 'sending'),
+                    ('paused', '=', False),
+                ])
+                if active_mailings:
+                    active_mailings.write({'paused': True})
+                    _logger.warning(
+                        'SMS Gateway: daily/monthly limit reached for phone(s) %s — '
+                        'paused %d active mailings', phone_ids, len(active_mailings),
+                    )
+                return self._json_response({
+                    'success': True,
+                    'sms_list': [],
+                    'limit_reached': True,
+                })
+
+            # Cap the batch size to the remaining capacity so we never
+            # over-issue SMS beyond the phone's limit.
+            effective_limit = min(limit, remaining)
+
             # Now pick up the next batch. Rows cancelled above are no longer
             # state='pending' so they are naturally excluded. If the pre-check
             # cancelled some rows the pickup may return fewer than ``limit``
@@ -220,17 +250,19 @@ class SmsGatewayController(http.Controller):
                 UPDATE sms_sms
                 SET gateway_state = 'processing'
                 WHERE id IN (
-                    SELECT id FROM sms_sms
-                    WHERE gateway_phone_id IN %s
-                      AND state = 'pending'
-                      AND gateway_state = 'pending'
-                      AND sms_provider = 'gateway'
-                    ORDER BY id ASC
+                    SELECT s.id FROM sms_sms s
+                    LEFT JOIN mailing_mailing m ON m.id = s.mailing_id
+                    WHERE s.gateway_phone_id IN %s
+                      AND s.state = 'pending'
+                      AND s.gateway_state = 'pending'
+                      AND s.sms_provider = 'gateway'
+                      AND (m.id IS NULL OR m.paused = false)
+                    ORDER BY s.id ASC
                     LIMIT %s
-                    FOR UPDATE SKIP LOCKED
+                    FOR UPDATE OF s SKIP LOCKED
                 )
                 RETURNING id, number, body, uuid, gateway_sim_number
-            """, (phone_ids, limit))
+            """, (phone_ids, effective_limit))
 
             rows = request.env.cr.fetchall()
 
@@ -1235,10 +1267,25 @@ class SmsGatewayController(http.Controller):
             return self._error_response('Invalid API key', 401)
 
         try:
-            mailings = request.env['mailing.mailing'].sudo().search([
+            data = self._get_json_data()
+            include_done = data.get('include_done', False)
+            include_archived = data.get('include_archived', False)
+
+            domain = [
                 ('gateway_phone_forced_id', 'in', phones.ids),
                 ('created_from_app', '=', True),
-            ], order='create_date desc', limit=50)
+            ]
+            if not include_done:
+                domain.append(('state', '!=', 'done'))
+            if not include_archived:
+                domain.append(('active', '=', True))
+            else:
+                # When including archived, search across active + inactive
+                domain = ['|', ('active', '=', True), ('active', '=', False)] + domain
+
+            mailings = request.env['mailing.mailing'].sudo().with_context(
+                active_test=False if include_archived else True,
+            ).search(domain, order='create_date desc', limit=50)
 
             result = []
             for m in mailings:
@@ -1269,6 +1316,8 @@ class SmsGatewayController(http.Controller):
                     'id': m.id,
                     'name': m.subject or m.name,
                     'state': m.state,
+                    'paused': m.paused,
+                    'active': m.active,
                     'date_created': m.create_date.isoformat() if m.create_date else '',
                     'total': total,
                     'sent': sent,
@@ -1363,7 +1412,81 @@ class SmsGatewayController(http.Controller):
                 'body_plaintext': mailing.body_plaintext or '',
                 'sms_allow_unsubscribe': mailing.sms_allow_unsubscribe,
                 'exclude_contacted_days': mailing.exclude_contacted_days or 0,
+                'paused': mailing.paused,
+                'active': mailing.active,
             })
         except Exception as e:
             _logger.exception('SMS Gateway campaign/status error')
+            return self._error_response(str(e), 500)
+
+    @http.route('/sms-gateway/campaign/pause/<int:mailing_id>', type='http', auth='public', methods=['POST'], csrf=False, cors='*')
+    def campaign_pause(self, mailing_id, **kw):
+        """Pause a sending campaign — pending SMS stay in queue but are not picked up."""
+        api_key = self._get_api_key()
+        if not api_key:
+            return self._error_response('Missing API key', 401)
+        phones = self._validate_api_key(api_key)
+        if not phones:
+            return self._error_response('Invalid API key', 401)
+
+        try:
+            mailing = request.env['mailing.mailing'].sudo().browse(mailing_id)
+            if not mailing.exists() or mailing.gateway_phone_forced_id.id not in phones.ids:
+                return self._error_response('Campaign not found', 404)
+
+            if mailing.state not in ('sending', 'in_queue'):
+                return self._error_response('Campaign cannot be paused in state: %s' % mailing.state, 400)
+
+            mailing.write({'paused': True})
+            _logger.info('SMS Gateway: campaign %s paused by app', mailing_id)
+            return self._json_response({'success': True, 'state': mailing.state, 'paused': True})
+        except Exception as e:
+            _logger.exception('SMS Gateway campaign/pause error')
+            return self._error_response(str(e), 500)
+
+    @http.route('/sms-gateway/campaign/resume/<int:mailing_id>', type='http', auth='public', methods=['POST'], csrf=False, cors='*')
+    def campaign_resume(self, mailing_id, **kw):
+        """Resume a paused campaign — unpause and set to sending so pickup resumes."""
+        api_key = self._get_api_key()
+        if not api_key:
+            return self._error_response('Missing API key', 401)
+        phones = self._validate_api_key(api_key)
+        if not phones:
+            return self._error_response('Invalid API key', 401)
+
+        try:
+            mailing = request.env['mailing.mailing'].sudo().browse(mailing_id)
+            if not mailing.exists() or mailing.gateway_phone_forced_id.id not in phones.ids:
+                return self._error_response('Campaign not found', 404)
+
+            if not mailing.paused:
+                return self._error_response('Campaign is not paused', 400)
+
+            mailing.write({'state': 'sending', 'paused': False})
+            _logger.info('SMS Gateway: campaign %s resumed by app', mailing_id)
+            return self._json_response({'success': True, 'state': 'sending', 'paused': False})
+        except Exception as e:
+            _logger.exception('SMS Gateway campaign/resume error')
+            return self._error_response(str(e), 500)
+
+    @http.route('/sms-gateway/campaign/archive/<int:mailing_id>', type='http', auth='public', methods=['POST'], csrf=False, cors='*')
+    def campaign_archive(self, mailing_id, **kw):
+        """Archive (deactivate) a finished campaign."""
+        api_key = self._get_api_key()
+        if not api_key:
+            return self._error_response('Missing API key', 401)
+        phones = self._validate_api_key(api_key)
+        if not phones:
+            return self._error_response('Invalid API key', 401)
+
+        try:
+            mailing = request.env['mailing.mailing'].sudo().browse(mailing_id)
+            if not mailing.exists() or mailing.gateway_phone_forced_id.id not in phones.ids:
+                return self._error_response('Campaign not found', 404)
+
+            mailing.write({'active': False})
+            _logger.info('SMS Gateway: campaign %s archived by app', mailing_id)
+            return self._json_response({'success': True, 'active': False})
+        except Exception as e:
+            _logger.exception('SMS Gateway campaign/archive error')
             return self._error_response(str(e), 500)
