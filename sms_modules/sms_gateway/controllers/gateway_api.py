@@ -218,7 +218,7 @@ class SmsGatewayController(http.Controller):
             # are queued on this phone and return an empty batch so the
             # app stops polling until the next period.
             phone = phones[0]
-            remaining = request.env['sms.sms'].sudo()._get_remaining_capacity(phone)
+            remaining = request.env['sms.sms'].sudo()._phone_remaining_capacity(phone)
             if remaining <= 0:
                 # Pause all active mailings for this phone
                 active_mailings = request.env['mailing.mailing'].sudo().search([
@@ -1097,6 +1097,7 @@ class SmsGatewayController(http.Controller):
             stored_domain = segment._get_storable_domain(
                 phone=phone,
                 exclude_contacted_days=exclude_days,
+                limit=effective_limit,
             )
             # Check if any recipients match
             count = request.env['res.partner'].sudo().search_count(stored_domain)

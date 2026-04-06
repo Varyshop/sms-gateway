@@ -196,7 +196,7 @@ class SmsMarketingSegment(models.Model):
         self.ensure_one()
         return bool(self.domain_filter)
 
-    def _get_storable_domain(self, phone=None, exclude_contacted_days=0):
+    def _get_storable_domain(self, phone=None, exclude_contacted_days=0, limit=None):
         """Return a domain suitable for storing in ``mailing_domain``.
 
         For segments with a declarative ``domain_filter``, composes the full
@@ -242,9 +242,11 @@ class SmsMarketingSegment(models.Model):
             return domain
 
         # SQL-based segments → pre-resolve to IDs (exclude_contacted_days
-        # is still applied here for accurate recipient set)
+        # is still applied here for accurate recipient set).
+        # When limit is provided, restrict the ID set to avoid exceeding
+        # Odoo's literal_eval buffer limit on mailing_domain.
         domain = self._get_full_domain(phone, exclude_contacted_days)
-        partner_ids = self.env['res.partner'].sudo().search(domain).ids
+        partner_ids = self.env['res.partner'].sudo().search(domain, limit=limit).ids
         return [('id', 'in', partner_ids)] if partner_ids else [('id', '=', 0)]
 
     def _resolve_recipient_ids(self, phone=None, exclude_contacted_days=0, limit=None):

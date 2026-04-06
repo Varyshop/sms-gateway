@@ -98,6 +98,15 @@ class Mailing(models.Model):
             composer = self.env['sms.composer'].with_context(active_id=False).create(composer_vals)
             sms_records = composer._action_send_sms()
 
+            # Composer creates SMS as 'outgoing' (mass_force_send=False).
+            # For gateway provider we need to explicitly call _send() to
+            # transition them to 'pending' + assign gateway phone.
+            outgoing = sms_records.filtered(
+                lambda s: s.state == 'outgoing' and s.sms_provider == 'gateway'
+            )
+            if outgoing:
+                outgoing._send(unlink_failed=False, unlink_sent=False)
+
             if sms_records:
                 sms_count = len(sms_records)
                 outgoing_count = len(sms_records.filtered(lambda s: s.state == 'outgoing'))
