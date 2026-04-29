@@ -16,6 +16,7 @@
         'data/ir_cron_data.xml',
         'data/sms_marketing_segment_data.xml',
         'views/sms_gateway_phone_views.xml',
+        'views/sms_gateway_release_views.xml',
         'views/mailing_mailing_views.xml',
         'views/res_config_settings_views.xml',
         'views/sms_sms_views.xml',
