@@ -63,6 +63,24 @@ class SmsGatewayController(http.Controller):
             digits = digits[3:]
         return digits[-9:] if len(digits) >= 9 else digits
 
+    def _get_app_update(self, app_version):
+        """Check if a newer app release is available."""
+        if not app_version:
+            return None
+        Release = request.env['sms.gateway.release'].sudo()
+        latest = Release.get_latest_release()
+        if not latest or latest.version_code <= app_version:
+            return None
+        return {
+            'available': True,
+            'version': latest.version,
+            'version_code': latest.version_code,
+            'force': latest.force_update,
+            'release_notes': latest.release_notes or '',
+            'download_url': f'/sms-gateway/download/{latest.id}',
+            'file_size': latest.file_size,
+        }
+
     # ---- Heartbeat ----
 
     @http.route('/sms-gateway/heartbeat', type='http', auth='public',
@@ -79,6 +97,7 @@ class SmsGatewayController(http.Controller):
             battery_level = data.get('battery_level')
             signal_strength = data.get('signal_strength')
             unsynced_count = data.get('unsynced_count', 0)
+            app_version = data.get('app_version')
 
             phones._update_heartbeat(
                 battery_level=battery_level,
@@ -120,9 +139,47 @@ class SmsGatewayController(http.Controller):
                 'pending_count': pending_count,
                 'rate_limit': phones[0].rate_limit if phones else 100,
                 'phone_stats': phone_stats,
+                'app_update': self._get_app_update(app_version),
             })
         except Exception as e:
             _logger.exception('SMS Gateway heartbeat error')
+            return self._error_response(str(e), 500)
+
+    # ---- App Download ----
+
+    @http.route('/sms-gateway/download/<int:release_id>', type='http', auth='public',
+                methods=['GET'], csrf=False, cors='*')
+    def download_release(self, release_id, **kwargs):
+        """Download APK file for a specific release."""
+        try:
+            api_key = self._get_api_key()
+            phones = self._validate_api_key(api_key)
+            if not phones:
+                return self._error_response('Invalid API key', 401)
+
+            release = request.env['sms.gateway.release'].sudo().browse(release_id)
+            if not release.exists() or not release.active:
+                return self._error_response('Release not found', 404)
+
+            att = request.env['ir.attachment'].sudo().search([
+                ('res_model', '=', 'sms.gateway.release'),
+                ('res_id', '=', release.id),
+                ('res_field', '=', 'apk_file'),
+            ], limit=1)
+            if not att:
+                return self._error_response('APK file not found', 404)
+
+            filename = release.apk_filename or f'sms-gateway-{release.version}.apk'
+            return request.make_response(
+                att.raw,
+                headers=[
+                    ('Content-Type', 'application/vnd.android.package-archive'),
+                    ('Content-Disposition', f'attachment; filename="{filename}"'),
+                    ('Content-Length', str(len(att.raw))),
+                ],
+            )
+        except Exception as e:
+            _logger.exception('SMS Gateway download error')
             return self._error_response(str(e), 500)
 
     # ---- Pending SMS ----
