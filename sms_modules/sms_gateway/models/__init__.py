@@ -8,3 +8,4 @@ from . import sms_marketing_segment
 from . import sms_marketing_template
 from . import res_partner_stats
 from . import res_partner
+from . import sms_gateway_release
