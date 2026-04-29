@@ -150,6 +150,12 @@
               action="sms_gateway_phone_action"
               sequence="10"/>
 
+    <menuitem id="sms_gateway_release_menu"
+              name="App Releases"
+              parent="sms_gateway_menu_root"
+              action="sms_gateway_release_action"
+              sequence="15"/>
+
     <!-- SMS list view accessible from SMS Marketing menu -->
     <menuitem id="sms_sms_menu_marketing"
               name="SMS Messages"
