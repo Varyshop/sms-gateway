@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Campaign Wizard Form -->
+    <record id="sms_campaign_wizard_view_form" model="ir.ui.view">
+        <field name="name">sms.campaign.wizard.form</field>
+        <field name="model">sms.campaign.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Create SMS Campaign">
+                <sheet>
+                    <div class="oe_title mb-3">
+                        <h2>Nová SMS kampaň</h2>
+                    </div>
+
+                    <group>
+                        <group string="Cílení">
+                            <field name="segment_id"
+                                   options="{'no_create': True}"/>
+                            <field name="template_id"
+                                   options="{'no_create': True}"/>
+                            <field name="exclude_contacted_days"/>
+                            <field name="recipient_limit"
+                                   help="0 = bez limitu"/>
+                        </group>
+                        <group string="Náhled">
+                            <field name="recipient_count" readonly="1"/>
+                            <field name="effective_count" readonly="1"/>
+                            <field name="sms_segment_count_preview" readonly="1"/>
+                            <field name="total_capacity" readonly="1"/>
+                            <field name="can_fit_all" readonly="1" widget="boolean"
+                                   invisible="not phone_line_ids"/>
+                        </group>
+                    </group>
+
+                    <div class="alert alert-warning" role="alert"
+                         invisible="can_fit_all or not phone_line_ids">
+                        Vybrané telefony nemají dostatečnou kapacitu pro všechny SMS.
+                        Některé zprávy nebudou přiřazeny.
+                    </div>
+
+                    <div class="alert alert-info" role="alert"
+                         invisible="recipient_count != 0 or not segment_id">
+                        Vybraný segment neobsahuje žádné příjemce.
+                    </div>
+
+                    <separator string="Text SMS"/>
+                    <field name="body" placeholder="Text SMS zprávy. Použijte {{object.name}} pro jméno zákazníka..."/>
+                    <group>
+                        <field name="sms_allow_unsubscribe"/>
+                        <field name="send_now"/>
+                    </group>
+
+                    <separator string="Gateway telefony"/>
+                    <field name="phone_line_ids" nolabel="1">
+                        <list editable="bottom" create="0" delete="0"
+                              decoration-success="state == 'online' and selected"
+                              decoration-muted="state == 'offline' or not selected">
+                            <field name="phone_id" column_invisible="1" force_save="1"/>
+                            <field name="selected" widget="boolean"/>
+                            <field name="phone_name" readonly="1" force_save="1"/>
+                            <field name="phone_number" readonly="1" force_save="1"/>
+                            <field name="phone_number_2" readonly="1" force_save="1"
+                                   column_invisible="not parent.phone_line_ids.phone_number_2"/>
+                            <field name="use_sim"/>
+                            <field name="state" widget="badge" readonly="1" force_save="1"
+                                   decoration-success="state == 'online'"
+                                   decoration-danger="state == 'offline'"/>
+                            <field name="sent_today" readonly="1" force_save="1"/>
+                            <field name="daily_limit" readonly="1" force_save="1"/>
+                            <field name="sent_month" readonly="1" force_save="1"/>
+                            <field name="monthly_limit" readonly="1" force_save="1"/>
+                            <field name="remaining_capacity" readonly="1" force_save="1"/>
+                        </list>
+                    </field>
+                </sheet>
+                <footer>
+                    <button name="action_create_campaign" type="object"
+                            string="Vytvořit kampaň" class="btn-primary"/>
+                    <button string="Zrušit" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action to open the wizard -->
+    <record id="sms_campaign_wizard_action" model="ir.actions.act_window">
+        <field name="name">Nová SMS kampaň</field>
+        <field name="res_model">sms.campaign.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu item under SMS Marketing -->
+    <menuitem id="sms_campaign_wizard_menu"
+              name="Nová kampaň"
+              parent="sms_marketing_menu_root"
+              action="sms_campaign_wizard_action"
+              sequence="1"/>
+
+</odoo>

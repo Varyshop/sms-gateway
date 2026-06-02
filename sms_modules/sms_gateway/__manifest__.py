@@ -21,6 +21,7 @@
         'views/res_config_settings_views.xml',
         'views/sms_sms_views.xml',
         'views/sms_gateway_send_wizard_views.xml',
+        'views/sms_campaign_wizard_views.xml',
         'views/sms_marketing_template_views.xml',
         'views/res_partner_views.xml',
     ],
