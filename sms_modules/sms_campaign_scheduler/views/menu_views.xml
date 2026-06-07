@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_campaign_scheduler"
+              name="Campaign Scheduler"
+              parent="sms_gateway.sms_marketing_menu_root"
+              action="campaign_schedule_action"
+              sequence="30"/>
+
+    <menuitem id="menu_campaign_scheduler_logs"
+              name="Scheduler Logs"
+              parent="sms_gateway.sms_marketing_menu_root"
+              action="campaign_schedule_log_action"
+              sequence="31"/>
+
+</odoo>

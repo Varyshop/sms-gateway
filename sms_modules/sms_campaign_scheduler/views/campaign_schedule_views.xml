@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Form View -->
+    <record id="campaign_schedule_view_form" model="ir.ui.view">
+        <field name="name">campaign.schedule.form</field>
+        <field name="model">campaign.schedule</field>
+        <field name="arch" type="xml">
+            <form string="Scheduled Campaign">
+                <header>
+                    <button name="action_activate" type="object" string="Activate"
+                        class="oe_highlight"
+                        invisible="state != 'draft'"/>
+                    <button name="action_pause" type="object" string="Pause"
+                        invisible="state != 'active'"/>
+                    <button name="action_activate" type="object" string="Resume"
+                        class="oe_highlight"
+                        invisible="state != 'paused'"/>
+                    <button name="action_draft" type="object" string="Reset to Draft"
+                        invisible="state == 'draft'"/>
+                    <button name="action_run_now" type="object" string="Run Now"
+                        class="oe_highlight"
+                        invisible="state != 'active'"
+                        confirm="This will create a campaign immediately. Continue?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_logs" type="object"
+                            class="oe_stat_button" icon="fa-history">
+                            <field name="run_count" widget="statinfo" string="Runs"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Schedule Name"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="Channel">
+                            <field name="channel"/>
+                        </group>
+                    </group>
+
+                    <group string="SMS Configuration" invisible="channel != 'sms'">
+                        <group>
+                            <field name="template_id"/>
+                            <field name="segment_id"/>
+                            <field name="phone_id"/>
+                        </group>
+                        <group>
+                            <field name="exclude_contacted_days"/>
+                            <field name="recipient_limit"/>
+                            <field name="sms_allow_unsubscribe"/>
+                            <field name="send_paused"/>
+                        </group>
+                    </group>
+
+                    <group string="Message" invisible="channel != 'sms'">
+                        <field name="body" nolabel="1" colspan="2"
+                            placeholder="Enter SMS text..."/>
+                    </group>
+
+                    <group string="Extra Filter (added to segment)">
+                        <field name="mailing_domain" widget="domain"
+                            options="{'model': 'res.partner'}"
+                            nolabel="1" colspan="2"/>
+                    </group>
+
+                    <group string="Schedule">
+                        <group>
+                            <field name="interval_type"/>
+                            <field name="weekday"
+                                invisible="interval_type != 'weekly'"/>
+                            <field name="monthday"
+                                invisible="interval_type != 'monthly'"/>
+                        </group>
+                        <group>
+                            <field name="execute_hour"/>
+                            <field name="execute_minute"/>
+                            <field name="tz"/>
+                        </group>
+                    </group>
+
+                    <group string="Execution">
+                        <group>
+                            <field name="next_run"/>
+                            <field name="last_run"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active" invisible="1"/>
+                            <field name="sequence" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Execution Log" name="logs">
+                            <field name="log_ids" readonly="1">
+                                <list>
+                                    <field name="create_date" string="Date"/>
+                                    <field name="state" widget="badge"
+                                        decoration-success="state == 'ok'"
+                                        decoration-danger="state == 'error'"/>
+                                    <field name="mailing_id"/>
+                                    <field name="recipient_count"/>
+                                    <field name="note"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- List View -->
+    <record id="campaign_schedule_view_list" model="ir.ui.view">
+        <field name="name">campaign.schedule.list</field>
+        <field name="model">campaign.schedule</field>
+        <field name="arch" type="xml">
+            <list string="Scheduled Campaigns"
+                decoration-muted="state == 'paused'"
+                decoration-info="state == 'draft'">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="channel"/>
+                <field name="segment_id"/>
+                <field name="interval_type"/>
+                <field name="state" widget="badge"
+                    decoration-success="state == 'active'"
+                    decoration-info="state == 'draft'"
+                    decoration-warning="state == 'paused'"/>
+                <field name="next_run"/>
+                <field name="last_run"/>
+                <field name="run_count"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="campaign_schedule_view_search" model="ir.ui.view">
+        <field name="name">campaign.schedule.search</field>
+        <field name="model">campaign.schedule</field>
+        <field name="arch" type="xml">
+            <search string="Scheduled Campaigns">
+                <field name="name"/>
+                <field name="segment_id"/>
+                <filter name="active_schedules" string="Active"
+                    domain="[('state', '=', 'active')]"/>
+                <filter name="paused_schedules" string="Paused"
+                    domain="[('state', '=', 'paused')]"/>
+                <separator/>
+                <filter name="sms_channel" string="SMS"
+                    domain="[('channel', '=', 'sms')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_channel" string="Channel" context="{'group_by': 'channel'}"/>
+                    <filter name="group_interval" string="Frequency" context="{'group_by': 'interval_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="campaign_schedule_action" model="ir.actions.act_window">
+        <field name="name">Campaign Schedules</field>
+        <field name="res_model">campaign.schedule</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="campaign_schedule_view_search"/>
+        <field name="context">{'search_default_active_schedules': 1}</field>
+    </record>
+
+    <!-- Log Action -->
+    <record id="campaign_schedule_log_action" model="ir.actions.act_window">
+        <field name="name">Execution Log</field>
+        <field name="res_model">campaign.schedule.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

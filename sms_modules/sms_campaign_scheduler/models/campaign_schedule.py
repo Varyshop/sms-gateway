@@ -1,0 +1,423 @@
+import ast
+import logging
+from datetime import datetime, timedelta
+
+import pytz
+
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
+
+WEEKDAY_SELECTION = [
+    ('0', 'Monday'),
+    ('1', 'Tuesday'),
+    ('2', 'Wednesday'),
+    ('3', 'Thursday'),
+    ('4', 'Friday'),
+    ('5', 'Saturday'),
+    ('6', 'Sunday'),
+]
+
+
+class CampaignSchedule(models.Model):
+    _name = 'campaign.schedule'
+    _description = 'Scheduled Campaign'
+    _inherit = ['mail.thread']
+    _order = 'sequence, name'
+
+    name = fields.Char(required=True, tracking=True)
+    active = fields.Boolean(default=True, tracking=True)
+    sequence = fields.Integer(default=10)
+
+    # Type — extensible for future email support
+    channel = fields.Selection([
+        ('sms', 'SMS'),
+    ], string='Channel', required=True, default='sms', tracking=True)
+
+    # SMS-specific fields
+    template_id = fields.Many2one(
+        'sms.marketing.template', string='SMS Template',
+    )
+    segment_id = fields.Many2one(
+        'sms.marketing.segment', string='Segment',
+        help='Segment defines the base recipients. Domain is resolved live at each execution.',
+    )
+    mailing_domain = fields.Char(
+        string='Extra Filter', default='[]',
+        help='Additional domain filter for res.partner. Merged with segment domain at execution time.',
+    )
+    body = fields.Text(
+        string='Message Text',
+        help='SMS text. Supports placeholders: {{object.name}}, etc.',
+    )
+    sms_allow_unsubscribe = fields.Boolean(
+        string='Add STOP message', default=True,
+    )
+    exclude_contacted_days = fields.Integer(
+        string='Exclude Contacted (days)', default=0,
+    )
+    recipient_limit = fields.Integer(
+        string='Recipient Limit', default=0,
+        help='0 = no limit.',
+    )
+    phone_id = fields.Many2one(
+        'sms.gateway.phone', string='Gateway Phone',
+        help='Force all SMS through this phone. Leave empty for auto-assignment.',
+    )
+    send_paused = fields.Boolean(
+        string='Create Paused', default=False,
+        help='Create the campaign in paused state (manual resume required).',
+    )
+
+    # Scheduling
+    interval_type = fields.Selection([
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
+    ], string='Frequency', required=True, default='weekly', tracking=True)
+
+    weekday = fields.Selection(
+        WEEKDAY_SELECTION, string='Day of Week', default='0',
+        help='For weekly schedules.',
+    )
+    monthday = fields.Integer(
+        string='Day of Month', default=1,
+        help='For monthly schedules (1-28). Values > 28 are clamped.',
+    )
+    execute_hour = fields.Integer(
+        string='Hour', default=9, help='0-23 in your timezone.',
+    )
+    execute_minute = fields.Integer(
+        string='Minute', default=0, help='0-59.',
+    )
+    tz = fields.Selection(
+        '_tz_list', string='Timezone', required=True,
+        default=lambda self: self.env.user.tz or 'Europe/Prague',
+    )
+
+    next_run = fields.Datetime(
+        string='Next Execution (UTC)', compute='_compute_next_run', store=True,
+        help='Computed next execution time in UTC.',
+    )
+    last_run = fields.Datetime(string='Last Execution', readonly=True)
+
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('active', 'Active'),
+        ('paused', 'Paused'),
+    ], string='Status', default='draft', required=True, tracking=True)
+
+    # Logs
+    log_ids = fields.One2many(
+        'campaign.schedule.log', 'schedule_id', string='Execution Log',
+    )
+    run_count = fields.Integer(
+        string='Total Runs', compute='_compute_run_count',
+    )
+
+    company_id = fields.Many2one(
+        'res.company', string='Company',
+        default=lambda self: self.env.company,
+    )
+
+    @api.model
+    def _tz_list(self):
+        return [(tz, tz) for tz in sorted(pytz.common_timezones)]
+
+    @api.constrains('execute_hour', 'execute_minute', 'monthday')
+    def _check_time_values(self):
+        for rec in self:
+            if not (0 <= rec.execute_hour <= 23):
+                raise ValidationError(_('Hour must be between 0 and 23.'))
+            if not (0 <= rec.execute_minute <= 59):
+                raise ValidationError(_('Minute must be between 0 and 59.'))
+            if rec.interval_type == 'monthly' and not (1 <= rec.monthday <= 28):
+                raise ValidationError(_('Day of month must be between 1 and 28.'))
+
+    @api.constrains('mailing_domain')
+    def _check_mailing_domain(self):
+        for rec in self:
+            if rec.mailing_domain and rec.mailing_domain != '[]':
+                try:
+                    d = ast.literal_eval(rec.mailing_domain)
+                    if not isinstance(d, list):
+                        raise ValueError
+                except Exception:
+                    raise ValidationError(_('Recipients filter must be a valid Odoo domain list.'))
+
+    @api.onchange('segment_id')
+    def _onchange_segment_id(self):
+        """Reset extra filter when segment changes."""
+        if self.segment_id and not self.mailing_domain or self.mailing_domain == '[]':
+            self.mailing_domain = '[]'
+
+    @api.onchange('template_id')
+    def _onchange_template_id(self):
+        if self.template_id:
+            self.body = self.template_id.body
+            self.exclude_contacted_days = self.template_id.exclude_contacted_days
+            self.recipient_limit = self.template_id.default_limit
+            if self.template_id.phone_id:
+                self.phone_id = self.template_id.phone_id
+            if self.template_id.segment_ids and len(self.template_id.segment_ids) == 1:
+                self.segment_id = self.template_id.segment_ids[0]
+
+    @api.depends('log_ids')
+    def _compute_run_count(self):
+        data = self.env['campaign.schedule.log']._read_group(
+            [('schedule_id', 'in', self.ids)],
+            ['schedule_id'],
+            ['__count'],
+        )
+        mapped = {s.id: c for s, c in data}
+        for rec in self:
+            rec.run_count = mapped.get(rec.id, 0)
+
+    @api.depends('interval_type', 'weekday', 'monthday',
+                 'execute_hour', 'execute_minute', 'tz', 'last_run')
+    def _compute_next_run(self):
+        for rec in self:
+            rec.next_run = rec._calculate_next_run()
+
+    def _calculate_next_run(self):
+        """Calculate next execution datetime in UTC."""
+        self.ensure_one()
+        try:
+            local_tz = pytz.timezone(self.tz or 'UTC')
+        except pytz.UnknownTimeZoneError:
+            local_tz = pytz.UTC
+
+        now_utc = fields.Datetime.now()
+        now_local = pytz.UTC.localize(now_utc).astimezone(local_tz)
+
+        target_time = now_local.replace(
+            hour=self.execute_hour,
+            minute=self.execute_minute,
+            second=0, microsecond=0,
+        )
+
+        if self.interval_type == 'daily':
+            candidate = target_time
+            if candidate <= now_local:
+                candidate += timedelta(days=1)
+
+        elif self.interval_type == 'weekly':
+            target_wd = int(self.weekday or '0')
+            days_ahead = target_wd - now_local.weekday()
+            if days_ahead < 0:
+                days_ahead += 7
+            candidate = target_time + timedelta(days=days_ahead)
+            if candidate <= now_local:
+                candidate += timedelta(weeks=1)
+
+        elif self.interval_type == 'monthly':
+            day = min(self.monthday or 1, 28)
+            candidate = target_time.replace(day=day)
+            if candidate <= now_local:
+                month = candidate.month + 1
+                year = candidate.year
+                if month > 12:
+                    month = 1
+                    year += 1
+                candidate = candidate.replace(year=year, month=month, day=day)
+        else:
+            return False
+
+        # Convert back to UTC
+        if candidate.tzinfo is None:
+            candidate = local_tz.localize(candidate)
+        else:
+            candidate = local_tz.normalize(candidate)
+        return candidate.astimezone(pytz.UTC).replace(tzinfo=None)
+
+    # --- Actions ---
+
+    def action_activate(self):
+        for rec in self:
+            if not rec.body or not rec.body.strip():
+                raise ValidationError(_('Message text is required.'))
+        self.write({'state': 'active'})
+
+    def action_pause(self):
+        self.write({'state': 'paused'})
+
+    def action_draft(self):
+        self.write({'state': 'draft'})
+
+    def action_run_now(self):
+        """Manual trigger — execute immediately regardless of schedule."""
+        self.ensure_one()
+        self._execute()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Campaign Created'),
+                'message': _('Scheduled campaign "%s" executed.') % self.name,
+                'type': 'success',
+                'sticky': False,
+            },
+        }
+
+    def action_view_logs(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Execution Log: %s') % self.name,
+            'res_model': 'campaign.schedule.log',
+            'view_mode': 'list,form',
+            'domain': [('schedule_id', '=', self.id)],
+        }
+
+    # --- Execution ---
+
+    def _execute(self):
+        """Create a mailing.mailing campaign from this schedule config."""
+        self.ensure_one()
+        if self.channel != 'sms':
+            _logger.warning('Channel %s not yet implemented', self.channel)
+            return
+
+        mailing, error = self._create_sms_campaign()
+        self.env['campaign.schedule.log'].create({
+            'schedule_id': self.id,
+            'mailing_id': mailing.id if mailing else False,
+            'state': 'ok' if mailing else 'error',
+            'note': error or '',
+            'recipient_count': mailing and self.env['sms.sms'].sudo().search_count([
+                ('mailing_id', '=', mailing.id),
+            ]) or 0,
+        })
+        self.last_run = fields.Datetime.now()
+
+    def _create_sms_campaign(self):
+        """Build and return a mailing.mailing for SMS.
+
+        Returns (mailing_record, error_string).
+        """
+        self.ensure_one()
+        try:
+            phone = self.phone_id or self.env['sms.gateway.phone'].sudo().search(
+                [('active', '=', True), ('state', '=', 'online')], limit=1,
+            )
+            if not phone:
+                return False, 'No online gateway phone available.'
+
+            if not self.segment_id:
+                return False, 'No segment selected.'
+
+            exclude_days = self.exclude_contacted_days or 0
+
+            # Always resolve segment domain LIVE (never store IDs)
+            live_domain = self.segment_id._get_full_domain(
+                phone=phone,
+                exclude_contacted_days=exclude_days,
+            )
+
+            # Merge user's extra filter on top
+            extra = ast.literal_eval(self.mailing_domain or '[]')
+            if extra:
+                live_domain = live_domain + extra
+
+            # Exclude partners who already have pending/queued SMS from this schedule
+            # (prevents duplicates on rapid re-trigger)
+            pending_partner_ids = self._get_pending_partner_ids()
+            if pending_partner_ids:
+                live_domain = live_domain + [('id', 'not in', pending_partner_ids)]
+
+            # Resolve to IDs for mailing storage (always fresh)
+            limit = self.recipient_limit if self.recipient_limit > 0 else None
+            partner_ids = self.env['res.partner'].sudo().search(live_domain, limit=limit).ids
+            if not partner_ids:
+                return False, 'No recipients match segment + filters (or all already have pending SMS).'
+            stored_domain = [('id', 'in', partner_ids)]
+
+            count = len(partner_ids)
+            if not count:
+                return False, 'No recipients match segment + filters.'
+
+            partner_model = self.env['ir.model'].sudo().search([
+                ('model', '=', 'res.partner'),
+            ], limit=1)
+
+            company = self.company_id.sudo() or self.env.company.sudo()
+            email_from = company.email or company.partner_id.email or 'noreply@example.com'
+
+            subject = '%s - %s' % (
+                self.name,
+                fields.Datetime.now().strftime('%d.%m.%Y %H:%M'),
+            )
+
+            mailing = self.env['mailing.mailing'].sudo().create({
+                'subject': subject,
+                'mailing_type': 'sms',
+                'body_plaintext': self.body.strip(),
+                'email_from': email_from,
+                'sms_provider': 'gateway',
+                'mailing_model_id': partner_model.id,
+                'mailing_domain': repr(stored_domain),
+                'gateway_phone_forced_id': phone.id,
+                'recipient_limit': self.recipient_limit if self.recipient_limit > 0 else 0,
+                'marketing_template_id': self.template_id.id if self.template_id else False,
+                'sms_allow_unsubscribe': self.sms_allow_unsubscribe,
+                'exclude_contacted_days': exclude_days,
+            })
+
+            mailing.state = 'in_queue'
+            mailing.action_force_create_sms_queue()
+
+            if self.send_paused:
+                mailing.write({'paused': True})
+
+            _logger.info(
+                'Campaign schedule %s created mailing %s with %d recipients',
+                self.name, mailing.id, count,
+            )
+            return mailing, None
+
+        except Exception as e:
+            _logger.error('Campaign schedule %s failed: %s', self.name, e)
+            return False, str(e)
+
+    def _get_pending_partner_ids(self):
+        """Get partner IDs that have unsent SMS from previous runs of this schedule."""
+        self.ensure_one()
+        mailing_ids = self.log_ids.filtered(
+            lambda l: l.state == 'ok' and l.mailing_id
+        ).mapped('mailing_id').ids
+        if not mailing_ids:
+            return []
+
+        self.env.cr.execute("""
+            SELECT DISTINCT s.partner_id
+            FROM sms_sms s
+            WHERE s.mailing_id IN %s
+              AND s.state IN ('outgoing', 'process')
+              AND s.gateway_state IN ('pending', 'processing', 'sending')
+              AND s.partner_id IS NOT NULL
+        """, (tuple(mailing_ids),))
+        return [r[0] for r in self.env.cr.fetchall()]
+
+    # --- Cron ---
+
+    @api.model
+    def _cron_run_schedules(self):
+        """Check all active schedules and execute those whose next_run is due."""
+        now = fields.Datetime.now()
+        schedules = self.search([
+            ('state', '=', 'active'),
+            ('next_run', '<=', now),
+        ])
+        for schedule in schedules:
+            try:
+                schedule._execute()
+                _logger.info('Cron executed schedule: %s', schedule.name)
+            except Exception as e:
+                _logger.error('Cron failed for schedule %s: %s', schedule.name, e)
+                self.env['campaign.schedule.log'].create({
+                    'schedule_id': schedule.id,
+                    'state': 'error',
+                    'note': str(e),
+                })
+                schedule.last_run = fields.Datetime.now()
