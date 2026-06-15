@@ -14,6 +14,7 @@
 
                     <group>
                         <group string="Cílení">
+                            <field name="campaign_id"/>
                             <field name="segment_id"
                                    options="{'no_create': True}"/>
                             <field name="template_id"

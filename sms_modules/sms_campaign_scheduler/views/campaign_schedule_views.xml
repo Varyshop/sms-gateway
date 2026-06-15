@@ -39,6 +39,9 @@
                         <group string="Channel">
                             <field name="channel"/>
                         </group>
+                        <group string="Tracking">
+                            <field name="campaign_id"/>
+                        </group>
                     </group>
 
                     <group string="SMS Configuration" invisible="channel != 'sms'">
