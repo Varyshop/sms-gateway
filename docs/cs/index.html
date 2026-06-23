@@ -1,0 +1,1849 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.8;
+        color: #1f2937;
+        margin: 0;
+        padding: 0;
+        background: #f8fafc;
+      }
+
+      /* ===== LAYOUT: sidebar + main ===== */
+      .page-wrapper {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar navigation */
+      .sidebar {
+        width: 260px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        background: #fff;
+        border-right: 1px solid #e5e7eb;
+        padding: 24px 0;
+        z-index: 10;
+      }
+      .sidebar-logo {
+        padding: 0 20px 16px;
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 12px;
+      }
+      .sidebar-logo h2 {
+        margin: 0;
+        font-size: 1.15em;
+        color: #111827;
+        border: none;
+        padding: 0;
+      }
+      .sidebar-logo small {
+        color: #6b7280;
+        font-size: 0.8em;
+      }
+      .sidebar nav {
+        padding: 0 8px;
+      }
+      .sidebar nav a {
+        display: block;
+        padding: 7px 14px;
+        margin: 1px 0;
+        color: #6b7280;
+        text-decoration: none;
+        font-size: 0.85em;
+        border-radius: 6px;
+        transition: all 0.15s ease;
+        line-height: 1.4;
+      }
+      .sidebar nav a:hover {
+        color: #1f2937;
+        background: #f3f4f6;
+      }
+      .sidebar nav a.active {
+        color: #1e40af;
+        background: #eff6ff;
+        font-weight: 600;
+      }
+      .sidebar nav .nav-group {
+        margin-top: 16px;
+        padding: 0 14px;
+        font-size: 0.7em;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9ca3af;
+        margin-bottom: 4px;
+      }
+
+      /* Main content */
+      .main-content {
+        flex: 1;
+        max-width: 820px;
+        padding: 32px 40px 80px;
+        margin: 0 auto;
+      }
+
+      /* ===== TYPOGRAPHY ===== */
+      h1 {
+        color: #111827;
+        border-bottom: 3px solid #2563eb;
+        padding-bottom: 12px;
+        font-size: 2em;
+        margin-bottom: 8px;
+        margin-top: 0;
+      }
+      .subtitle {
+        color: #6b7280;
+        font-size: 1.1em;
+        margin-bottom: 32px;
+      }
+      h2 {
+        color: #111827;
+        margin-top: 48px;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 8px;
+        font-size: 1.5em;
+        scroll-margin-top: 24px;
+      }
+      h3 {
+        color: #374151;
+        margin-top: 28px;
+        font-size: 1.15em;
+      }
+      strong {
+        color: #111827;
+      }
+
+      /* ===== COMPONENTS ===== */
+      .highlight-box {
+        background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+        border: 1px solid #bfdbfe;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin: 20px 0;
+      }
+      .info {
+        background: #eff6ff;
+        border-left: 4px solid #3b82f6;
+        padding: 14px 18px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+      }
+      .tip {
+        background: #ecfdf5;
+        border-left: 4px solid #10b981;
+        padding: 14px 18px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+      }
+      .warning {
+        background: #fffbeb;
+        border-left: 4px solid #f59e0b;
+        padding: 14px 18px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+      }
+      .danger {
+        background: #fef2f2;
+        border-left: 4px solid #ef4444;
+        padding: 14px 18px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+      }
+      ol.steps {
+        counter-reset: step;
+        list-style: none;
+        padding-left: 0;
+      }
+      ol.steps > li {
+        counter-increment: step;
+        padding: 10px 0 10px 48px;
+        position: relative;
+        border-left: 2px solid #e5e7eb;
+        margin-left: 16px;
+      }
+      ol.steps > li:last-child {
+        border-left-color: transparent;
+      }
+      ol.steps > li::before {
+        content: counter(step);
+        position: absolute;
+        left: -15px;
+        top: 8px;
+        width: 28px;
+        height: 28px;
+        background: #2563eb;
+        color: #fff;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 0.85em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .path {
+        display: inline-block;
+        background: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        padding: 2px 10px;
+        border-radius: 6px;
+        font-size: 0.9em;
+        color: #374151;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .btn {
+        display: inline-block;
+        background: #e0e7ff;
+        border: 1px solid #c7d2fe;
+        padding: 3px 12px;
+        border-radius: 6px;
+        font-size: 0.85em;
+        color: #3730a3;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .field-table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 14px 0;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .field-table th {
+        background: #f8fafc;
+        font-weight: 600;
+        text-align: left;
+        padding: 10px 14px;
+        border-bottom: 2px solid #e2e8f0;
+        color: #475569;
+        font-size: 0.9em;
+      }
+      .field-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: top;
+      }
+      .field-table tr:last-child td {
+        border-bottom: none;
+      }
+      .field-table tr:hover td {
+        background: #f8fafc;
+      }
+      .status {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.8em;
+      }
+      .status-green {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .status-red {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .flow {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .flow-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 8px 0;
+        flex-wrap: wrap;
+      }
+      .flow-box {
+        background: #fff;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px 16px;
+        text-align: center;
+        min-width: 120px;
+      }
+      .flow-box strong {
+        display: block;
+        font-size: 0.85em;
+        color: #374151;
+      }
+      .flow-box small {
+        color: #6b7280;
+        font-size: 0.8em;
+      }
+      .flow-arrow {
+        font-size: 1.4em;
+        color: #9ca3af;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 16px 0;
+      }
+      .two-col > div {
+        background: #fff;
+        border-radius: 10px;
+        padding: 16px;
+        border: 1px solid #e2e8f0;
+      }
+      .faq-q {
+        font-weight: 700;
+        color: #1e40af;
+        margin-top: 20px;
+        margin-bottom: 4px;
+      }
+      .faq-a {
+        margin-bottom: 16px;
+        padding-left: 16px;
+        border-left: 2px solid #e5e7eb;
+      }
+      hr {
+        border: none;
+        border-top: 1px solid #e5e7eb;
+        margin: 40px 0;
+      }
+
+      /* ===== MOBILE: hide sidebar, show hamburger ===== */
+      .mobile-header {
+        display: none;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: #fff;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 16px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .mobile-header h2 {
+        margin: 0;
+        font-size: 1em;
+        color: #111827;
+        border: none;
+        padding: 0;
+      }
+      .mobile-header button {
+        background: none;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 1.2em;
+        color: #374151;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 15;
+      }
+
+      @media (max-width: 860px) {
+        .mobile-header {
+          display: flex;
+        }
+        .sidebar {
+          position: fixed;
+          left: -280px;
+          top: 0;
+          height: 100vh;
+          transition: left 0.25s ease;
+          z-index: 20;
+          box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar.open {
+          left: 0;
+        }
+        .sidebar-overlay.open {
+          display: block;
+        }
+        .main-content {
+          padding: 20px 16px 60px;
+        }
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+        h2 {
+          scroll-margin-top: 72px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Mobile header -->
+    <div class="mobile-header">
+      <h2>Varyshop SMS</h2>
+      <button onclick="toggleSidebar()" aria-label="Menu">&#9776;</button>
+    </div>
+    <div
+      class="sidebar-overlay"
+      id="sidebarOverlay"
+      onclick="toggleSidebar()"
+    ></div>
+
+    <div class="page-wrapper">
+      <!-- ===== SIDEBAR ===== -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+          <h2>Varyshop SMS</h2>
+          <small>Uživatelská příručka</small>
+        </div>
+        <nav id="sidebarNav">
+          <div class="nav-group">Základní informace</div>
+          <a href="#jak-to-funguje" data-section="jak-to-funguje"
+            >Jak to funguje</a
+          >
+          <a href="#co-potrebujete" data-section="co-potrebujete"
+            >Co potřebujete</a
+          >
+
+          <div class="nav-group">Nastavení</div>
+          <a href="#nastaveni-v-Varyshop" data-section="nastaveni-v-Varyshop"
+            >Nastavení v administraci</a
+          >
+          <a href="#pridani-telefonu" data-section="pridani-telefonu"
+            >Přidání telefonu</a
+          >
+          <a href="#instalace-aplikace" data-section="instalace-aplikace"
+            >Instalace aplikace</a
+          >
+          <a href="#sparovani" data-section="sparovani">Spárování telefonu</a>
+
+          <div class="nav-group">Kampaně</div>
+          <a href="#prvni-kampan" data-section="prvni-kampan"
+            >Vaše první kampaň</a
+          >
+          <a href="#kampan-z-appky" data-section="kampan-z-appky"
+            >Kampaň z mobilní appky</a
+          >
+          <a href="#jak-se-odesilaji" data-section="jak-se-odesilaji"
+            >Jak se odesílají SMS</a
+          >
+          <a href="#pozastaveni" data-section="pozastaveni"
+            >Pozastavení kampaně</a
+          >
+
+          <div class="nav-group">Pokročilé funkce</div>
+          <a href="#vice-telefonu" data-section="vice-telefonu"
+            >Více telefonů</a
+          >
+          <a href="#filtrovani" data-section="filtrovani">Směrování SMS</a>
+          <a href="#limity" data-section="limity">Limity a rychlost</a>
+          <a href="#dual-sim" data-section="dual-sim">Dual SIM</a>
+
+          <div class="nav-group">Sledování a GDPR</div>
+          <a href="#odkazy" data-section="odkazy">Odkazy a kliknutí</a>
+          <a href="#odhlaseni" data-section="odhlaseni">Odhlášení a STOP</a>
+          <a href="#prichozi-sms" data-section="prichozi-sms">Příchozí SMS</a>
+          <a href="#statistiky" data-section="statistiky">Statistiky</a>
+
+          <div class="nav-group">Pokročilé nastavení</div>
+          <a href="#fcm" data-section="fcm">FCM Push notifikace</a>
+          <a href="#background" data-section="background">Pozadí a spolehlivost</a>
+
+          <div class="nav-group">Pomoc</div>
+          <a href="#overeni" data-section="overeni">Ověření funkce</a>
+          <a href="#casty-dotazy" data-section="casty-dotazy">Časté dotazy</a>
+
+          <div class="nav-group" style="margin-top:24px; border-top:1px solid #e5e7eb; padding-top:16px">Další stránky</div>
+          <a href="developer.html" style="color:#2563eb; font-weight:600">API &amp; Developer Docs</a>
+          <a href="https://github.com/Varyshop/sms-gateway-app/releases" style="color:#059669; font-weight:600" target="_blank">Stáhnout APK</a>
+          <a href="https://github.com/Varyshop/sms-gateway" target="_blank">GitHub</a>
+          <a href="../index.html" style="color:#6b7280; font-weight:600">English version</a>
+        </nav>
+      </aside>
+
+      <!-- ===== MAIN CONTENT ===== -->
+      <main class="main-content">
+        <h1>Varyshop SMS</h1>
+        <p class="subtitle">
+          Odesílání SMS kampaní přímo z vašich Android telefonů &mdash; bez
+          externího poskytovatele, bez poplatků za každé SMS.
+        </p>
+
+        <div class="highlight-box">
+          <strong>Co tento modul dělá?</strong><br />
+          Místo placení za každou odeslanou SMS přes cloudovou službu použijete
+          vlastní Android telefon(y) jako SMS bránu. Telefon se spojí s vaším
+          systémem, automaticky přijímá zprávy z front a odesílá je jako běžné
+          SMS. Můžete použít více telefonů najednou &mdash; systém sám rozdělí
+          zátěž.
+        </div>
+
+        <div class="highlight-box">
+          <strong>Novinka v1.3.0: Kampaně z mobilní appky</strong><br />
+          Nový tab <strong>Kampaně</strong> umožňuje vytvářet a odesílat SMS kampaně
+          přímo z telefonu. Vyberte šablonu, segment zákazníků, upravte text
+          a odešlete &mdash; včetně statistik (kliknutí, objednávky, příjem).
+          <a href="#kampan-z-appky">Více informací &darr;</a>
+        </div>
+
+        <!-- ==================== JAK TO FUNGUJE ==================== -->
+        <h2 id="jak-to-funguje">Jak to funguje</h2>
+
+        <p>Celý systém má tři části, které spolupracují:</p>
+
+        <div class="flow">
+          <div class="flow-row">
+            <div class="flow-box" style="border-color: #2563eb">
+              <strong>1. Vaše Varyshop instance</strong>
+              <small>Vytváří kampaně a frontu SMS</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #059669">
+              <strong>2. Aplikace na telefonu</strong>
+              <small>Vyzvedá SMS z fronty a odesílá</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #d97706">
+              <strong>3. Příjemce</strong>
+              <small>Dostane běžnou SMS zprávu</small>
+            </div>
+          </div>
+        </div>
+
+        <p>V praxi to vypadá takto:</p>
+        <ol class="steps">
+          <li>
+            V administraci vytvoříte SMS kampaň a kliknete
+            <span class="btn">Odeslat</span>
+          </li>
+          <li>Varyshop připraví SMS zprávy a zařadí je do fronty</li>
+          <li>
+            Aplikace na vašem Android telefonu se každý pár sekund ptá:
+            <em>&bdquo;Máte pro mě něco k odeslání?&ldquo;</em>
+          </li>
+          <li>
+            Když najde novou zprávu, odešle ji jako normální SMS z vašeho
+            telefonního čísla
+          </li>
+          <li>
+            Po odeslání hlásí zpět do Varyshopu:
+            <em>&bdquo;Odesláno&ldquo;</em> nebo
+            <em>&bdquo;Nepodařilo se&ldquo;</em>
+          </li>
+        </ol>
+
+        <div class="tip">
+          <strong>Proč to tak funguje?</strong> Protože SMS odesíláte z
+          vlastního čísla, neplatíte žádné poplatky za SMS službu. Platí se
+          pouze standardní cena SMS dle vašeho tarifu u operátora. U většiny
+          paušálních tarifů je to tedy zadarmo.
+        </div>
+
+        <!-- ==================== CO POTREBUJETE ==================== -->
+        <h2 id="co-potrebujete">Co potřebujete</h2>
+
+        <div class="two-col">
+          <div>
+            <strong>Na straně Varyshopu:</strong>
+            <ul>
+              <li>
+                Varyshop instance s Odoo 18 s modulem Varyshop SMS (nainstaluje
+                váš správce)
+              </li>
+              <li>Přístup do sekce <em>Email Marketing</em></li>
+            </ul>
+          </div>
+          <div>
+            <strong>Na straně telefonu:</strong>
+            <ul>
+              <li>Android telefon (verze 12 nebo novější)</li>
+              <li>SIM karta s aktivním tarifem pro SMS</li>
+              <li>Připojení k internetu (Wi-Fi nebo mobilní data)</li>
+              <li>Aplikace Varyshop SMS (nainstaluje váš správce)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ==================== NASTAVENI V Varyshop ==================== -->
+        <h2 id="nastaveni-v-Varyshop">Nastavení ve Varyshop administraci</h2>
+
+        <p>
+          Po instalaci modulu (tu provede váš technik) najdete novou sekci v
+          menu:
+        </p>
+
+        <p>
+          <span class="path"
+            >Email Marketing &rarr; Varyshop SMS &rarr; Gateway Phones</span
+          >
+        </p>
+
+        <p>Zde budete spravovat všechny telefony připojené k vašemu systému.</p>
+
+        <div class="info">
+          <strong>Kde najdu nastavení?</strong> Pokud máte modul nainstalovaný,
+          uvidíte v hlavním menu <em>Email Marketing</em> položku
+          <em>Varyshop SMS</em>. Pokud ji nevidíte, kontaktujte svého správce
+          &mdash; je možné že modul ještě není nainstalovaný nebo nemáte
+          dostatečná oprávnění.
+        </div>
+
+        <!-- ==================== PRIDANI TELEFONU ==================== -->
+        <h2 id="pridani-telefonu">Přidání telefonu</h2>
+
+        <p>
+          Každý fyzický telefon, který chcete použít pro odesílání, musíte
+          zaregistrovat ve Varyshop administraci.
+        </p>
+
+        <ol class="steps">
+          <li>
+            Přejděte do
+            <span class="path"
+              >Email Marketing &rarr; Varyshop SMS &rarr; Gateway Phones</span
+            >
+          </li>
+          <li>Kliknete <span class="btn">Nový</span></li>
+          <li>
+            Vyplňte základní údaje:
+            <table class="field-table">
+              <tr>
+                <th>Pole</th>
+                <th>Co vyplnit</th>
+                <th>Příklad</th>
+              </tr>
+              <tr>
+                <td><strong>Název</strong></td>
+                <td>Pojmenujte si telefon, ať ho později poznáte</td>
+                <td>Samsung &ndash; O2</td>
+              </tr>
+              <tr>
+                <td><strong>Telefonní číslo</strong></td>
+                <td>Číslo SIM karty v mezinárodním formátu</td>
+                <td>+420777123456</td>
+              </tr>
+              <tr>
+                <td><strong>Druhé číslo</strong></td>
+                <td>Pokud má telefon dvě SIM, zadejte i druhé (nepovinné)</td>
+                <td>+420608987654</td>
+              </tr>
+              <tr>
+                <td><strong>Denní limit</strong></td>
+                <td>Kolik SMS maximálně může telefon odeslat za den</td>
+                <td>500</td>
+              </tr>
+              <tr>
+                <td><strong>SMS za minutu</strong></td>
+                <td>Maximální rychlost odesílání</td>
+                <td>100</td>
+              </tr>
+            </table>
+          </li>
+          <li>
+            Kliknete <span class="btn">Generovat API klíč</span> &mdash; objeví
+            se QR kód, který použijete k párování
+          </li>
+          <li>Záznam uložte</li>
+        </ol>
+
+        <div class="tip">
+          <strong>Kolik telefonů potřebuji?</strong> Pro začátek stačí jeden.
+          Pokud plánujete rozsílat tisíce SMS denně, doporučujeme přidat více
+          telefonů &mdash; systém zátěž automaticky rozdělí.
+        </div>
+
+        <!-- ==================== INSTALACE APLIKACE ==================== -->
+        <h2 id="instalace-aplikace">Instalace aplikace na telefon</h2>
+
+        <p>
+          Na Android telefon je potřeba nainstalovat aplikaci
+          <strong>Varyshop SMS</strong>.
+        </p>
+
+        <h3>Stažení APK</h3>
+        <p>
+          Aplikace není na Google Play. Stáhněte APK soubor přímo z
+          <a href="https://github.com/Varyshop/sms-gateway-app/releases" target="_blank"><strong>GitHub Releases</strong></a>:
+        </p>
+        <ol class="steps">
+          <li>Na telefonu otevřete odkaz na <a href="https://github.com/Varyshop/sms-gateway-app/releases" target="_blank">Releases</a> a stáhněte nejnovější <strong>.apk</strong> soubor</li>
+          <li>Otevřete stažený soubor &mdash; pokud se objeví upozornění, povolte <em>Instalace z neznámých zdrojů</em></li>
+          <li>Dokončete instalaci</li>
+        </ol>
+
+        <div class="info">
+          <strong>Proč není na Google Play?</strong> Aplikace používá oprávnění
+          <code>SEND_SMS</code> a <code>READ_SMS</code>, která vyžadují speciální
+          review na Play Store. Instalace APK přímo z GitHub Releases je zamýšlený
+          způsob distribuce.
+        </div>
+
+        <p>Po spuštění aplikace budete požádáni o následující oprávnění:</p>
+
+        <table class="field-table">
+          <tr>
+            <th>Oprávnění</th>
+            <th>Proč ho potřebujeme</th>
+          </tr>
+          <tr>
+            <td><strong>Odesílání SMS</strong></td>
+            <td>Aby aplikace mohla odesílat SMS zprávy z vašeho čísla</td>
+          </tr>
+          <tr>
+            <td><strong>Přijímání SMS</strong></td>
+            <td>Aby aplikace zachytila odpovědi s textem STOP (odhlášení)</td>
+          </tr>
+          <tr>
+            <td><strong>Kamera</strong></td>
+            <td>Pro naskenování QR kódu při párování</td>
+          </tr>
+          <tr>
+            <td><strong>Informace o telefonu</strong></td>
+            <td>Pro zjištění čísel vašich SIM karet</td>
+          </tr>
+          <tr>
+            <td><strong>Notifikace</strong></td>
+            <td>Pro zobrazení stavu odesílání a služby na pozadí (Android 13+ se ptá v dialogu)</td>
+          </tr>
+        </table>
+
+        <p>
+        <div class="warning">
+          <strong>Zvýšení SMS limitu (WRITE_SECURE_SETTINGS):</strong> Pro zvýšení
+          nativního Android limitu na odchozí SMS je potřeba udělit aplikaci oprávnění
+          <code>WRITE_SECURE_SETTINGS</code>. To nelze udělit z telefonu &mdash;
+          je nutné připojit telefon k počítači přes USB a spustit:
+          <pre><code>adb shell pm grant com.varyshop.smsgatewayapp android.permission.WRITE_SECURE_SETTINGS</code></pre>
+          Pokud buildujete ze zdrojáků, můžete použít: <code>yarn grant-permission</code>
+        </div>
+
+        <p>
+          Kromě těchto oprávnění aplikace zobrazí také dialog pro
+          <strong>výjimku z optimalizace baterie</strong>. Tato výjimka je
+          nezbytná, aby Android neuspával aplikaci na pozadí a SMS se
+          spolehlivě odesílaly i při zamknuté obrazovce. Více viz sekce
+          <a href="#background">Pozadí a spolehlivost</a>.
+        </p>
+
+        <div class="warning">
+          <strong>Důležité:</strong> Všechna oprávnění je třeba povolit, jinak
+          nebude aplikace správně fungovat. Povolte také výjimku z optimalizace
+          baterie &mdash; bez ní může Android odesílání SMS na pozadí zastavit.
+          Pokud jste omylem oprávnění zamítnuli, můžete ho dodatečně povolit v
+          <em
+            >Nastavení telefonu &rarr; Aplikace &rarr; Varyshop SMS &rarr;
+            Oprávnění</em
+          >.
+        </div>
+
+        <!-- ==================== SPAROVANI ==================== -->
+        <h2 id="sparovani">Spárování telefonu s Varyshop administrací</h2>
+
+        <p>
+          Po instalaci aplikace ji musíte propojit s vaším Varyshop systémem. To
+          se dělá jednorázově pomocí QR kódu.
+        </p>
+
+        <ol class="steps">
+          <li>
+            V Varyshop administraci otevřete záznam vašeho telefonu (tam kde
+            jste klikli <em>Generovat API klíč</em>) &mdash; uvidíte QR kód
+          </li>
+          <li>Na telefonu otevřete aplikaci <strong>Varyshop SMS</strong></li>
+          <li>
+            Přejděte na záložku <strong>Nastavení</strong> (ikona ozubeného kola
+            dole)
+          </li>
+          <li>Kliknete na <span class="btn">Naskenovat QR kód</span></li>
+          <li>
+            Namiřte kameru telefonu na QR kód zobrazený na obrazovce v Varyshop
+            administraci
+          </li>
+          <li>Aplikace potvrdí úspěšné spárování &mdash; hotovo!</li>
+        </ol>
+
+        <div class="tip">
+          <strong>Jak poznám, že to funguje?</strong> Po úspěšném spárování se
+          stav telefonu v administraci Varyshop změní z
+          <span class="status status-red">Offline</span> na
+          <span class="status status-green">Online</span>. To znamená, že
+          telefon je připojený a připravený odesílat SMS.
+        </div>
+
+        <div class="warning">
+          <strong>Telefon zůstává Offline?</strong> Zkontrolujte:
+          <ul style="margin-bottom: 0">
+            <li>Má telefon připojení k internetu? (Wi-Fi nebo mobilní data)</li>
+            <li>
+              Běží aplikace na telefonu? (není zavřena, není v úsporném režimu)
+            </li>
+            <li>
+              Je adresa serveru správná? (v nastavení aplikace vidíte URL)
+            </li>
+          </ul>
+        </div>
+
+        <!-- ==================== PRVNI KAMPAN ==================== -->
+        <h2 id="prvni-kampan">Vaše první SMS kampaň</h2>
+
+        <p>
+          Když máte alespoň jeden telefon
+          <span class="status status-green">Online</span>, můžete odeslat první
+          kampaň.
+        </p>
+
+        <ol class="steps">
+          <li>
+            Přejděte do
+            <span class="path">Email Marketing &rarr; SMS Marketing</span>
+          </li>
+          <li>Kliknete <span class="btn">Nový</span></li>
+          <li>
+            Vyplňte kampaň:
+            <table class="field-table">
+              <tr>
+                <th>Pole</th>
+                <th>Co vyplnit</th>
+              </tr>
+              <tr>
+                <td><strong>Název</strong></td>
+                <td>Interní název kampaně (zákazník ho neuvidí)</td>
+              </tr>
+              <tr>
+                <td><strong>Příjemci</strong></td>
+                <td>
+                  Komu se SMS pošle &mdash; vyberete skupinu kontaktů nebo
+                  nastavíte filtr
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Text zprávy</strong></td>
+                <td>
+                  Samotný text SMS (max. 160 znaků pro jednu SMS, delší se
+                  rozdělí)
+                </td>
+              </tr>
+            </table>
+          </li>
+          <li>Zkontrolujte náhled zprávy</li>
+          <li>
+            Kliknete <span class="btn">Odeslat</span> (pro okamžité odeslání)
+            nebo <span class="btn">Naplánovat</span> (pro odeslání v určitý čas)
+          </li>
+        </ol>
+
+        <h3>Příklad textu SMS</h3>
+        <div
+          style="
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 10px;
+            padding: 16px;
+            font-family: monospace;
+            margin: 12px 0;
+          "
+        >
+          Ahoj {{ object.name }}! Máte 20% slevu na celý sortiment do konce
+          týdne. Nakupte na https://www.example.cz/akce
+        </div>
+
+        <div class="info">
+          <strong>Personalizace:</strong> Pomocí
+          <code>{{ object.name }}</code> vložíte do textu jméno každého
+          příjemce. Další pole najdete přes tlačítko dynamického obsahu v
+          editoru zprávy.
+        </div>
+
+        <!-- ==================== KAMPAN Z APPKY ==================== -->
+        <h2 id="kampan-z-appky">Kampaň z mobilní appky</h2>
+
+        <p>
+          <strong>Novinka v1.3.0:</strong> Kampaně můžete vytvářet přímo
+          z mobilní aplikace bez přístupu do Odoo backendu. Stačí otevřít
+          tab <strong>Kampaně</strong> v appce.
+        </p>
+
+        <h3>Předpoklady</h3>
+        <ul>
+          <li>
+            V administraci musí být vytvořena alespoň jedna
+            <strong>SMS šablona</strong> přiřazena k vašemu telefonu
+            (<span class="path">SMS Gateway &rarr; Marketing Templates</span>)
+          </li>
+          <li>
+            Šablona musí mít přiřazené <strong>segmenty</strong>
+            (skupiny příjemců)
+          </li>
+        </ul>
+
+        <h3>Wizard v appce (3 kroky)</h3>
+        <ol class="steps">
+          <li>
+            <strong>Výběr šablony</strong> &mdash; zobrazí se šablony přiřazené
+            k vašemu telefonu. Vyberte jednu klepnutím.
+          </li>
+          <li>
+            <strong>Segment a počet</strong> &mdash; vyberte segment
+            (např. &bdquo;Neobjednali 3 měsíce&ldquo;) a nastavte počet
+            příjemců. U každého segmentu vidíte kolik zákazníků odpovídá filtru.
+          </li>
+          <li>
+            <strong>Náhled a potvrzení</strong> &mdash; uvidíte náhled SMS
+            s ukázkovým jménem. Text můžete před odesláním upravit.
+            Zvolíte <strong>Odeslat ihned</strong> nebo
+            <strong>Do fronty</strong>.
+          </li>
+        </ol>
+
+        <h3>Odeslání a sledování</h3>
+        <p>
+          Po vytvoření kampaně se zobrazí karta stavu s realtime počítadly
+          (odesláno / čeká / chyby). Pokud jste zvolili &bdquo;Do fronty&ldquo;,
+          můžete SMS později odeslat tlačítkem
+          <strong>Odeslat ihned</strong>.
+        </p>
+        <p>
+          U telefonu s dvěma SIM kartami appka nabídne výběr:
+          odeslat přes jednu SIM, nebo rozdělit mezi obě.
+        </p>
+
+        <h3>Marketingové statistiky</h3>
+        <p>
+          Po odeslání kampaně appka zobrazuje:
+        </p>
+        <ul>
+          <li><strong>Kliknuto</strong> &mdash; kolik příjemců kliklo na odkaz</li>
+          <li><strong>Objednávky</strong> &mdash; počet objednávek z kampaně (UTM tracking)</li>
+          <li><strong>Příjem</strong> &mdash; celkový příjem z objednávek v Kč</li>
+          <li><strong>Odhlášeno</strong> &mdash; počet STOP odpovědí</li>
+          <li><strong>CTR, Konverze, Odhlášení %</strong> &mdash; procentuální metriky</li>
+        </ul>
+
+        <div class="info">
+          <strong>Tip:</strong> Segmenty a šablony nastavuje admin v Odoo.
+          Operátor v appce jen vybírá a odesílá &mdash; nemůže změnit
+          filtry ani příjemce mimo nastavených segmentů.
+        </div>
+
+        <!-- ==================== JAK SE ODESILAJI ==================== -->
+        <h2 id="jak-se-odesilaji">Jak se odesílají SMS</h2>
+
+        <p>Po kliknutí na <em>Odeslat</em> se děje následující:</p>
+
+        <div class="flow">
+          <div class="flow-row">
+            <div class="flow-box">
+              <strong>Připraveno</strong>
+              <small>Varyshop vytvoří SMS pro každého příjemce</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #2563eb">
+              <strong>Ve frontě</strong>
+              <small>SMS se přiřadí jednomu z vašich telefonů</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #d97706">
+              <strong>Odesílá se</strong>
+              <small>Telefon převzal SMS a odesílá</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #059669">
+              <strong>Odesláno</strong>
+              <small>Úspěšně odesláno</small>
+            </div>
+          </div>
+        </div>
+
+        <p>Průběh můžete sledovat v reálném čase:</p>
+        <ul>
+          <li>
+            <strong>V kampani</strong> &mdash; počítadla v záhlaví ukazují kolik
+            SMS je odesláno, kolik čeká, kolik selhalo
+          </li>
+          <li>
+            <strong>Na telefonu</strong> &mdash; aplikace ukazuje kolik SMS
+            odesílá a kolik jich ještě čeká ve frontě
+          </li>
+          <li>
+            <strong>U telefonu v administraci Varyshop</strong> &mdash; na kartě
+            telefonu vidíte <em>Odesláno dnes</em> a <em>Čekající</em>
+          </li>
+        </ul>
+
+        <!-- ==================== POZASTAVENI ==================== -->
+        <h2 id="pozastaveni">Pozastavení kampaně</h2>
+
+        <p>
+          Pokud potřebujete kampaň dočasně zastavit (třeba jste si všimli chyby
+          v textu), můžete ji pozastavit bez zrušení:
+        </p>
+
+        <ol class="steps">
+          <li>Otevřete kampaň, která se právě odesílá</li>
+          <li>
+            Zapněte přepínač <span class="btn">Paused</span> (Pozastaveno)
+          </li>
+          <li>SMS, které jsou ještě ve frontě, se nebudou odesílat</li>
+          <li>
+            SMS, které už byly odeslány, zůstanou odeslané &mdash; ty nelze vzít
+            zpět
+          </li>
+        </ol>
+
+        <p>
+          Pro obnovení odesílání jednoduše přepínač <em>Paused</em> vypněte.
+        </p>
+
+        <div class="info">
+          <strong>Co když se SMS nevytvořily?</strong> Někdy se stane, že se SMS
+          pro některé příjemce nevytvořily (třeba kvůli chybě). V tom případě
+          použijte tlačítko <span class="btn">Force Create SMS Queue</span>
+          &mdash; systém dotvoří SMS pro všechny příjemce, kteří je ještě
+          nemají.
+        </div>
+
+        <!-- ==================== VICE TELEFONU ==================== -->
+        <h2 id="vice-telefonu">Více telefonů a rozdělení zátěže</h2>
+
+        <p>
+          Můžete připojit libovolný počet telefonů. Systém automaticky rozděluje
+          SMS rovnoměrně &mdash; každá nová SMS se přiřadí telefonu, který má
+          momentálně
+          <strong>nejméně práce</strong> (nejméně čekajících SMS ve frontě).
+        </p>
+
+        <h3>Příklad se třemi telefony</h3>
+        <table class="field-table">
+          <tr>
+            <th>Telefon</th>
+            <th>Čeká ve frontě</th>
+            <th>Dostane další SMS?</th>
+          </tr>
+          <tr>
+            <td>Samsung &ndash; O2</td>
+            <td>15 SMS</td>
+            <td>Ne</td>
+          </tr>
+          <tr>
+            <td>Xiaomi &ndash; T-Mobile</td>
+            <td>8 SMS</td>
+            <td>Ne</td>
+          </tr>
+          <tr>
+            <td>Pixel &ndash; Vodafone</td>
+            <td style="color: #059669; font-weight: 600">3 SMS</td>
+            <td style="color: #059669; font-weight: 600">
+              Ano &mdash; má nejméně
+            </td>
+          </tr>
+        </table>
+
+        <div class="tip">
+          <strong>Doporučení:</strong> Pro rozsílku více než 500 SMS denně
+          doporučujeme alespoň 2 telefony. Pro tisíce SMS denně použijte
+          3&ndash;5 telefonů. Systém si poradí &mdash; vy se nemusíte o nic
+          starat.
+        </div>
+
+        <!-- ==================== FILTROVANI ==================== -->
+        <h2 id="filtrovani">Směrování SMS na konkrétní telefony</h2>
+
+        <p>
+          Pokročilá funkce: můžete nastavit, aby určitý telefon odesílal SMS
+          <strong>pouze pro určitou skupinu zákazníků</strong>. Například
+          chcete, aby SMS pro VIP zákazníky šly z jiného čísla než SMS pro
+          ostatní.
+        </p>
+
+        <h3>Jak to nastavit</h3>
+        <ol class="steps">
+          <li>
+            Otevřete záznam telefonu v
+            <span class="path">Varyshop SMS &rarr; Gateway Phones</span>
+          </li>
+          <li>Najdete pole <strong>Partner Domain Filter</strong></li>
+          <li>
+            Zadejte podmínku, kteří zákazníci mají být směrováni na tento
+            telefon
+          </li>
+        </ol>
+
+        <h3>Příklady</h3>
+        <table class="field-table">
+          <tr>
+            <th>Chci aby telefon odesílal pro...</th>
+            <th>Co zadat do filtru</th>
+          </tr>
+          <tr>
+            <td>Všechny zákazníky (bez omezení)</td>
+            <td><em>Nechat prázdné</em></td>
+          </tr>
+          <tr>
+            <td>Pouze VIP zákazníky (kategorie s ID 10)</td>
+            <td>[("category_id", "in", [10])]</td>
+          </tr>
+          <tr>
+            <td>Pouze zákazníky z Česka</td>
+            <td>[("country_id.code", "=", "CZ")]</td>
+          </tr>
+          <tr>
+            <td>Pouze firemní zákazníky</td>
+            <td>[("is_company", "=", True)]</td>
+          </tr>
+        </table>
+
+        <div class="warning">
+          <strong>Důležité:</strong> Pokud používáte filtry,
+          <strong>nechte alespoň jeden telefon bez filtru</strong> (prázdné
+          pole). Ten bude sloužit jako záloha &mdash; dostane SMS pro zákazníky,
+          kteří neodpovídají žádnému jinému filtru. Pokud by žádný telefon
+          neodpovídal, SMS se označí jako chyba.
+        </div>
+
+        <div class="info">
+          <strong>Pro pokročilé uživatele:</strong> Filtr používá stejný formát
+          jako filtry v Varyshop pohledech (doménový zápis). Pokud si nejste
+          jistí syntaxí, požádejte svého správce o pomoc.
+        </div>
+
+        <!-- ==================== LIMITY ==================== -->
+        <h2 id="limity">Denní limity a rychlost odesílání</h2>
+
+        <p>Každý telefon má dva limity, které můžete nastavit:</p>
+
+        <table class="field-table">
+          <tr>
+            <th>Limit</th>
+            <th>Co dělá</th>
+            <th>Výchozí hodnota</th>
+          </tr>
+          <tr>
+            <td><strong>Denní limit</strong></td>
+            <td>
+              Maximální počet SMS, které telefon odešle za jeden den. O půlnoci
+              se počítadlo automaticky resetuje.
+            </td>
+            <td>500 SMS/den</td>
+          </tr>
+          <tr>
+            <td><strong>SMS za minutu</strong></td>
+            <td>
+              Jak rychle za sebou telefon odesílá SMS. Vyšší číslo = rychlejší,
+              ale hrozí riziko blokování operátorem.
+            </td>
+            <td>100 SMS/min</td>
+          </tr>
+        </table>
+
+        <h3>Co se stane když telefon dosáhne limitu?</h3>
+        <ul>
+          <li>Nové SMS se automaticky přesměrují na další dostupný telefon</li>
+          <li>
+            Pokud žádný další telefon není k dispozici, SMS zůstane ve frontě do
+            dalšího dne
+          </li>
+          <li>
+            V Varyshop uvidíte na kartě telefonu, kolik SMS ještě může dnes
+            odeslat
+          </li>
+        </ul>
+
+        <div class="warning">
+          <strong>Upozornění na limit Androidu:</strong> Některá Android
+          zařízení mají vlastní omezení na počet odeslaných SMS (typicky ~30 SMS
+          za 30 minut). Pokud na to narazíte, aplikace to ohlásí jako chybu.
+          Toto omezení řeší váš technik v nastavení telefonu.
+        </div>
+
+        <!-- ==================== DUAL SIM ==================== -->
+        <h2 id="dual-sim">Telefony s dvěma SIM kartami</h2>
+
+        <p>
+          Pokud má váš telefon dvě SIM karty, můžete je obě zaregistrovat u
+          jednoho záznamu telefonu v Varyshop:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Telefonní číslo</strong> &mdash; číslo první SIM karty
+          </li>
+          <li><strong>Druhé číslo</strong> &mdash; číslo druhé SIM karty</li>
+        </ul>
+
+        <p>
+          Aplikace automaticky rozpozná obě SIM karty a zobrazí je v nastavení.
+          SMS se odesílají přes správnou SIM kartu podle toho, kterému číslu
+          byly v Varyshop přiřazeny.
+        </p>
+
+        <div class="info">
+          <strong>V praxi:</strong> Jeden telefon s dvěma SIM kartami se chová
+          jako dva odesílající telefony. Každé číslo má svoji vlastní frontu a
+          svoje vlastní počítadlo odeslaných SMS.
+        </div>
+
+        <!-- ==================== ODKAZY ==================== -->
+        <h2 id="odkazy">Odkazy v SMS a sledování kliknutí</h2>
+
+        <p>
+          Pokud vložíte do textu SMS odkaz (URL adresu), systém ho automaticky
+          zkrátí a přidá sledování.
+        </p>
+
+        <h3>Co se děje s odkazem</h3>
+        <table class="field-table">
+          <tr>
+            <th>Fáze</th>
+            <th>Jak odkaz vypadá</th>
+          </tr>
+          <tr>
+            <td>Jak ho napíšete</td>
+            <td>https://www.vas-eshop.cz/akce-jaro-2026</td>
+          </tr>
+          <tr>
+            <td>Jak dojde příjemci</td>
+            <td>https://vas-admin.cz/r/Ab3x (krátký trackovací odkaz)</td>
+          </tr>
+        </table>
+
+        <h3>Co se stane když příjemce klikne</h3>
+        <ol class="steps">
+          <li>Příjemce klikne na krátký odkaz v SMS</li>
+          <li>Váš server zaznamená kliknutí &mdash; kdo klikl, kdy, odkud</li>
+          <li>
+            Příjemce je okamžitě přesměrován na původní stránku
+            (vas-eshop.cz/akce-jaro-2026)
+          </li>
+        </ol>
+
+        <p>
+          Díky tomu
+          <strong>vidíte v Varyshop kolik lidí kliklo na odkaz</strong> a kdo
+          přesně to byl. Nemusíte nic nastavovat &mdash; děje se to automaticky.
+        </p>
+
+        <h3>Kde najdu statistiky odkazů</h3>
+        <p>
+          Přejděte do
+          <span class="path">Email Marketing &rarr; Link Tracker</span> &mdash;
+          uvidíte všechny krátké odkazy, počet kliknutí a další detaily.
+        </p>
+
+        <div class="tip">
+          <strong>Google Analytics:</strong> Pokud používáte Google Analytics,
+          sledovací odkazy automaticky přidávají UTM parametry (kampaň, zdroj,
+          médium). Návštěvnost z SMS kampaní tak uvidíte přímo v reportech
+          Google Analytics.
+        </div>
+
+        <!-- ==================== ODHLASENI ==================== -->
+        <h2 id="odhlaseni">Odhlášení příjemců a STOP zprávy</h2>
+
+        <p>
+          Podle zákona (GDPR) musí mít každý příjemce možnost se z
+          marketingových SMS odhlásit. Náš systém to řeší automaticky.
+        </p>
+
+        <h3>Jak to funguje</h3>
+        <ol class="steps">
+          <li>
+            Na konci každé SMS zprávy je automaticky text:
+            <strong>STOP pro odhlášení</strong>
+          </li>
+          <li>
+            Pokud příjemce odpoví SMS zprávou obsahující slovo
+            <strong>STOP</strong>...
+          </li>
+          <li>...aplikace na telefonu tuto odpověď zachytí</li>
+          <li>
+            Automaticky přidá číslo příjemce na <strong>černou listinu</strong>
+          </li>
+          <li>Všechny budoucí kampaně toto číslo automaticky přeskočí</li>
+        </ol>
+
+        <div class="danger">
+          <strong>GDPR povinnost:</strong> Text &bdquo;STOP pro odhlášení&ldquo;
+          se přidává automaticky a <strong>nesmí být odstraněn</strong>.
+          Odesílání marketingových SMS bez možnosti odhlášení je porušení
+          legislativy.
+        </div>
+
+        <h3>Kde najdu černou listinu</h3>
+        <p>
+          <span class="path"
+            >SMS Marketing &rarr; Konfigurace &rarr; Phone Blacklist</span
+          >
+        </p>
+
+        <p>Zde můžete:</p>
+        <ul>
+          <li>Vidět všechna odhlášená čísla</li>
+          <li>
+            Přidat číslo ručně (pokud vás zákazník požádá telefonicky či
+            emailem)
+          </li>
+          <li>
+            Odebrat číslo z listiny (pokud zákazník svůj souhlas obnoví &mdash;
+            např. písemně)
+          </li>
+        </ul>
+
+        <!-- ==================== PRICHOZI SMS ==================== -->
+        <h2 id="prichozi-sms">Příchozí SMS</h2>
+
+        <p>
+          Od verze 1.2.0 aplikace obsahuje nový tab <strong>Příchozí</strong>,
+          kde můžete sledovat všechny přijaté SMS zprávy na vašem gateway telefonu.
+        </p>
+
+        <h3>Co tab Příchozí ukazuje</h3>
+        <ul>
+          <li><strong>Odesílatel</strong> &mdash; číslo odesílatele a jméno partnera (pokud existuje v systému)</li>
+          <li><strong>Text zprávy</strong> &mdash; obsah přijaté SMS</li>
+          <li><strong>Stav blacklistu</strong> &mdash; zda je číslo na černé listině</li>
+          <li><strong>Datum a čas</strong> &mdash; kdy byla zpráva přijata</li>
+        </ul>
+
+        <h3>Filtrování</h3>
+        <p>
+          V horní části obrazovky můžete přepnout mezi zobrazením
+          <strong>Všechny zprávy</strong> a <strong>Pouze STOP</strong>.
+          Seznam podporuje stránkování pro snazší procházení velkého objemu zpráv.
+        </p>
+
+        <h3>Chatter integrace</h3>
+        <p>
+          Všechny přijaté SMS se automaticky zobrazují v <strong>chatteru partnera</strong>
+          v Odoo. Každá příchozí zpráva se zobrazí jako formátovaná poznámka s textem
+          v blockquote a případně se štítkem STOP, pokud zpráva obsahovala klíč pro odhlášení.
+        </p>
+
+        <h3>Znovu prohledání inboxu</h3>
+        <p>
+          Pokud chybí některé příchozí zprávy, přejděte v aplikaci do
+          <em>Nastavení &rarr; Služba</em> a kliknete
+          <span class="btn">Znovu prohledat přijaté SMS</span>. Aplikace přečte
+          SMS inbox za posledních 30 dní a všechny nalezené zprávy odešle na server.
+          Duplicity se automaticky ignorují.
+        </p>
+
+        <!-- ==================== STATISTIKY ==================== -->
+        <h2 id="statistiky">Statistiky kampaně</h2>
+
+        <p>Po odeslání kampaně najdete statistiky přímo v záhlaví kampaně:</p>
+
+        <table class="field-table">
+          <tr>
+            <th>Ukazatel</th>
+            <th>Co znamená</th>
+          </tr>
+          <tr>
+            <td><strong>Odesláno (Sent)</strong></td>
+            <td>Počet úspěšně odeslaných SMS</td>
+          </tr>
+          <tr>
+            <td><strong>Kliknuto (Clicked)</strong></td>
+            <td>Kolik příjemců kliklo na odkaz ve zprávě</td>
+          </tr>
+          <tr>
+            <td><strong>Chyby (Failed)</strong></td>
+            <td>Počet SMS, které se nepodařilo odeslat</td>
+          </tr>
+          <tr>
+            <td><strong>Bounced</strong></td>
+            <td>Neplatná telefonní čísla</td>
+          </tr>
+          <tr>
+            <td><strong>Objednávky (Orders)</strong></td>
+            <td>Počet objednávek vytvořených z kampaně (UTM tracking)</td>
+          </tr>
+          <tr>
+            <td><strong>Příjem (Revenue)</strong></td>
+            <td>Celkový příjem z objednávek přiřazených kampani</td>
+          </tr>
+          <tr>
+            <td><strong>Odhlášeno (Opt-out)</strong></td>
+            <td>Počet příjemců, kteří odpověděli STOP</td>
+          </tr>
+        </table>
+
+        <p>
+          Kliknutím na kterýkoliv ukazatel zobrazíte detailní seznam &mdash;
+          vidíte přesně, kterým kontaktům byla SMS odeslána, kdo klikl atd.
+        </p>
+
+        <h3>Statistiky telefonu</h3>
+        <p>
+          Na kartě každého telefonu v
+          <span class="path">Varyshop SMS &rarr; Gateway Phones</span> vidíte:
+        </p>
+        <ul>
+          <li>
+            <strong>Odesláno dnes</strong> &mdash; kolik SMS telefon dnes
+            odeslal (z denního limitu)
+          </li>
+          <li>
+            <strong>Celkem odesláno</strong> &mdash; celkový počet SMS za celou
+            dobu
+          </li>
+          <li>
+            <strong>Čekající</strong> &mdash; kolik SMS čeká ve frontě na
+            odeslání
+          </li>
+          <li>
+            <strong>Chyby</strong> &mdash; kolik SMS se nepodařilo odeslat
+          </li>
+        </ul>
+
+        <!-- ==================== FCM PUSH NOTIFIKACE ==================== -->
+        <h2 id="fcm">FCM Push notifikace</h2>
+
+        <p>
+          Standardně si aplikace na telefonu <strong>každý pár sekund</strong>
+          vyzvedá nové SMS z fronty (tzv. polling). To funguje dobře, ale
+          mezi vytvořením SMS v administraci a začátkem odesílání může být
+          prodleva až 10 sekund.
+        </p>
+
+        <p>
+          <strong>FCM (Firebase Cloud Messaging)</strong> tuto prodlevu
+          eliminuje. Když je FCM povoleno, administrace pošle telefonu
+          okamžitý &bdquo;push&ldquo; impuls &mdash; aplikace začne
+          odesílat prakticky ihned.
+        </p>
+
+        <h3>Jak FCM zapnout</h3>
+        <ol class="steps">
+          <li>
+            Přejděte do
+            <span class="path">Nastavení &rarr; SMS Gateway</span>
+          </li>
+          <li>
+            Zapněte přepínač <strong>FCM Push Enabled</strong>
+          </li>
+          <li>
+            Nahrajte soubor <strong>Firebase Service Account JSON</strong>
+            &mdash; získáte ho ve
+            <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a>
+            (Project Settings &rarr; Service accounts &rarr; Generate new private key)
+          </li>
+          <li>Uložte nastavení</li>
+        </ol>
+
+        <div class="info">
+          <strong>Jeden Firebase projekt pro všechny instance.</strong>
+          Pokud provozujete více Varyshop instancí (např. pro různé
+          zákazníky), stačí jeden Firebase projekt a jeden Service Account
+          JSON soubor. Každá instance ho použije samostatně.
+        </div>
+
+        <div class="tip">
+          <strong>Co když FCM nenastavím?</strong> Aplikace funguje
+          naprosto normálně i bez FCM &mdash; použije standardní polling.
+          SMS se odešlou, jen s mírně vyšší prodlevou (do 10 sekund).
+          FCM je volitelné vylepšení, ne nutnost.
+        </div>
+
+        <!-- ==================== POZADI A SPOLEHLIVOST ==================== -->
+        <h2 id="background">Pozadí a spolehlivost</h2>
+
+        <p>
+          Aplikace Varyshop SMS odesílá zprávy i když je
+          <strong>obrazovka zamknutá</strong> nebo když používáte jiný
+          program. Aby to fungovalo spolehlivě, musí být správně nastavena
+          optimalizace baterie.
+        </p>
+
+        <h3>Optimalizace baterie</h3>
+        <p>
+          Android se snaží šetřit baterii a může aplikacím na pozadí
+          omezit činnost. Pro Varyshop SMS je třeba toto omezení vypnout:
+        </p>
+        <ol class="steps">
+          <li>
+            Otevřete <span class="path">Nastavení telefonu &rarr; Baterie &rarr; Využití baterie aplikacemi</span>
+          </li>
+          <li>
+            Najdete aplikaci <strong>SMS Gateway</strong>
+          </li>
+          <li>
+            Zvolte <strong>Neomezené</strong> (Unrestricted)
+          </li>
+        </ol>
+
+        <div class="info">
+          <strong>Jak to ověřit:</strong>
+          <span class="path">Nastavení &rarr; Baterie &rarr; Využití baterie aplikacemi &rarr; SMS Gateway</span>
+          &mdash; mělo by tam být nastaveno <em>Neomezené</em>.
+        </div>
+
+        <h3>Xiaomi / MIUI &mdash; extra kroky</h3>
+        <p>
+          Telefony Xiaomi s nadstavbou MIUI mají agresivnější správu
+          baterie. Kromě výjimky z optimalizace baterie je třeba navíc:
+        </p>
+        <ul>
+          <li>
+            Povolit <strong>Autostart</strong>:
+            <span class="path">Nastavení &rarr; Aplikace &rarr; Oprávnění &rarr; Autostart</span>
+            &mdash; zapnout pro SMS Gateway
+          </li>
+          <li>
+            V nastavení baterie pro aplikaci zvolit <strong>Bez omezení</strong>
+          </li>
+        </ul>
+
+        <div class="warning">
+          <strong>Důležité:</strong> Pokud se SMS neodesílají při zamknuté
+          obrazovce, optimalizace baterie je nejčastější příčina. Vždy
+          nejdřív zkontrolujte toto nastavení.
+        </div>
+
+        <!-- ==================== OVERENI ==================== -->
+        <h2 id="overeni">Jak ověřit že vše funguje</h2>
+
+        <p>
+          Předtím než spustíte první velkou kampaň, doporučujeme vše otestovat:
+        </p>
+
+        <ol class="steps">
+          <li>
+            <strong>Zkontrolujte stav telefonu</strong><br />
+            V <span class="path">Varyshop SMS &rarr; Gateway Phones</span> by
+            měl být alespoň jeden telefon
+            <span class="status status-green">Online</span>
+          </li>
+          <li>
+            <strong>Pošlete testovací SMS</strong><br />
+            Vytvořte kampaň s jediným příjemcem (např. sami sobě) a odeslat ji
+          </li>
+          <li>
+            <strong>Zkontrolujte doručení</strong><br />
+            Zkontrolujte, že vám SMS přišla na telefon příjemce
+          </li>
+          <li>
+            <strong>Ověřit sledování</strong><br />
+            Kliknete na odkaz v SMS a zkontrolujte v Varyshop (Link Tracker), že
+            se kliknutí zaznamenalo
+          </li>
+          <li>
+            <strong>Otestujte odhlášení</strong><br />
+            Odpovězte na SMS zprávou &bdquo;STOP&ldquo; a ověřit, že se vaše
+            číslo objeví na černé listině v Varyshop
+          </li>
+        </ol>
+
+        <div class="tip">
+          <strong>Vše funguje?</strong> Skvěle! Můžete spustit plnohodnotnou
+          kampaň. Pokud něco nefunguje, podívejte se do sekce
+          <a href="#casty-dotazy">Časté dotazy a řešení problémů</a> níže.
+        </div>
+
+        <!-- ==================== CASTE DOTAZY ==================== -->
+        <h2 id="casty-dotazy">Časté dotazy a řešení problémů</h2>
+
+        <p class="faq-q">
+          Telefon je v Varyshop stále Offline, i když aplikace běží
+        </p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Zkontrolujte, že má telefon připojení k internetu (otevřete
+              prohlížeč a zkuste načíst stránku)
+            </li>
+            <li>
+              V aplikaci v záložce <em>Nastavení</em> ověříte, že je zobrazena
+              URL adresa vašeho serveru
+            </li>
+            <li>Zkuste aplikaci zavřít a znovu otevřít</li>
+            <li>Pokud nic nepomůže, znovu naskenujte QR kód</li>
+          </ul>
+        </div>
+
+        <p class="faq-q">SMS se neodesílají, zůstávají ve frontě</p>
+        <div class="faq-a">
+          <ul>
+            <li>Je telefon <span class="status status-green">Online</span>?</li>
+            <li>
+              Je v aplikaci zapnuto odesílání? (Dashboard &rarr; přepínač
+              <em>Start</em>)
+            </li>
+            <li>
+              Nedosáhl telefon denního limitu? (zkontrolujte
+              <em>Odesláno dnes</em> vs. <em>Denní limit</em>)
+            </li>
+            <li>
+              Má aplikace oprávnění k odesílání SMS? (Nastavení Android &rarr;
+              Aplikace &rarr; Varyshop SMS &rarr; Oprávnění)
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">Některá SMS se označila jako chyba</p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Číslo příjemce může být neplatné (špatný formát, neexistující
+              číslo)
+            </li>
+            <li>Telefon mohl ztratit signál v průběhu odesílání</li>
+            <li>Android mohl zablokovat odesílání kvůli limitu (viz níže)</li>
+            <li>
+              Chybové SMS můžete zkusit odeslat znovu tlačítkem
+              <span class="btn">Force Create SMS Queue</span> v kampani
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">Android blokuje odesílání po 30 SMS</p>
+        <div class="faq-a">
+          Některé Android telefony mají vestavěný limit na počet SMS (typicky 30
+          za 30 minut). Řešení:<br />
+          <ul>
+            <li>
+              Snížit <em>SMS za minutu</em> na 1 (jedno SMS za minutu) &mdash;
+              pomalejší, ale nenarazíte na limit
+            </li>
+            <li>
+              Požádat správce o změnu nastavení telefonu (technické řešení)
+            </li>
+            <li>
+              Použít více telefonů &mdash; limit platí na každý telefon zvlášť
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">SMS se neodesílají při zamknuté obrazovce</p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Nejčastější příčina: <strong>optimalizace baterie</strong> uspí
+              aplikaci na pozadí. Zkontrolujte
+              <span class="path">Nastavení &rarr; Baterie &rarr; Využití baterie aplikacemi &rarr; SMS Gateway</span>
+              a nastavte na <em>Neomezené</em>
+            </li>
+            <li>
+              Na Xiaomi/MIUI: povolte také <em>Autostart</em> (viz sekce
+              <a href="#background">Pozadí a spolehlivost</a>)
+            </li>
+            <li>
+              Ověřit, že aplikace má povolené notifikace (potřeba pro službu na pozadí)
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">
+          STOP zprávy se neobjeví v blacklistu
+        </p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Ověřit, že aplikace má oprávnění <strong>Přijímání SMS</strong>
+              (<em>RECEIVE_SMS</em>) &mdash; bez něj aplikace odpovědi neuvidí
+            </li>
+            <li>
+              Zkontrolujte připojení k internetu &mdash; aplikace musí
+              zaslat informaci o STOP zprávě zpět na server
+            </li>
+            <li>
+              Příjemce musí odpovědět na <strong>stejné číslo</strong>, ze
+              kterého SMS přišel
+            </li>
+            <li>
+              Zpráva musí obsahovat slovo STOP (velká/malá písmena nehrají roli)
+            </li>
+            <li>
+              <strong>Znovu prohledat přijaté SMS:</strong> V aplikaci přejděte do
+              <em>Nastavení &rarr; Služba</em> a kliknete tlačítko
+              <span class="btn">Znovu prohledat přijaté SMS</span>. Aplikace znovu
+              přečte SMS inbox za posledních 30 dní a odešle nalezené zprávy na server
+              (s deduplikací &mdash; duplicity se ignorují).
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">
+          STOP zpráva nefunguje &mdash; číslo se nepřidá na černou listinu
+        </p>
+        <div class="faq-a">
+          <ul>
+            <li>Ověřit, že aplikace má oprávnění <em>Přijímání SMS</em></li>
+            <li>
+              Příjemce musí odpovědět na <strong>stejné číslo</strong>, ze
+              kterého SMS přišel
+            </li>
+            <li>
+              Zpráva musí obsahovat slovo STOP (velká/malá písmena nehrají roli)
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">Odkazy v SMS nefungují nebo vedou na chybu</p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Odkaz vyžaduje, aby byl váš Varyshop server veřejně dostupný z
+              internetu
+            </li>
+            <li>
+              Pokud používáte HTTPS (doporučeno), certifikát musí být platný
+            </li>
+            <li>
+              Kontaktujte správce, ať zkontroluje nastavení
+              <em>web.base.url</em> v Varyshop
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">Jak odpojím telefon od systému?</p>
+        <div class="faq-a">
+          V aplikaci na telefonu přejděte do <em>Nastavení</em> a kliknete
+          <span
+            class="btn"
+            style="background: #fee2e2; color: #991b1b; border-color: #fca5a5"
+            >Odpojit</span
+          >. Telefon přestane odesílat a v Varyshop se označí jako Offline. V
+          Varyshop můžete záznam telefonu také smazat nebo archivovat.
+        </div>
+
+        <p class="faq-q">Můžu měnit text SMS potom co jsem kampaň odeslal?</p>
+        <div class="faq-a">
+          Ne. SMS, které už byly odeslány, nelze změnit &mdash; přišly na
+          telefon příjemce. Můžete však kampaň
+          <strong>pozastavit</strong> (přepínač Paused) a upravit text. SMS,
+          které ještě nebyly odeslány, budou mít původní text. Pro nový text je
+          třeba vytvořit novou kampaň.
+        </div>
+
+        <p class="faq-q">Kolik SMS můžu odeslat denně?</p>
+        <div class="faq-a">
+          Záleží na počtu telefonů a jejich nastavení. Každý telefon může
+          typicky odeslat 200&ndash;1000 SMS denně (dle vašeho nastavení denního
+          limitu a tarifu operátora). S pěti telefony tedy můžete odeslat až
+          5000 SMS denně.
+        </div>
+
+        <div class="info">
+          V případě jakýchkoli dotazů nebo potřebné pomoci s nastavením kontaktujte
+          <a href="mailto:info@varyshop.eu">info@varyshop.eu</a> nebo přímo vývojáře
+          <a href="mailto:info@michalvarys.eu">info@michalvarys.eu</a>
+        </div>
+
+        <hr />
+
+        <p
+          style="
+            color: #9ca3af;
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.9em;
+          "
+        >
+          Varyshop SMS v18.0.2.2.0 &bull; VaryShop &bull; 2026
+        </p>
+      </main>
+    </div>
+
+    <script>
+      // ===== Sidebar toggle (mobile) =====
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("sidebarOverlay").classList.toggle("open");
+      }
+
+      (function () {
+        var sections = document.querySelectorAll("h2[id]");
+        var navLinks = document.querySelectorAll("#sidebarNav a[data-section]");
+        var clickLock = null;
+        var clickTimer = null;
+
+        if (!sections.length || !navLinks.length) return;
+
+        // Helper: activate a nav link by section id
+        function setActive(id) {
+          navLinks.forEach(function (l) { l.classList.remove("active"); });
+          var link = document.querySelector('#sidebarNav a[data-section="' + id + '"]');
+          if (link) {
+            link.classList.add("active");
+            // Keep sidebar nav link visible
+            var sidebar = document.getElementById("sidebar");
+            var linkRect = link.getBoundingClientRect();
+            var sidebarRect = sidebar.getBoundingClientRect();
+            if (linkRect.top < sidebarRect.top + 80 || linkRect.bottom > sidebarRect.bottom - 20) {
+              link.scrollIntoView({ block: "center", behavior: "smooth" });
+            }
+          }
+        }
+
+        // ===== Click: immediately activate + lock scroll updates for 1s =====
+        navLinks.forEach(function (link) {
+          link.addEventListener("click", function () {
+            var section = this.getAttribute("data-section");
+            setActive(section);
+            // Lock scroll-based updates while browser animates to the section
+            clickLock = section;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(function () { clickLock = null; }, 1000);
+            // Mobile: close sidebar
+            if (window.innerWidth <= 860) {
+              toggleSidebar();
+            }
+          });
+        });
+
+        // ===== Scroll: detect which section is currently in view =====
+        function getActiveSection() {
+          var offset = window.innerHeight * 0.2;
+          var active = null;
+          for (var i = sections.length - 1; i >= 0; i--) {
+            if (sections[i].getBoundingClientRect().top <= offset) {
+              active = sections[i].getAttribute("id");
+              break;
+            }
+          }
+          // At the very bottom of the page, activate last section
+          var scrollY = window.scrollY || window.pageYOffset;
+          if (window.innerHeight + scrollY >= document.body.scrollHeight - 50) {
+            active = sections[sections.length - 1].getAttribute("id");
+          }
+          return active || sections[0].getAttribute("id");
+        }
+
+        var ticking = false;
+        window.addEventListener("scroll", function () {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(function () {
+            ticking = false;
+            if (clickLock) return; // Don't override click selection during animation
+            setActive(getActiveSection());
+          });
+        }, { passive: true });
+
+        // ===== Hashchange (browser back/forward) =====
+        window.addEventListener("hashchange", function () {
+          var hash = window.location.hash.replace("#", "");
+          if (hash) {
+            setActive(hash);
+            clickLock = hash;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(function () { clickLock = null; }, 1000);
+          }
+        });
+
+        // Initial state
+        var initHash = window.location.hash.replace("#", "");
+        setActive(initHash || getActiveSection());
+      })();
+    </script>
+  </body>
+</html>
