@@ -1,0 +1,42 @@
+# VPS deployment compose — uses the pre-built image from the registry instead of
+# building from the website Dockerfile (the full build context is not present on
+# the VPS). Generated/copied by scripts/deploy-vps.sh.
+services:
+  web:
+    container_name: varyshop_eu-web
+    image: ${WEB_IMAGE:-varyshop/website:release-1.1.0}
+    restart: unless-stopped
+    command: 'python3 odoo-bin --addons-path="addons,varyshop,extra/sms/sms_modules" -r ${POSTGRES_USER-varyshop} -w ${POSTGRES_PASSWORD} --db_host varyshop_eu-db --db_port 5432 --limit-time-real=600 --limit-time-cpu=300 --proxy-mode'
+    depends_on:
+      - db
+    ports:
+      - "127.0.0.1:${WEB_HTTP_PORT:-8069}:8069"
+    # sms_modules is baked into the image (release-1.1.0), so it is NOT mounted —
+    # the image is the source of truth. Update modules by deploying a new tag.
+    volumes:
+      - ./.config:/etc/odoo
+      - ./.data:/root/.local/share/Odoo
+    environment:
+      HOST: db
+      USER: ${POSTGRES_USER-varyshop}
+      DB_NAME: ${POSTGRES_DB:-postgres}
+      PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - proxy
+
+  db:
+    container_name: varyshop_eu-db
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB-postgres}
+      POSTGRES_USER: ${POSTGRES_USER-varyshop}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./.data/.db:/var/lib/postgresql/data
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    driver: bridge

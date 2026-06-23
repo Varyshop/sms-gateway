@@ -1,0 +1,45 @@
+services:
+  web:
+    container_name: varyshop_eu-web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: varyshop/website:release-1.1.0
+    command: 'python3 odoo-bin --addons-path="addons,varyshop,extra/sms/sms_modules" -r ${POSTGRES_USER-varyshop} -w ${POSTGRES_PASSWORD} --db_host varyshop_eu-db --db_port 5432 --limit-time-real=600 --limit-time-cpu=300'
+    depends_on:
+      - db
+    ports:
+      - ${WEB_HTTP_PORT}:8069
+    volumes:
+      - ./.config:/etc/odoo
+      - ./.data:/root/.local/share/Odoo
+      # - ./sms_modules:/app/extra/sms/sms_modules
+    labels:
+      createdBy: "bt_apps"
+    environment:
+      HOST: db
+      USER: ${POSTGRES_USER-varyshop}
+      DB_NAME: ${POSTGRES_DB:-postgres}
+      PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - proxy
+
+  db:
+    container_name: varyshop_eu-db
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB-postgres}
+      POSTGRES_USER: ${POSTGRES_USER-varyshop}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./.data/.db:/var/lib/postgresql/data
+    labels:
+      createdBy: "bt_apps"
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    driver: bridge

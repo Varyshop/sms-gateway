@@ -456,16 +456,36 @@
 
           <div class="nav-group">Advanced settings</div>
           <a href="#fcm" data-section="fcm">FCM Push notifications</a>
-          <a href="#background" data-section="background">Background and reliability</a>
+          <a href="#background" data-section="background"
+            >Background and reliability</a
+          >
 
           <div class="nav-group">Help</div>
           <a href="#overeni" data-section="overeni">Verification</a>
           <a href="#casty-dotazy" data-section="casty-dotazy">FAQ</a>
 
-          <div class="nav-group" style="margin-top:24px; border-top:1px solid #e5e7eb; padding-top:16px">Other pages</div>
-          <a href="developer.html" style="color:#2563eb; font-weight:600">API &amp; Developer Docs</a>
-          <a href="https://github.com/Varyshop/sms-gateway-app/releases" style="color:#059669; font-weight:600" target="_blank">Download APK</a>
-          <a href="https://github.com/Varyshop/sms-gateway" target="_blank">GitHub</a>
+          <div
+            class="nav-group"
+            style="
+              margin-top: 24px;
+              border-top: 1px solid #e5e7eb;
+              padding-top: 16px;
+            "
+          >
+            Other pages
+          </div>
+          <a href="developer.html" style="color: #2563eb; font-weight: 600"
+            >API &amp; Developer Docs</a
+          >
+          <a
+            href="https://github.com/Varyshop/sms-gateway-app/releases"
+            style="color: #059669; font-weight: 600"
+            target="_blank"
+            >Download APK</a
+          >
+          <a href="https://github.com/Varyshop/sms-gateway" target="_blank"
+            >GitHub</a
+          >
           <a href="cs/index.html">Česká verze</a>
         </nav>
       </aside>
@@ -481,17 +501,18 @@
         <div class="highlight-box">
           <strong>What does this module do?</strong><br />
           Instead of paying for every SMS sent through a cloud service, you use
-          your own Android phone(s) as an SMS gateway. The phone connects to your
-          system, automatically picks up messages from the queue and sends them as
-          regular SMS. You can use multiple phones at once &mdash; the system
-          automatically distributes the load.
+          your own Android phone(s) as an SMS gateway. The phone connects to
+          your system, automatically picks up messages from the queue and sends
+          them as regular SMS. You can use multiple phones at once &mdash; the
+          system automatically distributes the load.
         </div>
 
         <div class="highlight-box">
           <strong>New in v1.3.0: Campaigns from the mobile app</strong><br />
-          The new <strong>Campaigns</strong> tab lets you create and send SMS campaigns
-          directly from your phone. Select a template, a customer segment, edit the text
-          and send &mdash; including statistics (clicks, orders, revenue).
+          The new <strong>Campaigns</strong> tab lets you create and send SMS
+          campaigns directly from your phone. Select a template, a customer
+          segment, edit the text and send &mdash; including statistics (clicks,
+          orders, revenue).
           <a href="#kampan-z-appky">More info &darr;</a>
         </div>
 
@@ -633,7 +654,9 @@
               </tr>
               <tr>
                 <td><strong>Second number</strong></td>
-                <td>If the phone has two SIMs, enter the second one (optional)</td>
+                <td>
+                  If the phone has two SIMs, enter the second one (optional)
+                </td>
                 <td>+420608987654</td>
               </tr>
               <tr>
@@ -656,8 +679,8 @@
         </ol>
 
         <div class="tip">
-          <strong>How many phones do I need?</strong> One is enough to start.
-          If you plan to send thousands of SMS daily, we recommend adding more
+          <strong>How many phones do I need?</strong> One is enough to start. If
+          you plan to send thousands of SMS daily, we recommend adding more
           phones &mdash; the system automatically distributes the load.
         </div>
 
@@ -672,22 +695,49 @@
         <h3>Downloading the APK</h3>
         <p>
           The app is not on Google Play. Download the APK file directly from
-          <a href="https://github.com/Varyshop/sms-gateway-app/releases" target="_blank"><strong>GitHub Releases</strong></a>:
+          <a
+            href="https://github.com/Varyshop/sms-gateway-app/releases"
+            target="_blank"
+            ><strong>GitHub Releases</strong></a
+          >:
         </p>
         <ol class="steps">
-          <li>On your phone, open the link to <a href="https://github.com/Varyshop/sms-gateway-app/releases" target="_blank">Releases</a> and download the latest <strong>.apk</strong> file</li>
-          <li>Open the downloaded file &mdash; if a warning appears, allow <em>Install from unknown sources</em></li>
+          <li>
+            On your phone, open the link to
+            <a
+              href="https://github.com/Varyshop/sms-gateway-app/releases"
+              target="_blank"
+              >Releases</a
+            >
+            and download the latest <strong>.apk</strong> file
+          </li>
+          <li>
+            Open the downloaded file &mdash; if a warning appears, allow
+            <em>Install from unknown sources</em>
+          </li>
           <li>Complete the installation</li>
         </ol>
 
         <div class="info">
           <strong>Why isn't it on Google Play?</strong> The app uses
           <code>SEND_SMS</code> and <code>READ_SMS</code> permissions, which
-          require a special review on the Play Store. Installing the APK directly
-          from GitHub Releases is the intended distribution method.
+          require a special review on the Play Store. Installing the APK
+          directly from GitHub Releases is the intended distribution method.
         </div>
 
-        <p>After launching the app, you will be asked for the following permissions:</p>
+        <div class="info">
+          <strong>Installing from a computer (technical users):</strong> if you
+          have the phone connected via USB, you can install the latest release with
+          one command &mdash; <code>./scripts/install-release.sh</code> from the
+          <code>extra/sms</code> module. See the
+          <a href="developer.html#3-instalace-aplikace">Developer documentation</a>
+          for build &amp; install scripts.
+        </div>
+
+        <p>
+          After launching the app, you will be asked for the following
+          permissions:
+        </p>
 
         <table class="field-table">
           <tr>
@@ -700,7 +750,10 @@
           </tr>
           <tr>
             <td><strong>Receive SMS</strong></td>
-            <td>So the app can capture replies containing the word STOP (unsubscribe)</td>
+            <td>
+              So the app can capture replies containing the word STOP
+              (unsubscribe)
+            </td>
           </tr>
           <tr>
             <td><strong>Camera</strong></td>
@@ -712,26 +765,32 @@
           </tr>
           <tr>
             <td><strong>Notifications</strong></td>
-            <td>To display sending status and background service status (Android 13+ asks in a dialog)</td>
+            <td>
+              To display sending status and background service status (Android
+              13+ asks in a dialog)
+            </td>
           </tr>
         </table>
 
-        <p>
+        <p></p>
         <div class="warning">
-          <strong>Increasing the SMS limit (WRITE_SECURE_SETTINGS):</strong> To increase
-          the native Android limit on outgoing SMS, the app needs the
-          <code>WRITE_SECURE_SETTINGS</code> permission. This cannot be granted from
-          the phone &mdash; you need to connect the phone to a computer via USB and run:
+          <strong>Increasing the SMS limit (WRITE_SECURE_SETTINGS):</strong> To
+          increase the native Android limit on outgoing SMS, the app needs the
+          <code>WRITE_SECURE_SETTINGS</code> permission. This cannot be granted
+          from the phone &mdash; you need to connect the phone to a computer via
+          USB and run:
           <pre><code>adb shell pm grant com.varyshop.smsgatewayapp android.permission.WRITE_SECURE_SETTINGS</code></pre>
-          If you're building from source, you can use: <code>yarn grant-permission</code>
+          If you're building from source, you can use:
+          <code>yarn grant-permission</code>
         </div>
 
         <p>
           In addition to these permissions, the app will also show a dialog for
           <strong>battery optimization exemption</strong>. This exemption is
-          essential so that Android doesn't put the app to sleep in the background
-          and SMS are reliably sent even when the screen is locked. See the
-          <a href="#background">Background and reliability</a> section for more.
+          essential so that Android doesn't put the app to sleep in the
+          background and SMS are reliably sent even when the screen is locked.
+          See the <a href="#background">Background and reliability</a> section
+          for more.
         </p>
 
         <div class="warning">
@@ -775,19 +834,23 @@
           <strong>How do I know it works?</strong> After successful pairing, the
           phone status in Varyshop admin will change from
           <span class="status status-red">Offline</span> to
-          <span class="status status-green">Online</span>. This means the
-          phone is connected and ready to send SMS.
+          <span class="status status-green">Online</span>. This means the phone
+          is connected and ready to send SMS.
         </div>
 
         <div class="warning">
           <strong>Phone stays Offline?</strong> Check:
           <ul style="margin-bottom: 0">
-            <li>Does the phone have an internet connection? (Wi-Fi or mobile data)</li>
             <li>
-              Is the app running on the phone? (not closed, not in power saving mode)
+              Does the phone have an internet connection? (Wi-Fi or mobile data)
             </li>
             <li>
-              Is the server address correct? (you can see the URL in the app settings)
+              Is the app running on the phone? (not closed, not in power saving
+              mode)
+            </li>
+            <li>
+              Is the server address correct? (you can see the URL in the app
+              settings)
             </li>
           </ul>
         </div>
@@ -821,8 +884,8 @@
               <tr>
                 <td><strong>Recipients</strong></td>
                 <td>
-                  Who will receive the SMS &mdash; select a contact group or
-                  set up a filter
+                  Who will receive the SMS &mdash; select a contact group or set
+                  up a filter
                 </td>
               </tr>
               <tr>
@@ -858,26 +921,27 @@
 
         <div class="info">
           <strong>Personalization:</strong> Use
-          <code>{{ object.name }}</code> to insert each recipient's name into the
-          text. You can find more fields via the dynamic content button in the
-          message editor.
+          <code>{{ object.name }}</code> to insert each recipient's name into
+          the text. You can find more fields via the dynamic content button in
+          the message editor.
         </div>
 
         <!-- ==================== KAMPAN Z APPKY ==================== -->
         <h2 id="kampan-z-appky">Campaign from mobile app</h2>
 
         <p>
-          <strong>New in v1.3.0:</strong> You can create campaigns directly
-          from the mobile app without accessing the Odoo backend. Just open
-          the <strong>Campaigns</strong> tab in the app.
+          <strong>New in v1.3.0:</strong> You can create campaigns directly from
+          the mobile app without accessing the Odoo backend. Just open the
+          <strong>Campaigns</strong> tab in the app.
         </p>
 
         <h3>Prerequisites</h3>
         <ul>
           <li>
             At least one <strong>SMS template</strong> must be created in the
-            admin panel and assigned to your phone
-            (<span class="path">SMS Gateway &rarr; Marketing Templates</span>)
+            admin panel and assigned to your phone (<span class="path"
+              >SMS Gateway &rarr; Marketing Templates</span
+            >)
           </li>
           <li>
             The template must have assigned <strong>segments</strong>
@@ -888,50 +952,56 @@
         <h3>Wizard in the app (3 steps)</h3>
         <ol class="steps">
           <li>
-            <strong>Select template</strong> &mdash; templates assigned to
-            your phone will be displayed. Select one by tapping.
+            <strong>Select template</strong> &mdash; templates assigned to your
+            phone will be displayed. Select one by tapping.
           </li>
           <li>
-            <strong>Segment and count</strong> &mdash; select a segment
-            (e.g. &ldquo;Haven't ordered in 3 months&rdquo;) and set the number
-            of recipients. For each segment, you can see how many customers match the filter.
+            <strong>Segment and count</strong> &mdash; select a segment (e.g.
+            &ldquo;Haven't ordered in 3 months&rdquo;) and set the number of
+            recipients. For each segment, you can see how many customers match
+            the filter.
           </li>
           <li>
             <strong>Preview and confirm</strong> &mdash; you'll see an SMS
             preview with a sample name. You can edit the text before sending.
-            Choose <strong>Send now</strong> or
-            <strong>Add to queue</strong>.
+            Choose <strong>Send now</strong> or <strong>Add to queue</strong>.
           </li>
         </ol>
 
         <h3>Sending and tracking</h3>
         <p>
           After creating the campaign, a status card is displayed with real-time
-          counters (sent / pending / errors). If you chose &ldquo;Add to queue&rdquo;,
-          you can send the SMS later with the
+          counters (sent / pending / errors). If you chose &ldquo;Add to
+          queue&rdquo;, you can send the SMS later with the
           <strong>Send now</strong> button.
         </p>
         <p>
-          On phones with two SIM cards, the app will offer a choice:
-          send via one SIM or split between both.
+          On phones with two SIM cards, the app will offer a choice: send via
+          one SIM or split between both.
         </p>
 
         <h3>Marketing statistics</h3>
-        <p>
-          After sending a campaign, the app displays:
-        </p>
+        <p>After sending a campaign, the app displays:</p>
         <ul>
-          <li><strong>Clicked</strong> &mdash; how many recipients clicked a link</li>
-          <li><strong>Orders</strong> &mdash; number of orders from the campaign (UTM tracking)</li>
+          <li>
+            <strong>Clicked</strong> &mdash; how many recipients clicked a link
+          </li>
+          <li>
+            <strong>Orders</strong> &mdash; number of orders from the campaign
+            (UTM tracking)
+          </li>
           <li><strong>Revenue</strong> &mdash; total revenue from orders</li>
           <li><strong>Unsubscribed</strong> &mdash; number of STOP replies</li>
-          <li><strong>CTR, Conversion, Unsubscribe %</strong> &mdash; percentage metrics</li>
+          <li>
+            <strong>CTR, Conversion, Unsubscribe %</strong> &mdash; percentage
+            metrics
+          </li>
         </ul>
 
         <div class="info">
-          <strong>Tip:</strong> Segments and templates are set up by the admin in Odoo.
-          The operator in the app only selects and sends &mdash; they cannot change
-          filters or recipients outside the configured segments.
+          <strong>Tip:</strong> Segments and templates are set up by the admin
+          in Odoo. The operator in the app only selects and sends &mdash; they
+          cannot change filters or recipients outside the configured segments.
         </div>
 
         <!-- ==================== JAK SE ODESILAJI ==================== -->
@@ -989,9 +1059,7 @@
 
         <ol class="steps">
           <li>Open the campaign that is currently being sent</li>
-          <li>
-            Turn on the <span class="btn">Paused</span> toggle
-          </li>
+          <li>Turn on the <span class="btn">Paused</span> toggle</li>
           <li>SMS still in the queue will not be sent</li>
           <li>
             SMS that have already been sent will remain sent &mdash; they cannot
@@ -999,15 +1067,13 @@
           </li>
         </ol>
 
-        <p>
-          To resume sending, simply turn off the <em>Paused</em> toggle.
-        </p>
+        <p>To resume sending, simply turn off the <em>Paused</em> toggle.</p>
 
         <div class="info">
           <strong>What if SMS were not created?</strong> Sometimes SMS for some
           recipients are not created (e.g. due to an error). In that case, use
-          the <span class="btn">Force Create SMS Queue</span> button &mdash;
-          the system will create SMS for all recipients who don't have them yet.
+          the <span class="btn">Force Create SMS Queue</span> button &mdash; the
+          system will create SMS for all recipients who don't have them yet.
         </div>
 
         <!-- ==================== VICE TELEFONU ==================== -->
@@ -1104,8 +1170,8 @@
           <strong>Important:</strong> If you use filters,
           <strong>leave at least one phone without a filter</strong> (empty
           field). It will serve as a fallback &mdash; it will receive SMS for
-          customers that don't match any other filter. If no phone matches,
-          the SMS will be marked as an error.
+          customers that don't match any other filter. If no phone matches, the
+          SMS will be marked as an error.
         </div>
 
         <div class="info">
@@ -1145,7 +1211,9 @@
 
         <h3>What happens when a phone reaches its limit?</h3>
         <ul>
-          <li>New SMS are automatically redirected to the next available phone</li>
+          <li>
+            New SMS are automatically redirected to the next available phone
+          </li>
           <li>
             If no other phone is available, the SMS will stay in the queue until
             the next day
@@ -1157,10 +1225,10 @@
         </ul>
 
         <div class="warning">
-          <strong>Android limit warning:</strong> Some Android devices have their
-          own limit on the number of sent SMS (typically ~30 SMS per 30 minutes).
-          If you encounter this, the app will report it as an error. Your
-          technician can resolve this in the phone settings.
+          <strong>Android limit warning:</strong> Some Android devices have
+          their own limit on the number of sent SMS (typically ~30 SMS per 30
+          minutes). If you encounter this, the app will report it as an error.
+          Your technician can resolve this in the phone settings.
         </div>
 
         <!-- ==================== DUAL SIM ==================== -->
@@ -1172,9 +1240,7 @@
         </p>
 
         <ul>
-          <li>
-            <strong>Phone number</strong> &mdash; first SIM card number
-          </li>
+          <li><strong>Phone number</strong> &mdash; first SIM card number</li>
           <li><strong>Second number</strong> &mdash; second SIM card number</li>
         </ul>
 
@@ -1217,7 +1283,9 @@
         <h3>What happens when the recipient clicks</h3>
         <ol class="steps">
           <li>The recipient clicks the short link in the SMS</li>
-          <li>Your server records the click &mdash; who clicked, when, from where</li>
+          <li>
+            Your server records the click &mdash; who clicked, when, from where
+          </li>
           <li>
             The recipient is immediately redirected to the original page
             (your-shop.com/spring-sale-2026)
@@ -1265,16 +1333,17 @@
           </li>
           <li>...the app on the phone captures this reply</li>
           <li>
-            It automatically adds the recipient's number to the <strong>blacklist</strong>
+            It automatically adds the recipient's number to the
+            <strong>blacklist</strong>
           </li>
           <li>All future campaigns will automatically skip this number</li>
         </ol>
 
         <div class="danger">
-          <strong>GDPR requirement:</strong> The text &ldquo;STOP to unsubscribe&rdquo;
-          is added automatically and <strong>must not be removed</strong>.
-          Sending marketing SMS without the option to unsubscribe is a violation
-          of the law.
+          <strong>GDPR requirement:</strong> The text &ldquo;STOP to
+          unsubscribe&rdquo; is added automatically and
+          <strong>must not be removed</strong>. Sending marketing SMS without
+          the option to unsubscribe is a violation of the law.
         </div>
 
         <h3>Where to find the blacklist</h3>
@@ -1302,44 +1371,60 @@
 
         <p>
           Since version 1.2.0, the app includes a new <strong>Incoming</strong>
-          tab where you can monitor all received SMS messages on your gateway phone.
+          tab where you can monitor all received SMS messages on your gateway
+          phone.
         </p>
 
         <h3>What the Incoming tab shows</h3>
         <ul>
-          <li><strong>Sender</strong> &mdash; the sender's number and partner name (if they exist in the system)</li>
-          <li><strong>Message text</strong> &mdash; content of the received SMS</li>
-          <li><strong>Blacklist status</strong> &mdash; whether the number is on the blacklist</li>
-          <li><strong>Date and time</strong> &mdash; when the message was received</li>
+          <li>
+            <strong>Sender</strong> &mdash; the sender's number and partner name
+            (if they exist in the system)
+          </li>
+          <li>
+            <strong>Message text</strong> &mdash; content of the received SMS
+          </li>
+          <li>
+            <strong>Blacklist status</strong> &mdash; whether the number is on
+            the blacklist
+          </li>
+          <li>
+            <strong>Date and time</strong> &mdash; when the message was received
+          </li>
         </ul>
 
         <h3>Filtering</h3>
         <p>
           At the top of the screen, you can switch between
-          <strong>All messages</strong> and <strong>STOP only</strong>.
-          The list supports pagination for easier browsing of large volumes of messages.
+          <strong>All messages</strong> and <strong>STOP only</strong>. The list
+          supports pagination for easier browsing of large volumes of messages.
         </p>
 
         <h3>Chatter integration</h3>
         <p>
-          All received SMS are automatically displayed in the <strong>partner's chatter</strong>
-          in Odoo. Each incoming message is shown as a formatted note with the text
-          in a blockquote and optionally with a STOP tag if the message contained an unsubscribe keyword.
+          All received SMS are automatically displayed in the
+          <strong>partner's chatter</strong>
+          in Odoo. Each incoming message is shown as a formatted note with the
+          text in a blockquote and optionally with a STOP tag if the message
+          contained an unsubscribe keyword.
         </p>
 
         <h3>Re-scanning the inbox</h3>
         <p>
           If some incoming messages are missing, go to
           <em>Settings &rarr; Service</em> in the app and tap
-          <span class="btn">Re-scan received SMS</span>. The app will read
-          the SMS inbox for the last 30 days and send all found messages to the server.
-          Duplicates are automatically ignored.
+          <span class="btn">Re-scan received SMS</span>. The app will read the
+          SMS inbox for the last 30 days and send all found messages to the
+          server. Duplicates are automatically ignored.
         </p>
 
         <!-- ==================== STATISTIKY ==================== -->
         <h2 id="statistiky">Campaign statistics</h2>
 
-        <p>After sending a campaign, you'll find statistics directly in the campaign header:</p>
+        <p>
+          After sending a campaign, you'll find statistics directly in the
+          campaign header:
+        </p>
 
         <table class="field-table">
           <tr>
@@ -1384,7 +1469,8 @@
         <h3>Phone statistics</h3>
         <p>
           On each phone's card in
-          <span class="path">Varyshop SMS &rarr; Gateway Phones</span> you can see:
+          <span class="path">Varyshop SMS &rarr; Gateway Phones</span> you can
+          see:
         </p>
         <ul>
           <li>
@@ -1399,9 +1485,7 @@
             <strong>Pending</strong> &mdash; how many SMS are waiting in the
             queue to be sent
           </li>
-          <li>
-            <strong>Errors</strong> &mdash; how many SMS failed to send
-          </li>
+          <li><strong>Errors</strong> &mdash; how many SMS failed to send</li>
         </ul>
 
         <!-- ==================== FCM PUSH NOTIFIKACE ==================== -->
@@ -1427,30 +1511,31 @@
             Go to
             <span class="path">Settings &rarr; SMS Gateway</span>
           </li>
-          <li>
-            Turn on the <strong>FCM Push Enabled</strong> toggle
-          </li>
+          <li>Turn on the <strong>FCM Push Enabled</strong> toggle</li>
           <li>
             Upload the <strong>Firebase Service Account JSON</strong> file
             &mdash; you can get it from the
-            <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a>
-            (Project Settings &rarr; Service accounts &rarr; Generate new private key)
+            <a href="https://console.firebase.google.com/" target="_blank"
+              >Firebase Console</a
+            >
+            (Project Settings &rarr; Service accounts &rarr; Generate new
+            private key)
           </li>
           <li>Save the settings</li>
         </ol>
 
         <div class="info">
           <strong>One Firebase project for all instances.</strong>
-          If you run multiple Varyshop instances (e.g. for different
-          customers), one Firebase project and one Service Account JSON
-          file is sufficient. Each instance uses it independently.
+          If you run multiple Varyshop instances (e.g. for different customers),
+          one Firebase project and one Service Account JSON file is sufficient.
+          Each instance uses it independently.
         </div>
 
         <div class="tip">
-          <strong>What if I don't set up FCM?</strong> The app works
-          perfectly fine without FCM &mdash; it uses standard polling.
-          SMS will be sent, just with a slightly higher delay (up to 10 seconds).
-          FCM is an optional enhancement, not a requirement.
+          <strong>What if I don't set up FCM?</strong> The app works perfectly
+          fine without FCM &mdash; it uses standard polling. SMS will be sent,
+          just with a slightly higher delay (up to 10 seconds). FCM is an
+          optional enhancement, not a requirement.
         </div>
 
         <!-- ==================== POZADI A SPOLEHLIVOST ==================== -->
@@ -1458,9 +1543,9 @@
 
         <p>
           The Varyshop SMS app sends messages even when the
-          <strong>screen is locked</strong> or when you're using another
-          app. For this to work reliably, battery optimization must be
-          configured correctly.
+          <strong>screen is locked</strong> or when you're using another app.
+          For this to work reliably, battery optimization must be configured
+          correctly.
         </p>
 
         <h3>Battery optimization</h3>
@@ -1470,42 +1555,47 @@
         </p>
         <ol class="steps">
           <li>
-            Open <span class="path">Phone Settings &rarr; Battery &rarr; App battery usage</span>
+            Open
+            <span class="path"
+              >Phone Settings &rarr; Battery &rarr; App battery usage</span
+            >
           </li>
-          <li>
-            Find the <strong>SMS Gateway</strong> app
-          </li>
-          <li>
-            Select <strong>Unrestricted</strong>
-          </li>
+          <li>Find the <strong>SMS Gateway</strong> app</li>
+          <li>Select <strong>Unrestricted</strong></li>
         </ol>
 
         <div class="info">
           <strong>How to verify:</strong>
-          <span class="path">Settings &rarr; Battery &rarr; App battery usage &rarr; SMS Gateway</span>
+          <span class="path"
+            >Settings &rarr; Battery &rarr; App battery usage &rarr; SMS
+            Gateway</span
+          >
           &mdash; it should be set to <em>Unrestricted</em>.
         </div>
 
         <h3>Xiaomi / MIUI &mdash; extra steps</h3>
         <p>
-          Xiaomi phones with MIUI have more aggressive battery management.
-          In addition to the battery optimization exemption, you also need to:
+          Xiaomi phones with MIUI have more aggressive battery management. In
+          addition to the battery optimization exemption, you also need to:
         </p>
         <ul>
           <li>
             Enable <strong>Autostart</strong>:
-            <span class="path">Settings &rarr; Apps &rarr; Permissions &rarr; Autostart</span>
+            <span class="path"
+              >Settings &rarr; Apps &rarr; Permissions &rarr; Autostart</span
+            >
             &mdash; turn on for SMS Gateway
           </li>
           <li>
-            In the battery settings for the app, select <strong>No restrictions</strong>
+            In the battery settings for the app, select
+            <strong>No restrictions</strong>
           </li>
         </ul>
 
         <div class="warning">
           <strong>Important:</strong> If SMS are not being sent while the screen
-          is locked, battery optimization is the most common cause. Always
-          check this setting first.
+          is locked, battery optimization is the most common cause. Always check
+          this setting first.
         </div>
 
         <!-- ==================== OVERENI ==================== -->
@@ -1519,13 +1609,14 @@
         <ol class="steps">
           <li>
             <strong>Check the phone status</strong><br />
-            In <span class="path">Varyshop SMS &rarr; Gateway Phones</span>,
-            at least one phone should be
+            In <span class="path">Varyshop SMS &rarr; Gateway Phones</span>, at
+            least one phone should be
             <span class="status status-green">Online</span>
           </li>
           <li>
             <strong>Send a test SMS</strong><br />
-            Create a campaign with a single recipient (e.g. yourself) and send it
+            Create a campaign with a single recipient (e.g. yourself) and send
+            it
           </li>
           <li>
             <strong>Check delivery</strong><br />
@@ -1538,8 +1629,8 @@
           </li>
           <li>
             <strong>Test unsubscribe</strong><br />
-            Reply to the SMS with &ldquo;STOP&rdquo; and verify that your
-            number appears on the blacklist in Varyshop
+            Reply to the SMS with &ldquo;STOP&rdquo; and verify that your number
+            appears on the blacklist in Varyshop
           </li>
         </ol>
 
@@ -1573,7 +1664,9 @@
         <p class="faq-q">SMS are not being sent, they stay in the queue</p>
         <div class="faq-a">
           <ul>
-            <li>Is the phone <span class="status status-green">Online</span>?</li>
+            <li>
+              Is the phone <span class="status status-green">Online</span>?
+            </li>
             <li>
               Is sending enabled in the app? (Dashboard &rarr; the
               <em>Start</em> toggle)
@@ -1600,7 +1693,8 @@
             <li>Android may have blocked sending due to a limit (see below)</li>
             <li>
               You can try resending failed SMS with the
-              <span class="btn">Force Create SMS Queue</span> button in the campaign
+              <span class="btn">Force Create SMS Queue</span> button in the
+              campaign
             </li>
           </ul>
         </div>
@@ -1630,7 +1724,10 @@
             <li>
               Most common cause: <strong>battery optimization</strong> puts the
               app to sleep in the background. Check
-              <span class="path">Settings &rarr; Battery &rarr; App battery usage &rarr; SMS Gateway</span>
+              <span class="path"
+                >Settings &rarr; Battery &rarr; App battery usage &rarr; SMS
+                Gateway</span
+              >
               and set to <em>Unrestricted</em>
             </li>
             <li>
@@ -1638,19 +1735,19 @@
               <a href="#background">Background and reliability</a> section)
             </li>
             <li>
-              Verify that the app has notification permissions enabled (required for the background service)
+              Verify that the app has notification permissions enabled (required
+              for the background service)
             </li>
           </ul>
         </div>
 
-        <p class="faq-q">
-          STOP messages don't appear in the blacklist
-        </p>
+        <p class="faq-q">STOP messages don't appear in the blacklist</p>
         <div class="faq-a">
           <ul>
             <li>
               Verify that the app has <strong>Receive SMS</strong> permission
-              (<em>RECEIVE_SMS</em>) &mdash; without it, the app won't see replies
+              (<em>RECEIVE_SMS</em>) &mdash; without it, the app won't see
+              replies
             </li>
             <li>
               Check internet connection &mdash; the app needs to send the STOP
@@ -1667,8 +1764,8 @@
               <strong>Re-scan received SMS:</strong> In the app, go to
               <em>Settings &rarr; Service</em> and tap the
               <span class="btn">Re-scan received SMS</span> button. The app will
-              re-read the SMS inbox for the last 30 days and send found messages to the server
-              (with deduplication &mdash; duplicates are ignored).
+              re-read the SMS inbox for the last 30 days and send found messages
+              to the server (with deduplication &mdash; duplicates are ignored).
             </li>
           </ul>
         </div>
@@ -1714,10 +1811,13 @@
             style="background: #fee2e2; color: #991b1b; border-color: #fca5a5"
             >Disconnect</span
           >. The phone will stop sending and will be marked as Offline in
-          Varyshop. In Varyshop, you can also delete or archive the phone record.
+          Varyshop. In Varyshop, you can also delete or archive the phone
+          record.
         </div>
 
-        <p class="faq-q">Can I change the SMS text after I've sent the campaign?</p>
+        <p class="faq-q">
+          Can I change the SMS text after I've sent the campaign?
+        </p>
         <div class="faq-a">
           No. SMS that have already been sent cannot be changed &mdash; they've
           arrived on the recipient's phone. However, you can
@@ -1729,14 +1829,15 @@
         <p class="faq-q">How many SMS can I send per day?</p>
         <div class="faq-a">
           It depends on the number of phones and their settings. Each phone can
-          typically send 200&ndash;1000 SMS per day (depending on your daily
+          typically send 200&ndash;5000 SMS per day (depending on your daily
           limit setting and carrier plan). With five phones, you can send up to
-          5000 SMS per day.
+          20000 SMS per day.
         </div>
 
         <div class="info">
           If you have any questions or need help with setup, contact
-          <a href="mailto:info@varyshop.eu">info@varyshop.eu</a> or the developer directly at
+          <a href="mailto:info@varyshop.eu">info@varyshop.eu</a> or the
+          developer directly at
           <a href="mailto:info@michalvarys.eu">info@michalvarys.eu</a>
         </div>
 
@@ -1772,15 +1873,22 @@
 
         // Helper: activate a nav link by section id
         function setActive(id) {
-          navLinks.forEach(function (l) { l.classList.remove("active"); });
-          var link = document.querySelector('#sidebarNav a[data-section="' + id + '"]');
+          navLinks.forEach(function (l) {
+            l.classList.remove("active");
+          });
+          var link = document.querySelector(
+            '#sidebarNav a[data-section="' + id + '"]',
+          );
           if (link) {
             link.classList.add("active");
             // Keep sidebar nav link visible
             var sidebar = document.getElementById("sidebar");
             var linkRect = link.getBoundingClientRect();
             var sidebarRect = sidebar.getBoundingClientRect();
-            if (linkRect.top < sidebarRect.top + 80 || linkRect.bottom > sidebarRect.bottom - 20) {
+            if (
+              linkRect.top < sidebarRect.top + 80 ||
+              linkRect.bottom > sidebarRect.bottom - 20
+            ) {
               link.scrollIntoView({ block: "center", behavior: "smooth" });
             }
           }
@@ -1794,7 +1902,9 @@
             // Lock scroll-based updates while browser animates to the section
             clickLock = section;
             clearTimeout(clickTimer);
-            clickTimer = setTimeout(function () { clickLock = null; }, 1000);
+            clickTimer = setTimeout(function () {
+              clickLock = null;
+            }, 1000);
             // Mobile: close sidebar
             if (window.innerWidth <= 860) {
               toggleSidebar();
@@ -1821,15 +1931,19 @@
         }
 
         var ticking = false;
-        window.addEventListener("scroll", function () {
-          if (ticking) return;
-          ticking = true;
-          requestAnimationFrame(function () {
-            ticking = false;
-            if (clickLock) return; // Don't override click selection during animation
-            setActive(getActiveSection());
-          });
-        }, { passive: true });
+        window.addEventListener(
+          "scroll",
+          function () {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(function () {
+              ticking = false;
+              if (clickLock) return; // Don't override click selection during animation
+              setActive(getActiveSection());
+            });
+          },
+          { passive: true },
+        );
 
         // ===== Hashchange (browser back/forward) =====
         window.addEventListener("hashchange", function () {
@@ -1838,7 +1952,9 @@
             setActive(hash);
             clickLock = hash;
             clearTimeout(clickTimer);
-            clickTimer = setTimeout(function () { clickLock = null; }, 1000);
+            clickTimer = setTimeout(function () {
+              clickLock = null;
+            }, 1000);
           }
         });
 

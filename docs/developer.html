@@ -205,16 +205,17 @@
     <h2 id="1-architektura">1. System Architecture</h2>
 
     <div class="flow-diagram">
-      ┌─────────────────┐ ┌──────────────────────┐ ┌─────────────────┐ │ Odoo
-      Server │ │ SMS Gateway App │ │ SMS Recipient │ │ │ │ (Android phone) │ │
-      │ │ mailing.mailing │────▶│ │────▶│ +420 777... │ │ sms.sms │ │ DirectSms
-      (native) │ │ │ │ sms.gateway.phone│◀───│ Heartbeat │ │ Clicks link │ │
-      │ │ SMS Queue Polling │ │ │ │ │ link.tracker │◀────│ Inbound SMS (STOP) │
-      │ ▼ │ │ phone.blacklist │ │ │ │ /r/ABC/s/42 │ └─────────────────┘
-      └──────────────────────┘ └─────────────────┘ │ │ │
-      ┌──────────────────────┐ │ └──────────────│ Link Tracker │◀──────────────┘
-      │ /r/{code}/s/{sms_id}│ │ UTM tracking │ │ Click counting │
-      └──────────────────────┘
+┌────────────────────────┐      REST API       ┌────────────────────────┐
+│  Odoo Server           │  pending / confirm  │  SMS Gateway App        │
+│                        │ ◀─────────────────▶ │  (Android phone)        │
+│  • mailing.mailing     │   heartbeat (60s)   │                         │
+│  • sms.sms             │                     │  • SMS Queue Polling    │      ┌──────────────┐
+│  • sms.gateway.phone   │                     │  • DirectSms (native)   │ ───▶ │ SMS Recipient│
+│  • phone.blacklist     │ ◀─────────────────  │  • Inbound SMS (STOP)   │      │  +420 777... │
+│  • link.tracker        │   inbound / STOP    │                         │      └──────┬───────┘
+└──────────┬─────────────┘                     └─────────────────────────┘             │
+           │  /r/{code}/s/{sms_id}  (UTM tracking + click counting)                     │
+           └────────────────────────────── Clicks link ◀──────────────────────────────┘
     </div>
 
     <h3>Components</h3>
@@ -293,27 +294,62 @@
       Sideloading the APK from GitHub Releases is the intended distribution method.
     </div>
 
+    <h3>Install the latest release via ADB (script)</h3>
+    <p>
+      Connect the phone via USB (with USB debugging enabled). From the
+      <code>sms-gateway</code> module root (<code>extra/sms</code>):
+    </p>
+    <pre><code># Latest release
+./scripts/install-release.sh
+
+# A specific tag
+./scripts/install-release.sh v1.3.0
+
+# Re-download even if cached
+./scripts/install-release.sh --force</code></pre>
+    <p>
+      Downloads <code>app-release.apk</code> from the GitHub release (cached per tag under
+      <code>.release-cache/</code>), installs it with <code>adb install -r</code> and grants the
+      SMS-limit permission. Requires <code>gh</code> (authenticated) and <code>adb</code> —
+      no build toolchain needed.
+    </p>
+
     <h3>Prerequisites (build from source)</h3>
     <ul>
       <li>Android phone (version 8.0+ / API 26)</li>
-      <li>Node.js 18+ and npm/yarn</li>
-      <li>Expo CLI (<code>npx expo</code>)</li>
-      <li>Android Studio (for local build)</li>
+      <li>Node.js 18+ (the setup script installs Node 20 via nvm automatically)</li>
+      <li>Android Studio / Android SDK (the setup script auto-detects it)</li>
+      <li>ADB and <code>gh</code> in PATH</li>
     </ul>
 
-    <h3>Build the app</h3>
-    <pre><code>cd sms-gateway-app
+    <h3>Build &amp; install (one script)</h3>
+    <p>
+      Connect the phone via USB. From the <code>sms-gateway</code> module root (<code>extra/sms</code>):
+    </p>
+    <pre><code>./scripts/setup.sh              # full flow: deps, prebuild, build, install
+./scripts/setup.sh --clean      # prebuild with --clean (after app.json / native changes)
+./scripts/setup.sh --no-install # build only, skip ADB install</code></pre>
+    <p>
+      The script bootstraps nvm + Node 20 (installs them if missing), initializes the
+      <code>sms-gateway-app</code> submodule, detects the Android SDK, installs dependencies,
+      prebuilds, builds the release APK, installs it via ADB and grants
+      <code>WRITE_SECURE_SETTINGS</code>.
+    </p>
 
-# Instalace zavislosti
+    <h3>Build manually</h3>
+    <pre><code>git submodule update --init --recursive   # fetch sms-gateway-app sources
+cd sms-gateway-app
+
+# Install dependencies
 npm install
 
-# Prebuild nativniho projektu (nutne pro nativni moduly)
+# Prebuild native project (required for native modules)
 npx expo prebuild
 
-# Spusteni na pripojenem telefonu
+# Run on a connected phone
 npx expo run:android
 
-# NEBO build release APK pres EAS
+# OR build a release APK via EAS
 eas build --profile production-apk --platform android</code></pre>
 
     <h3>Upload as GitHub Release</h3>
@@ -609,11 +645,12 @@ STOP pro odhlaseni</code></pre>
     </ol>
 
     <div class="flow-diagram">
-      SMS states: outgoing ──▶ pending (assigned to phone) ──▶ processing
-      (phone picked up) │ ├──▶ sending (phone sending) │ │ │ ├──▶ sent
-      (successfully sent) ✓ │ └──▶ error (send error) ✗ │ └──▶ error (send
-      error) ✗ If campaign is paused: outgoing ──▶ (skipped, stays
-      outgoing)
+outgoing ──▶ pending ──▶ processing ──▶ sending ──┬──▶ sent   (successfully sent) ✓
+          (assigned    (phone          (phone      │
+           to phone)    picked up)      sending)    └──▶ error  (send error) ✗
+
+If the campaign is paused:
+outgoing ──▶ (skipped, stays outgoing)
     </div>
 
     <!-- ==================== 9. ODKAZY ==================== -->

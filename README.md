@@ -101,9 +101,32 @@ On the phone:
 
 > **Note:** The app is not published on Google Play. It uses `SEND_SMS` and `READ_SMS` permissions which require special review on the Play Store. Sideloading the APK is the intended distribution method.
 
-#### Build from source
+#### Install the latest release via ADB (one script)
+
+Connect a phone via USB (USB debugging enabled). From the `sms-gateway` module root (`extra/sms`):
 
 ```bash
+./scripts/install-release.sh            # latest release
+./scripts/install-release.sh v1.3.0     # a specific tag
+./scripts/install-release.sh --force    # re-download even if cached
+```
+
+Downloads `app-release.apk` from the GitHub release (cached per tag under `.release-cache/` and reused on the next run), installs it with `adb install -r` and grants the SMS-limit permission. Requires `gh` (authenticated) and `adb`. No build toolchain needed.
+
+#### Build from source
+
+**Quick setup (one script)** — from the `sms-gateway` module root (`extra/sms`), connect a phone via USB (USB debugging enabled) and run:
+
+```bash
+./scripts/setup.sh
+```
+
+This bootstraps nvm + Node 20 (installs them if missing), initializes the `sms-gateway-app` submodule, installs dependencies, prebuilds the native project, builds the release APK, installs it on the connected device via ADB and grants the `WRITE_SECURE_SETTINGS` permission. Options: `--clean` (prebuild with `--clean` after `app.json`/native changes), `--no-install` (build only).
+
+**Manual build:**
+
+```bash
+git submodule update --init --recursive   # fetch the sms-gateway-app sources
 cd sms-gateway-app
 npm install  # or yarn
 npx expo prebuild
@@ -164,6 +187,33 @@ In the mailing form, set the **SMS Provider** field to **SMS Gateway**. All SMS 
 3. Click **Action → Send with Gateway**
 4. Select which SIM numbers to use
 5. Review capacity and click **Send**
+
+### 5. Deploy to a VPS (one script)
+
+Provision a fresh VPS and deploy the full Odoo + SMS gateway stack with nginx and a
+Let's Encrypt certificate, in one command from your machine:
+
+```bash
+./scripts/deploy-vps.sh <user@ip> <domain> <email> [remote-dir]
+
+# e.g.
+./scripts/deploy-vps.sh root@203.0.113.10 sms.varyshop.eu admin@varyshop.eu
+```
+
+What it does over SSH:
+
+1. Installs Docker (+ compose), nginx and certbot if missing
+2. Uploads `scripts/deploy/docker-compose.vps.yml` (as `docker-compose.yml`) and `.env` via rsync to `remote-dir` (default `/opt/varyshop-sms`)
+3. Pulls the pre-built image (`varyshop/website:release-1.1.0`, override with `WEB_IMAGE`) and runs `docker compose up -d`
+4. Configures an nginx reverse proxy (Odoo bound to `127.0.0.1`, `--proxy-mode` enabled) and obtains a Let's Encrypt cert with HTTP→HTTPS redirect
+
+**Requirements:** local `ssh` + `rsync`; the SSH user must be `root` or have `sudo`; the
+domain's DNS **A record must already point at the VPS IP** (certbot validates over HTTP).
+
+> The VPS compose uses the **pre-built registry image**, which already contains
+> `sms_modules` baked in — so no module upload or git clone is needed, and the image
+> is the source of truth (update modules by deploying a new tag). The `.env` file
+> (incl. the Postgres password) is uploaded; treat the remote dir as sensitive.
 
 ## How It Works
 

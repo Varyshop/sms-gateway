@@ -205,16 +205,17 @@
     <h2 id="1-architektura">1. Architektura systému</h2>
 
     <div class="flow-diagram">
-      ┌─────────────────┐ ┌──────────────────────┐ ┌─────────────────┐ │ Odoo
-      Server │ │ SMS Gateway App │ │ Příjemce SMS │ │ │ │ (Android telefon) │ │
-      │ │ mailing.mailing │────▶│ │────▶│ +420 777... │ │ sms.sms │ │ DirectSms
-      (nativní) │ │ │ │ sms.gateway.phone│◀───│ Heartbeat │ │ Klikne na link │ │
-      │ │ SMS Queue Polling │ │ │ │ │ link.tracker │◀────│ Inbound SMS (STOP) │
-      │ ▼ │ │ phone.blacklist │ │ │ │ /r/ABC/s/42 │ └─────────────────┘
-      └──────────────────────┘ └─────────────────┘ │ │ │
-      ┌──────────────────────┐ │ └──────────────│ Link Tracker │◀──────────────┘
-      │ /r/{code}/s/{sms_id}│ │ UTM tracking │ │ Click counting │
-      └──────────────────────┘
+┌────────────────────────┐      REST API       ┌────────────────────────┐
+│  Odoo Server           │  pending / confirm  │  SMS Gateway App        │
+│                        │ ◀─────────────────▶ │  (Android telefon)      │
+│  • mailing.mailing     │   heartbeat (60s)   │                         │
+│  • sms.sms             │                     │  • SMS Queue Polling    │      ┌──────────────┐
+│  • sms.gateway.phone   │                     │  • DirectSms (nativní)  │ ───▶ │ Příjemce SMS │
+│  • phone.blacklist     │ ◀─────────────────  │  • Inbound SMS (STOP)   │      │  +420 777... │
+│  • link.tracker        │   inbound / STOP    │                         │      └──────┬───────┘
+└──────────┬─────────────┘                     └─────────────────────────┘             │
+           │  /r/{code}/s/{sms_id}  (UTM tracking + počítání kliknutí)                  │
+           └────────────────────────────── Klikne na link ◀───────────────────────────┘
     </div>
 
     <h3>Komponenty</h3>
@@ -293,27 +294,61 @@
       Sideloading APK z GitHub Releases je zamýšlený způsob distribuce.
     </div>
 
+    <h3>Instalace nejnovějšího release přes ADB (skript)</h3>
+    <p>
+      Připojte telefon přes USB (se zapnutým USB laděním). Z kořene modulu
+      <code>sms-gateway</code> (<code>extra/sms</code>):
+    </p>
+    <pre><code># Nejnovější release
+./scripts/install-release.sh
+
+# Konkrétní tag
+./scripts/install-release.sh v1.3.0
+
+# Stáhnout znovu i když je v cache
+./scripts/install-release.sh --force</code></pre>
+    <p>
+      Stáhne <code>app-release.apk</code> z GitHub release (cache podle tagu ve složce
+      <code>.release-cache/</code>), nainstaluje přes <code>adb install -r</code> a udělí
+      oprávnění pro SMS limit. Vyžaduje <code>gh</code> (přihlášený) a <code>adb</code> —
+      žádný build toolchain není potřeba.
+    </p>
+
     <h3>Předpoklady (build ze zdrojáků)</h3>
     <ul>
       <li>Android telefon (verze 8.0+ / API 26)</li>
-      <li>Node.js 18+ a npm/yarn</li>
-      <li>Expo CLI (<code>npx expo</code>)</li>
-      <li>Android Studio (pro lokální build)</li>
+      <li>Node.js 18+ (setup skript nainstaluje Node 20 přes nvm automaticky)</li>
+      <li>Android Studio / Android SDK (setup skript ho automaticky najde)</li>
+      <li>ADB a <code>gh</code> v PATH</li>
     </ul>
 
-    <h3>Build aplikace</h3>
-    <pre><code>cd sms-gateway-app
+    <h3>Build &amp; instalace (jeden skript)</h3>
+    <p>
+      Připojte telefon přes USB. Z kořene modulu <code>sms-gateway</code> (<code>extra/sms</code>):
+    </p>
+    <pre><code>./scripts/setup.sh              # celý flow: závislosti, prebuild, build, instalace
+./scripts/setup.sh --clean      # prebuild s --clean (po změně app.json / nativního kódu)
+./scripts/setup.sh --no-install # jen build, přeskočit ADB instalaci</code></pre>
+    <p>
+      Skript bootstrapuje nvm + Node 20 (nainstaluje, pokud chybí), inicializuje submodul
+      <code>sms-gateway-app</code>, najde Android SDK, nainstaluje závislosti, provede prebuild,
+      sestaví release APK, nainstaluje ho přes ADB a udělí <code>WRITE_SECURE_SETTINGS</code>.
+    </p>
 
-# Instalace zavislosti
+    <h3>Build ručně</h3>
+    <pre><code>git submodule update --init --recursive   # stáhnout zdroje sms-gateway-app
+cd sms-gateway-app
+
+# Instalace závislostí
 npm install
 
-# Prebuild nativniho projektu (nutne pro nativni moduly)
+# Prebuild nativního projektu (nutné pro nativní moduly)
 npx expo prebuild
 
-# Spusteni na pripojenem telefonu
+# Spuštění na připojeném telefonu
 npx expo run:android
 
-# NEBO build release APK pres EAS
+# NEBO build release APK přes EAS
 eas build --profile production-apk --platform android</code></pre>
 
     <h3>Upload jako GitHub Release</h3>
@@ -611,11 +646,12 @@ STOP pro odhlaseni</code></pre>
     </ol>
 
     <div class="flow-diagram">
-      Stavy SMS: outgoing ──▶ pending (přiřazeno telefonu) ──▶ processing
-      (telefon vyzvedl) │ ├──▶ sending (telefon odesílá) │ │ │ ├──▶ sent
-      (úspěšně odesláno) ✓ │ └──▶ error (chyba odeslání) ✗ │ └──▶ error (chyba
-      odeslání) ✗ Pokud je kampaň pozastavená: outgoing ──▶ (přeskočeno, zůstává
-      outgoing)
+outgoing ──▶ pending ──▶ processing ──▶ sending ──┬──▶ sent   (úspěšně odesláno) ✓
+          (přiřazeno   (telefon       (telefon     │
+           telefonu)    vyzvedl)       odesílá)     └──▶ error  (chyba odeslání) ✗
+
+Pokud je kampaň pozastavená:
+outgoing ──▶ (přeskočeno, zůstává outgoing)
     </div>
 
     <!-- ==================== 9. ODKAZY ==================== -->

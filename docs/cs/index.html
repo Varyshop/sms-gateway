@@ -456,17 +456,39 @@
 
           <div class="nav-group">Pokročilé nastavení</div>
           <a href="#fcm" data-section="fcm">FCM Push notifikace</a>
-          <a href="#background" data-section="background">Pozadí a spolehlivost</a>
+          <a href="#background" data-section="background"
+            >Pozadí a spolehlivost</a
+          >
 
           <div class="nav-group">Pomoc</div>
           <a href="#overeni" data-section="overeni">Ověření funkce</a>
           <a href="#casty-dotazy" data-section="casty-dotazy">Časté dotazy</a>
 
-          <div class="nav-group" style="margin-top:24px; border-top:1px solid #e5e7eb; padding-top:16px">Další stránky</div>
-          <a href="developer.html" style="color:#2563eb; font-weight:600">API &amp; Developer Docs</a>
-          <a href="https://github.com/Varyshop/sms-gateway-app/releases" style="color:#059669; font-weight:600" target="_blank">Stáhnout APK</a>
-          <a href="https://github.com/Varyshop/sms-gateway" target="_blank">GitHub</a>
-          <a href="../index.html" style="color:#6b7280; font-weight:600">English version</a>
+          <div
+            class="nav-group"
+            style="
+              margin-top: 24px;
+              border-top: 1px solid #e5e7eb;
+              padding-top: 16px;
+            "
+          >
+            Další stránky
+          </div>
+          <a href="developer.html" style="color: #2563eb; font-weight: 600"
+            >API &amp; Developer Docs</a
+          >
+          <a
+            href="https://github.com/Varyshop/sms-gateway-app/releases"
+            style="color: #059669; font-weight: 600"
+            target="_blank"
+            >Stáhnout APK</a
+          >
+          <a href="https://github.com/Varyshop/sms-gateway" target="_blank"
+            >GitHub</a
+          >
+          <a href="../index.html" style="color: #6b7280; font-weight: 600"
+            >English version</a
+          >
         </nav>
       </aside>
 
@@ -489,9 +511,10 @@
 
         <div class="highlight-box">
           <strong>Novinka v1.3.0: Kampaně z mobilní appky</strong><br />
-          Nový tab <strong>Kampaně</strong> umožňuje vytvářet a odesílat SMS kampaně
-          přímo z telefonu. Vyberte šablonu, segment zákazníků, upravte text
-          a odešlete &mdash; včetně statistik (kliknutí, objednávky, příjem).
+          Nový tab <strong>Kampaně</strong> umožňuje vytvářet a odesílat SMS
+          kampaně přímo z telefonu. Vyberte šablonu, segment zákazníků, upravte
+          text a odešlete &mdash; včetně statistik (kliknutí, objednávky,
+          příjem).
           <a href="#kampan-z-appky">Více informací &darr;</a>
         </div>
 
@@ -672,19 +695,43 @@
         <h3>Stažení APK</h3>
         <p>
           Aplikace není na Google Play. Stáhněte APK soubor přímo z
-          <a href="https://github.com/Varyshop/sms-gateway-app/releases" target="_blank"><strong>GitHub Releases</strong></a>:
+          <a
+            href="https://github.com/Varyshop/sms-gateway-app/releases"
+            target="_blank"
+            ><strong>GitHub Releases</strong></a
+          >:
         </p>
         <ol class="steps">
-          <li>Na telefonu otevřete odkaz na <a href="https://github.com/Varyshop/sms-gateway-app/releases" target="_blank">Releases</a> a stáhněte nejnovější <strong>.apk</strong> soubor</li>
-          <li>Otevřete stažený soubor &mdash; pokud se objeví upozornění, povolte <em>Instalace z neznámých zdrojů</em></li>
+          <li>
+            Na telefonu otevřete odkaz na
+            <a
+              href="https://github.com/Varyshop/sms-gateway-app/releases"
+              target="_blank"
+              >Releases</a
+            >
+            a stáhněte nejnovější <strong>.apk</strong> soubor
+          </li>
+          <li>
+            Otevřete stažený soubor &mdash; pokud se objeví upozornění, povolte
+            <em>Instalace z neznámých zdrojů</em>
+          </li>
           <li>Dokončete instalaci</li>
         </ol>
 
         <div class="info">
           <strong>Proč není na Google Play?</strong> Aplikace používá oprávnění
-          <code>SEND_SMS</code> a <code>READ_SMS</code>, která vyžadují speciální
-          review na Play Store. Instalace APK přímo z GitHub Releases je zamýšlený
-          způsob distribuce.
+          <code>SEND_SMS</code> a <code>READ_SMS</code>, která vyžadují
+          speciální review na Play Store. Instalace APK přímo z GitHub Releases
+          je zamýšlený způsob distribuce.
+        </div>
+
+        <div class="info">
+          <strong>Instalace z počítače (pro pokročilé):</strong> pokud máte
+          telefon připojený přes USB, můžete nejnovější release nainstalovat
+          jedním příkazem &mdash; <code>./scripts/install-release.sh</code>
+          z modulu <code>extra/sms</code>. Viz
+          <a href="developer.html#3-instalace-aplikace">Vývojářská dokumentace</a>
+          pro build &amp; install skripty.
         </div>
 
         <p>Po spuštění aplikace budete požádáni o následující oprávnění:</p>
@@ -712,25 +759,30 @@
           </tr>
           <tr>
             <td><strong>Notifikace</strong></td>
-            <td>Pro zobrazení stavu odesílání a služby na pozadí (Android 13+ se ptá v dialogu)</td>
+            <td>
+              Pro zobrazení stavu odesílání a služby na pozadí (Android 13+ se
+              ptá v dialogu)
+            </td>
           </tr>
         </table>
 
-        <p>
+        <p></p>
         <div class="warning">
-          <strong>Zvýšení SMS limitu (WRITE_SECURE_SETTINGS):</strong> Pro zvýšení
-          nativního Android limitu na odchozí SMS je potřeba udělit aplikaci oprávnění
-          <code>WRITE_SECURE_SETTINGS</code>. To nelze udělit z telefonu &mdash;
-          je nutné připojit telefon k počítači přes USB a spustit:
+          <strong>Zvýšení SMS limitu (WRITE_SECURE_SETTINGS):</strong> Pro
+          zvýšení nativního Android limitu na odchozí SMS je potřeba udělit
+          aplikaci oprávnění <code>WRITE_SECURE_SETTINGS</code>. To nelze udělit
+          z telefonu &mdash; je nutné připojit telefon k počítači přes USB a
+          spustit:
           <pre><code>adb shell pm grant com.varyshop.smsgatewayapp android.permission.WRITE_SECURE_SETTINGS</code></pre>
-          Pokud buildujete ze zdrojáků, můžete použít: <code>yarn grant-permission</code>
+          Pokud buildujete ze zdrojáků, můžete použít:
+          <code>yarn grant-permission</code>
         </div>
 
         <p>
           Kromě těchto oprávnění aplikace zobrazí také dialog pro
           <strong>výjimku z optimalizace baterie</strong>. Tato výjimka je
-          nezbytná, aby Android neuspával aplikaci na pozadí a SMS se
-          spolehlivě odesílaly i při zamknuté obrazovce. Více viz sekce
+          nezbytná, aby Android neuspával aplikaci na pozadí a SMS se spolehlivě
+          odesílaly i při zamknuté obrazovce. Více viz sekce
           <a href="#background">Pozadí a spolehlivost</a>.
         </p>
 
@@ -867,17 +919,19 @@
         <h2 id="kampan-z-appky">Kampaň z mobilní appky</h2>
 
         <p>
-          <strong>Novinka v1.3.0:</strong> Kampaně můžete vytvářet přímo
-          z mobilní aplikace bez přístupu do Odoo backendu. Stačí otevřít
-          tab <strong>Kampaně</strong> v appce.
+          <strong>Novinka v1.3.0:</strong> Kampaně můžete vytvářet přímo z
+          mobilní aplikace bez přístupu do Odoo backendu. Stačí otevřít tab
+          <strong>Kampaně</strong> v appce.
         </p>
 
         <h3>Předpoklady</h3>
         <ul>
           <li>
             V administraci musí být vytvořena alespoň jedna
-            <strong>SMS šablona</strong> přiřazena k vašemu telefonu
-            (<span class="path">SMS Gateway &rarr; Marketing Templates</span>)
+            <strong>SMS šablona</strong> přiřazena k vašemu telefonu (<span
+              class="path"
+              >SMS Gateway &rarr; Marketing Templates</span
+            >)
           </li>
           <li>
             Šablona musí mít přiřazené <strong>segmenty</strong>
@@ -892,15 +946,14 @@
             k vašemu telefonu. Vyberte jednu klepnutím.
           </li>
           <li>
-            <strong>Segment a počet</strong> &mdash; vyberte segment
-            (např. &bdquo;Neobjednali 3 měsíce&ldquo;) a nastavte počet
-            příjemců. U každého segmentu vidíte kolik zákazníků odpovídá filtru.
+            <strong>Segment a počet</strong> &mdash; vyberte segment (např.
+            &bdquo;Neobjednali 3 měsíce&ldquo;) a nastavte počet příjemců. U
+            každého segmentu vidíte kolik zákazníků odpovídá filtru.
           </li>
           <li>
-            <strong>Náhled a potvrzení</strong> &mdash; uvidíte náhled SMS
-            s ukázkovým jménem. Text můžete před odesláním upravit.
-            Zvolíte <strong>Odeslat ihned</strong> nebo
-            <strong>Do fronty</strong>.
+            <strong>Náhled a potvrzení</strong> &mdash; uvidíte náhled SMS s
+            ukázkovým jménem. Text můžete před odesláním upravit. Zvolíte
+            <strong>Odeslat ihned</strong> nebo <strong>Do fronty</strong>.
           </li>
         </ol>
 
@@ -912,26 +965,34 @@
           <strong>Odeslat ihned</strong>.
         </p>
         <p>
-          U telefonu s dvěma SIM kartami appka nabídne výběr:
-          odeslat přes jednu SIM, nebo rozdělit mezi obě.
+          U telefonu s dvěma SIM kartami appka nabídne výběr: odeslat přes jednu
+          SIM, nebo rozdělit mezi obě.
         </p>
 
         <h3>Marketingové statistiky</h3>
-        <p>
-          Po odeslání kampaně appka zobrazuje:
-        </p>
+        <p>Po odeslání kampaně appka zobrazuje:</p>
         <ul>
-          <li><strong>Kliknuto</strong> &mdash; kolik příjemců kliklo na odkaz</li>
-          <li><strong>Objednávky</strong> &mdash; počet objednávek z kampaně (UTM tracking)</li>
-          <li><strong>Příjem</strong> &mdash; celkový příjem z objednávek v Kč</li>
+          <li>
+            <strong>Kliknuto</strong> &mdash; kolik příjemců kliklo na odkaz
+          </li>
+          <li>
+            <strong>Objednávky</strong> &mdash; počet objednávek z kampaně (UTM
+            tracking)
+          </li>
+          <li>
+            <strong>Příjem</strong> &mdash; celkový příjem z objednávek v Kč
+          </li>
           <li><strong>Odhlášeno</strong> &mdash; počet STOP odpovědí</li>
-          <li><strong>CTR, Konverze, Odhlášení %</strong> &mdash; procentuální metriky</li>
+          <li>
+            <strong>CTR, Konverze, Odhlášení %</strong> &mdash; procentuální
+            metriky
+          </li>
         </ul>
 
         <div class="info">
           <strong>Tip:</strong> Segmenty a šablony nastavuje admin v Odoo.
-          Operátor v appce jen vybírá a odesílá &mdash; nemůže změnit
-          filtry ani příjemce mimo nastavených segmentů.
+          Operátor v appce jen vybírá a odesílá &mdash; nemůže změnit filtry ani
+          příjemce mimo nastavených segmentů.
         </div>
 
         <!-- ==================== JAK SE ODESILAJI ==================== -->
@@ -1302,29 +1363,38 @@
 
         <p>
           Od verze 1.2.0 aplikace obsahuje nový tab <strong>Příchozí</strong>,
-          kde můžete sledovat všechny přijaté SMS zprávy na vašem gateway telefonu.
+          kde můžete sledovat všechny přijaté SMS zprávy na vašem gateway
+          telefonu.
         </p>
 
         <h3>Co tab Příchozí ukazuje</h3>
         <ul>
-          <li><strong>Odesílatel</strong> &mdash; číslo odesílatele a jméno partnera (pokud existuje v systému)</li>
+          <li>
+            <strong>Odesílatel</strong> &mdash; číslo odesílatele a jméno
+            partnera (pokud existuje v systému)
+          </li>
           <li><strong>Text zprávy</strong> &mdash; obsah přijaté SMS</li>
-          <li><strong>Stav blacklistu</strong> &mdash; zda je číslo na černé listině</li>
+          <li>
+            <strong>Stav blacklistu</strong> &mdash; zda je číslo na černé
+            listině
+          </li>
           <li><strong>Datum a čas</strong> &mdash; kdy byla zpráva přijata</li>
         </ul>
 
         <h3>Filtrování</h3>
         <p>
           V horní části obrazovky můžete přepnout mezi zobrazením
-          <strong>Všechny zprávy</strong> a <strong>Pouze STOP</strong>.
-          Seznam podporuje stránkování pro snazší procházení velkého objemu zpráv.
+          <strong>Všechny zprávy</strong> a <strong>Pouze STOP</strong>. Seznam
+          podporuje stránkování pro snazší procházení velkého objemu zpráv.
         </p>
 
         <h3>Chatter integrace</h3>
         <p>
-          Všechny přijaté SMS se automaticky zobrazují v <strong>chatteru partnera</strong>
-          v Odoo. Každá příchozí zpráva se zobrazí jako formátovaná poznámka s textem
-          v blockquote a případně se štítkem STOP, pokud zpráva obsahovala klíč pro odhlášení.
+          Všechny přijaté SMS se automaticky zobrazují v
+          <strong>chatteru partnera</strong>
+          v Odoo. Každá příchozí zpráva se zobrazí jako formátovaná poznámka s
+          textem v blockquote a případně se štítkem STOP, pokud zpráva
+          obsahovala klíč pro odhlášení.
         </p>
 
         <h3>Znovu prohledání inboxu</h3>
@@ -1332,8 +1402,8 @@
           Pokud chybí některé příchozí zprávy, přejděte v aplikaci do
           <em>Nastavení &rarr; Služba</em> a kliknete
           <span class="btn">Znovu prohledat přijaté SMS</span>. Aplikace přečte
-          SMS inbox za posledních 30 dní a všechny nalezené zprávy odešle na server.
-          Duplicity se automaticky ignorují.
+          SMS inbox za posledních 30 dní a všechny nalezené zprávy odešle na
+          server. Duplicity se automaticky ignorují.
         </p>
 
         <!-- ==================== STATISTIKY ==================== -->
@@ -1409,16 +1479,16 @@
 
         <p>
           Standardně si aplikace na telefonu <strong>každý pár sekund</strong>
-          vyzvedá nové SMS z fronty (tzv. polling). To funguje dobře, ale
-          mezi vytvořením SMS v administraci a začátkem odesílání může být
-          prodleva až 10 sekund.
+          vyzvedá nové SMS z fronty (tzv. polling). To funguje dobře, ale mezi
+          vytvořením SMS v administraci a začátkem odesílání může být prodleva
+          až 10 sekund.
         </p>
 
         <p>
           <strong>FCM (Firebase Cloud Messaging)</strong> tuto prodlevu
-          eliminuje. Když je FCM povoleno, administrace pošle telefonu
-          okamžitý &bdquo;push&ldquo; impuls &mdash; aplikace začne
-          odesílat prakticky ihned.
+          eliminuje. Když je FCM povoleno, administrace pošle telefonu okamžitý
+          &bdquo;push&ldquo; impuls &mdash; aplikace začne odesílat prakticky
+          ihned.
         </p>
 
         <h3>Jak FCM zapnout</h3>
@@ -1427,30 +1497,31 @@
             Přejděte do
             <span class="path">Nastavení &rarr; SMS Gateway</span>
           </li>
-          <li>
-            Zapněte přepínač <strong>FCM Push Enabled</strong>
-          </li>
+          <li>Zapněte přepínač <strong>FCM Push Enabled</strong></li>
           <li>
             Nahrajte soubor <strong>Firebase Service Account JSON</strong>
             &mdash; získáte ho ve
-            <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a>
-            (Project Settings &rarr; Service accounts &rarr; Generate new private key)
+            <a href="https://console.firebase.google.com/" target="_blank"
+              >Firebase Console</a
+            >
+            (Project Settings &rarr; Service accounts &rarr; Generate new
+            private key)
           </li>
           <li>Uložte nastavení</li>
         </ol>
 
         <div class="info">
           <strong>Jeden Firebase projekt pro všechny instance.</strong>
-          Pokud provozujete více Varyshop instancí (např. pro různé
-          zákazníky), stačí jeden Firebase projekt a jeden Service Account
-          JSON soubor. Každá instance ho použije samostatně.
+          Pokud provozujete více Varyshop instancí (např. pro různé zákazníky),
+          stačí jeden Firebase projekt a jeden Service Account JSON soubor.
+          Každá instance ho použije samostatně.
         </div>
 
         <div class="tip">
-          <strong>Co když FCM nenastavím?</strong> Aplikace funguje
-          naprosto normálně i bez FCM &mdash; použije standardní polling.
-          SMS se odešlou, jen s mírně vyšší prodlevou (do 10 sekund).
-          FCM je volitelné vylepšení, ne nutnost.
+          <strong>Co když FCM nenastavím?</strong> Aplikace funguje naprosto
+          normálně i bez FCM &mdash; použije standardní polling. SMS se odešlou,
+          jen s mírně vyšší prodlevou (do 10 sekund). FCM je volitelné
+          vylepšení, ne nutnost.
         </div>
 
         <!-- ==================== POZADI A SPOLEHLIVOST ==================== -->
@@ -1458,43 +1529,48 @@
 
         <p>
           Aplikace Varyshop SMS odesílá zprávy i když je
-          <strong>obrazovka zamknutá</strong> nebo když používáte jiný
-          program. Aby to fungovalo spolehlivě, musí být správně nastavena
-          optimalizace baterie.
+          <strong>obrazovka zamknutá</strong> nebo když používáte jiný program.
+          Aby to fungovalo spolehlivě, musí být správně nastavena optimalizace
+          baterie.
         </p>
 
         <h3>Optimalizace baterie</h3>
         <p>
-          Android se snaží šetřit baterii a může aplikacím na pozadí
-          omezit činnost. Pro Varyshop SMS je třeba toto omezení vypnout:
+          Android se snaží šetřit baterii a může aplikacím na pozadí omezit
+          činnost. Pro Varyshop SMS je třeba toto omezení vypnout:
         </p>
         <ol class="steps">
           <li>
-            Otevřete <span class="path">Nastavení telefonu &rarr; Baterie &rarr; Využití baterie aplikacemi</span>
+            Otevřete
+            <span class="path"
+              >Nastavení telefonu &rarr; Baterie &rarr; Využití baterie
+              aplikacemi</span
+            >
           </li>
-          <li>
-            Najdete aplikaci <strong>SMS Gateway</strong>
-          </li>
-          <li>
-            Zvolte <strong>Neomezené</strong> (Unrestricted)
-          </li>
+          <li>Najdete aplikaci <strong>SMS Gateway</strong></li>
+          <li>Zvolte <strong>Neomezené</strong> (Unrestricted)</li>
         </ol>
 
         <div class="info">
           <strong>Jak to ověřit:</strong>
-          <span class="path">Nastavení &rarr; Baterie &rarr; Využití baterie aplikacemi &rarr; SMS Gateway</span>
+          <span class="path"
+            >Nastavení &rarr; Baterie &rarr; Využití baterie aplikacemi &rarr;
+            SMS Gateway</span
+          >
           &mdash; mělo by tam být nastaveno <em>Neomezené</em>.
         </div>
 
         <h3>Xiaomi / MIUI &mdash; extra kroky</h3>
         <p>
-          Telefony Xiaomi s nadstavbou MIUI mají agresivnější správu
-          baterie. Kromě výjimky z optimalizace baterie je třeba navíc:
+          Telefony Xiaomi s nadstavbou MIUI mají agresivnější správu baterie.
+          Kromě výjimky z optimalizace baterie je třeba navíc:
         </p>
         <ul>
           <li>
             Povolit <strong>Autostart</strong>:
-            <span class="path">Nastavení &rarr; Aplikace &rarr; Oprávnění &rarr; Autostart</span>
+            <span class="path"
+              >Nastavení &rarr; Aplikace &rarr; Oprávnění &rarr; Autostart</span
+            >
             &mdash; zapnout pro SMS Gateway
           </li>
           <li>
@@ -1504,8 +1580,8 @@
 
         <div class="warning">
           <strong>Důležité:</strong> Pokud se SMS neodesílají při zamknuté
-          obrazovce, optimalizace baterie je nejčastější příčina. Vždy
-          nejdřív zkontrolujte toto nastavení.
+          obrazovce, optimalizace baterie je nejčastější příčina. Vždy nejdřív
+          zkontrolujte toto nastavení.
         </div>
 
         <!-- ==================== OVERENI ==================== -->
@@ -1628,7 +1704,10 @@
             <li>
               Nejčastější příčina: <strong>optimalizace baterie</strong> uspí
               aplikaci na pozadí. Zkontrolujte
-              <span class="path">Nastavení &rarr; Baterie &rarr; Využití baterie aplikacemi &rarr; SMS Gateway</span>
+              <span class="path"
+                >Nastavení &rarr; Baterie &rarr; Využití baterie aplikacemi
+                &rarr; SMS Gateway</span
+              >
               a nastavte na <em>Neomezené</em>
             </li>
             <li>
@@ -1636,14 +1715,13 @@
               <a href="#background">Pozadí a spolehlivost</a>)
             </li>
             <li>
-              Ověřit, že aplikace má povolené notifikace (potřeba pro službu na pozadí)
+              Ověřit, že aplikace má povolené notifikace (potřeba pro službu na
+              pozadí)
             </li>
           </ul>
         </div>
 
-        <p class="faq-q">
-          STOP zprávy se neobjeví v blacklistu
-        </p>
+        <p class="faq-q">STOP zprávy se neobjeví v blacklistu</p>
         <div class="faq-a">
           <ul>
             <li>
@@ -1651,8 +1729,8 @@
               (<em>RECEIVE_SMS</em>) &mdash; bez něj aplikace odpovědi neuvidí
             </li>
             <li>
-              Zkontrolujte připojení k internetu &mdash; aplikace musí
-              zaslat informaci o STOP zprávě zpět na server
+              Zkontrolujte připojení k internetu &mdash; aplikace musí zaslat
+              informaci o STOP zprávě zpět na server
             </li>
             <li>
               Příjemce musí odpovědět na <strong>stejné číslo</strong>, ze
@@ -1662,11 +1740,11 @@
               Zpráva musí obsahovat slovo STOP (velká/malá písmena nehrají roli)
             </li>
             <li>
-              <strong>Znovu prohledat přijaté SMS:</strong> V aplikaci přejděte do
-              <em>Nastavení &rarr; Služba</em> a kliknete tlačítko
-              <span class="btn">Znovu prohledat přijaté SMS</span>. Aplikace znovu
-              přečte SMS inbox za posledních 30 dní a odešle nalezené zprávy na server
-              (s deduplikací &mdash; duplicity se ignorují).
+              <strong>Znovu prohledat přijaté SMS:</strong> V aplikaci přejděte
+              do <em>Nastavení &rarr; Služba</em> a kliknete tlačítko
+              <span class="btn">Znovu prohledat přijaté SMS</span>. Aplikace
+              znovu přečte SMS inbox za posledních 30 dní a odešle nalezené
+              zprávy na server (s deduplikací &mdash; duplicity se ignorují).
             </li>
           </ul>
         </div>
@@ -1727,14 +1805,16 @@
         <p class="faq-q">Kolik SMS můžu odeslat denně?</p>
         <div class="faq-a">
           Záleží na počtu telefonů a jejich nastavení. Každý telefon může
-          typicky odeslat 200&ndash;1000 SMS denně (dle vašeho nastavení denního
+          typicky odeslat 200&ndash;5000 SMS denně (dle vašeho nastavení denního
           limitu a tarifu operátora). S pěti telefony tedy můžete odeslat až
-          5000 SMS denně.
+          20000 SMS denně.
         </div>
 
         <div class="info">
-          V případě jakýchkoli dotazů nebo potřebné pomoci s nastavením kontaktujte
-          <a href="mailto:info@varyshop.eu">info@varyshop.eu</a> nebo přímo vývojáře
+          V případě jakýchkoli dotazů nebo potřebné pomoci s nastavením
+          kontaktujte
+          <a href="mailto:info@varyshop.eu">info@varyshop.eu</a> nebo přímo
+          vývojáře
           <a href="mailto:info@michalvarys.eu">info@michalvarys.eu</a>
         </div>
 
@@ -1770,15 +1850,22 @@
 
         // Helper: activate a nav link by section id
         function setActive(id) {
-          navLinks.forEach(function (l) { l.classList.remove("active"); });
-          var link = document.querySelector('#sidebarNav a[data-section="' + id + '"]');
+          navLinks.forEach(function (l) {
+            l.classList.remove("active");
+          });
+          var link = document.querySelector(
+            '#sidebarNav a[data-section="' + id + '"]',
+          );
           if (link) {
             link.classList.add("active");
             // Keep sidebar nav link visible
             var sidebar = document.getElementById("sidebar");
             var linkRect = link.getBoundingClientRect();
             var sidebarRect = sidebar.getBoundingClientRect();
-            if (linkRect.top < sidebarRect.top + 80 || linkRect.bottom > sidebarRect.bottom - 20) {
+            if (
+              linkRect.top < sidebarRect.top + 80 ||
+              linkRect.bottom > sidebarRect.bottom - 20
+            ) {
               link.scrollIntoView({ block: "center", behavior: "smooth" });
             }
           }
@@ -1792,7 +1879,9 @@
             // Lock scroll-based updates while browser animates to the section
             clickLock = section;
             clearTimeout(clickTimer);
-            clickTimer = setTimeout(function () { clickLock = null; }, 1000);
+            clickTimer = setTimeout(function () {
+              clickLock = null;
+            }, 1000);
             // Mobile: close sidebar
             if (window.innerWidth <= 860) {
               toggleSidebar();
@@ -1819,15 +1908,19 @@
         }
 
         var ticking = false;
-        window.addEventListener("scroll", function () {
-          if (ticking) return;
-          ticking = true;
-          requestAnimationFrame(function () {
-            ticking = false;
-            if (clickLock) return; // Don't override click selection during animation
-            setActive(getActiveSection());
-          });
-        }, { passive: true });
+        window.addEventListener(
+          "scroll",
+          function () {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(function () {
+              ticking = false;
+              if (clickLock) return; // Don't override click selection during animation
+              setActive(getActiveSection());
+            });
+          },
+          { passive: true },
+        );
 
         // ===== Hashchange (browser back/forward) =====
         window.addEventListener("hashchange", function () {
@@ -1836,7 +1929,9 @@
             setActive(hash);
             clickLock = hash;
             clearTimeout(clickTimer);
-            clickTimer = setTimeout(function () { clickLock = null; }, 1000);
+            clickTimer = setTimeout(function () {
+              clickLock = null;
+            }, 1000);
           }
         });
 
