@@ -157,57 +157,58 @@
   <body>
     <nav style="background:#f8fafc; border-bottom:1px solid #e5e7eb; padding:12px 20px; margin-bottom:24px; display:flex; gap:20px; align-items:center; font-size:0.9em">
       <strong style="color:#111827">Varyshop SMS</strong>
-      <a href="index.html" style="color:#3b82f6; text-decoration:none">Uzivatelska prirucka</a>
+      <a href="index.html" style="color:#3b82f6; text-decoration:none">Uživatelská příručka</a>
       <span style="color:#3b82f6; font-weight:600; border-bottom:2px solid #3b82f6; padding-bottom:2px">API &amp; Developer Docs</span>
-      <a href="https://github.com/Varyshop/sms-gateway-app/releases" style="color:#059669; text-decoration:none; margin-left:auto" target="_blank">Stahnout APK</a>
+      <a href="https://github.com/Varyshop/sms-gateway-app/releases" style="color:#059669; text-decoration:none; margin-left:auto" target="_blank">Stáhnout APK</a>
       <a href="https://github.com/Varyshop/sms-gateway" style="color:#6b7280; text-decoration:none" target="_blank">GitHub</a>
+      <a href="en/developer.html" style="color:#6b7280; text-decoration:none">English</a>
     </nav>
 
-    <h1>SMS Gateway - Kompletni dokumentace</h1>
+    <h1>SMS Gateway - Kompletní dokumentace</h1>
 
     <p>
-      Modul <strong>SMS Gateway</strong> nahrazuje Odoo IAP pro odesilani SMS.
-      Misto cloudove sluzby pouziva fyzicke Android telefony jako SMS brany.
-      Kazdy telefon se sparuje s Odoo pomoci QR kodu a automaticky odesilajici
+      Modul <strong>SMS Gateway</strong> nahrazuje Odoo IAP pro odesílání SMS.
+      Místo cloudové služby používá fyzické Android telefony jako SMS brány.
+      Každý telefon se spáruje s Odoo pomocí QR kódu a automaticky odesílající
       SMS z fronty.
     </p>
 
     <div class="toc">
       <strong>Obsah</strong>
       <ul>
-        <li><a href="#1-architektura">1. Architektura systemu</a></li>
+        <li><a href="#1-architektura">1. Architektura systému</a></li>
         <li><a href="#2-instalace-modulu">2. Instalace Odoo modulu</a></li>
         <li>
-          <a href="#3-instalace-aplikace">3. Instalace mobilni aplikace</a>
+          <a href="#3-instalace-aplikace">3. Instalace mobilní aplikace</a>
         </li>
-        <li><a href="#4-nastaveni-modulu">4. Nastaveni modulu v Odoo</a></li>
-        <li><a href="#5-parovani">5. Parovani telefonu</a></li>
-        <li><a href="#6-kampane">6. Nastaveni SMS kampane</a></li>
-        <li><a href="#7-filtrovani">7. Filtrovani domeny pro telefony</a></li>
-        <li><a href="#8-odeslani">8. Spusteni odeslani</a></li>
-        <li><a href="#9-odkazy">9. Jak funguji odkazy a tracking</a></li>
-        <li><a href="#10-odhlaseni">10. Odhlaseni a blacklist (GDPR)</a></li>
-        <li><a href="#11-statistiky">11. Statistiky a vykon kampane</a></li>
+        <li><a href="#4-nastaveni-modulu">4. Nastavení modulu v Odoo</a></li>
+        <li><a href="#5-parovani">5. Párování telefonu</a></li>
+        <li><a href="#6-kampane">6. Nastavení SMS kampaně</a></li>
+        <li><a href="#7-filtrovani">7. Filtrování domény pro telefony</a></li>
+        <li><a href="#8-odeslani">8. Spuštění odesílání</a></li>
+        <li><a href="#9-odkazy">9. Jak fungují odkazy a tracking</a></li>
+        <li><a href="#10-odhlaseni">10. Odhlášení a blacklist (GDPR)</a></li>
+        <li><a href="#11-statistiky">11. Statistiky a výkon kampaně</a></li>
         <li><a href="#12-limity">12. Limity a rate limiting</a></li>
         <li><a href="#13-dual-sim">13. Dual SIM podpora</a></li>
         <li><a href="#14-api">14. API reference</a></li>
-        <li><a href="#14b-marketing-modely">14b. Marketing modely (segmenty a sablony)</a></li>
-        <li><a href="#14c-campaign-api">14c. Campaign API (mobilni appka)</a></li>
-        <li><a href="#15-troubleshooting">15. Reseni problemu</a></li>
+        <li><a href="#14b-marketing-modely">14b. Marketing modely (segmenty a šablony)</a></li>
+        <li><a href="#14c-campaign-api">14c. Campaign API (mobilní appka)</a></li>
+        <li><a href="#15-troubleshooting">15. Řešení problémů</a></li>
         <li><a href="#16-fcm">16. FCM Push Notifications</a></li>
-        <li><a href="#17-pozadi">17. Pozadi a spolehlivost (Android)</a></li>
+        <li><a href="#17-pozadi">17. Pozadí a spolehlivost (Android)</a></li>
         <li><a href="#18-changelog">18. Changelog</a></li>
       </ul>
     </div>
 
     <!-- ==================== 1. ARCHITEKTURA ==================== -->
-    <h2 id="1-architektura">1. Architektura systemu</h2>
+    <h2 id="1-architektura">1. Architektura systému</h2>
 
     <div class="flow-diagram">
       ┌─────────────────┐ ┌──────────────────────┐ ┌─────────────────┐ │ Odoo
-      Server │ │ SMS Gateway App │ │ Prijemce SMS │ │ │ │ (Android telefon) │ │
+      Server │ │ SMS Gateway App │ │ Příjemce SMS │ │ │ │ (Android telefon) │ │
       │ │ mailing.mailing │────▶│ │────▶│ +420 777... │ │ sms.sms │ │ DirectSms
-      (nativni) │ │ │ │ sms.gateway.phone│◀───│ Heartbeat │ │ Klikne na link │ │
+      (nativní) │ │ │ │ sms.gateway.phone│◀───│ Heartbeat │ │ Klikne na link │ │
       │ │ SMS Queue Polling │ │ │ │ │ link.tracker │◀────│ Inbound SMS (STOP) │
       │ ▼ │ │ phone.blacklist │ │ │ │ /r/ABC/s/42 │ └─────────────────┘
       └──────────────────────┘ └─────────────────┘ │ │ │
@@ -232,12 +233,12 @@
       </tr>
       <tr>
         <td><code>sms.gateway.phone</code></td>
-        <td>Model reprezentujici jeden registrovany telefon</td>
+        <td>Model reprezentující jeden registrovaný telefon</td>
       </tr>
       <tr>
         <td><code>sms.sms</code></td>
         <td>
-          Rozsireny o <code>gateway_phone_id</code> a <code>gateway_state</code>
+          Rozšířený o <code>gateway_phone_id</code> a <code>gateway_state</code>
         </td>
       </tr>
     </table>
@@ -245,59 +246,59 @@
     <!-- ==================== 2. INSTALACE MODULU ==================== -->
     <h2 id="2-instalace-modulu">2. Instalace Odoo modulu</h2>
 
-    <h3>Predpoklady</h3>
+    <h3>Předpoklady</h3>
     <ul>
       <li>
         Odoo 18 s moduly: <code>sms</code>, <code>mass_mailing_sms</code>,
         <code>phone_validation</code>
       </li>
-      <li>Python knihovna <code>qrcode</code> (pro generovani QR kodu)</li>
+      <li>Python knihovna <code>qrcode</code> (pro generování QR kódu)</li>
     </ul>
 
     <h3>Postup</h3>
     <ol>
       <li class="step">
-        Nainstalujte Python zavislost:
+        Nainstalujte Python závislost:
         <pre><code>pip install qrcode[pil]</code></pre>
       </li>
       <li class="step">
-        Zkopirujte modul <code>sms_gateway</code> do adresare Odoo addons:
+        Zkopírujte modul <code>sms_gateway</code> do adresáře Odoo addons:
         <pre><code>cp -r extra/sms/sms_modules/sms_gateway /path/to/odoo/addons/</code></pre>
       </li>
-      <li class="step">Restartujte Odoo server a aktualizujte seznam modulu</li>
+      <li class="step">Restartujte Odoo server a aktualizujte seznam modulů</li>
       <li class="step">
-        Nainstalujte modul <strong>SMS Gateway</strong> pres Aplikace
+        Nainstalujte modul <strong>SMS Gateway</strong> přes Aplikace
       </li>
     </ol>
 
     <div class="warning">
-      <strong>Dulezite:</strong> Modul <code>sms_gateway</code> je vzajemne
-      exkluzivni s <code>sms_httpsms</code>. Pokud pouzivate sms_httpsms,
-      odinstalujte ho pred instalaci sms_gateway.
+      <strong>Důležité:</strong> Modul <code>sms_gateway</code> je vzájemně
+      exkluzivní s <code>sms_httpsms</code>. Pokud používáte sms_httpsms,
+      odinstalujte ho před instalací sms_gateway.
     </div>
 
     <!-- ==================== 3. INSTALACE APLIKACE ==================== -->
-    <h2 id="3-instalace-aplikace">3. Instalace mobilni aplikace</h2>
+    <h2 id="3-instalace-aplikace">3. Instalace mobilní aplikace</h2>
 
-    <h3>Stazeni APK (doporuceno)</h3>
+    <h3>Stažení APK (doporučeno)</h3>
     <p>
-      Stahnete nejnovejsi release APK z
+      Stáhněte nejnovější release APK z
       <a href="https://github.com/Varyshop/sms-gateway-app/releases" target="_blank"><strong>GitHub Releases</strong></a>.
-      Na telefonu otevrete stazeny <code>.apk</code> soubor a povolte instalaci z neznamych zdroju.
+      Na telefonu otevřete stažený <code>.apk</code> soubor a povolte instalaci z neznámých zdrojů.
     </p>
 
     <div class="note">
-      <strong>Poznamka:</strong> Aplikace neni na Google Play. Pouziva opravneni
-      <code>SEND_SMS</code> a <code>READ_SMS</code>, ktera vyzaduji specialni review.
-      Sideloading APK z GitHub Releases je zamysleny zpusob distribuce.
+      <strong>Poznámka:</strong> Aplikace není na Google Play. Používá oprávnění
+      <code>SEND_SMS</code> a <code>READ_SMS</code>, která vyžadují speciální review.
+      Sideloading APK z GitHub Releases je zamýšlený způsob distribuce.
     </div>
 
-    <h3>Predpoklady (build ze zdrojaku)</h3>
+    <h3>Předpoklady (build ze zdrojáků)</h3>
     <ul>
       <li>Android telefon (verze 8.0+ / API 26)</li>
       <li>Node.js 18+ a npm/yarn</li>
       <li>Expo CLI (<code>npx expo</code>)</li>
-      <li>Android Studio (pro lokalni build)</li>
+      <li>Android Studio (pro lokální build)</li>
     </ul>
 
     <h3>Build aplikace</h3>
@@ -321,65 +322,65 @@ eas build --profile production-apk --platform android</code></pre>
   --title "v1.x.x" \
   --notes "Release notes"</code></pre>
 
-    <h3>Pozadovana opravneni Android</h3>
+    <h3>Požadovaná oprávnění Android</h3>
     <table>
       <tr>
-        <th>Opravneni</th>
-        <th>Ucel</th>
+        <th>Oprávnění</th>
+        <th>Účel</th>
       </tr>
       <tr>
         <td><code>SEND_SMS</code></td>
-        <td>Odesilani SMS bez otevreni aplikace</td>
+        <td>Odesílání SMS bez otevření aplikace</td>
       </tr>
       <tr>
         <td><code>RECEIVE_SMS</code></td>
-        <td>Cteni prichozich SMS (detekce STOP)</td>
+        <td>Čtení příchozích SMS (detekce STOP)</td>
       </tr>
       <tr>
         <td><code>READ_PHONE_STATE</code></td>
-        <td>Cteni cisel SIM karet</td>
+        <td>Čtení čísel SIM karet</td>
       </tr>
       <tr>
         <td><code>READ_PHONE_NUMBERS</code></td>
-        <td>Cteni telefonniho cisla</td>
+        <td>Čtení telefonního čísla</td>
       </tr>
       <tr>
         <td><code>CAMERA</code></td>
-        <td>Skenovani QR kodu</td>
+        <td>Skenování QR kódu</td>
       </tr>
     </table>
 
     <!-- ==================== 4. NASTAVENI MODULU ==================== -->
-    <h2 id="4-nastaveni-modulu">4. Nastaveni modulu v Odoo</h2>
+    <h2 id="4-nastaveni-modulu">4. Nastavení modulu v Odoo</h2>
 
-    <h3>Vytvoreni gateway telefonu</h3>
+    <h3>Vytvoření gateway telefonu</h3>
     <ol>
       <li class="step">
-        Prejdete do
+        Přejděte do
         <strong>Email Marketing &gt; SMS Gateway &gt; Gateway Phones</strong>
       </li>
-      <li class="step">Kliknete <strong>Novy</strong></li>
+      <li class="step">Klikněte <strong>Nový</strong></li>
       <li class="step">
-        Vyplnte:
+        Vyplňte:
         <table>
           <tr>
             <th>Pole</th>
             <th>Popis</th>
-            <th>Priklad</th>
+            <th>Příklad</th>
           </tr>
           <tr>
             <td>Name</td>
-            <td>Nazev telefonu</td>
+            <td>Název telefonu</td>
             <td>Telefon 1 - O2</td>
           </tr>
           <tr>
             <td>Phone Number</td>
-            <td>Hlavni cislo (mezinarodni format)</td>
+            <td>Hlavní číslo (mezinárodní formát)</td>
             <td>+420777123456</td>
           </tr>
           <tr>
             <td>Phone Number 2</td>
-            <td>Druhe cislo (dual SIM, volitelne)</td>
+            <td>Druhé číslo (dual SIM, volitelné)</td>
             <td>+420608987654</td>
           </tr>
           <tr>
@@ -394,42 +395,42 @@ eas build --profile production-apk --platform android</code></pre>
           </tr>
           <tr>
             <td>Heartbeat Timeout</td>
-            <td>Po kolika minutach bez heartbeatu = offline</td>
+            <td>Po kolika minutách bez heartbeatu = offline</td>
             <td>5</td>
           </tr>
         </table>
       </li>
       <li class="step">
-        Kliknete <strong>Generate API Key</strong> - vygeneruje se API klic a QR
-        kod
+        Klikněte <strong>Generate API Key</strong> - vygeneruje se API klíč a QR
+        kód
       </li>
     </ol>
 
     <div class="note">
-      <strong>Tip:</strong> Muzete registrovat vice telefonu. System automaticky
-      rozdeluje zatez (least-loaded algoritmus).
+      <strong>Tip:</strong> Můžete registrovat více telefonů. Systém automaticky
+      rozděluje zátěž (least-loaded algoritmus).
     </div>
 
     <!-- ==================== 5. PAROVANI ==================== -->
-    <h2 id="5-parovani">5. Parovani telefonu</h2>
+    <h2 id="5-parovani">5. Párování telefonu</h2>
 
     <ol>
       <li class="step">
-        V Odoo otevrete formular gateway telefonu a ujistete se, ze je
-        vygenerovany QR kod
+        V Odoo otevřete formulář gateway telefonu a ujistěte se, že je
+        vygenerovaný QR kód
       </li>
       <li class="step">
-        Na Android telefonu otevrete aplikaci <strong>SMS Gateway</strong>
+        Na Android telefonu otevřete aplikaci <strong>SMS Gateway</strong>
       </li>
-      <li class="step">Prejdete na tab <strong>Nastaveni</strong></li>
-      <li class="step">Kliknete <strong>Naskenovat QR kod</strong></li>
-      <li class="step">Nasmerujte kameru na QR kod zobrazeny v Odoo</li>
+      <li class="step">Přejděte na tab <strong>Nastavení</strong></li>
+      <li class="step">Klikněte <strong>Naskenovat QR kód</strong></li>
+      <li class="step">Nasměrujte kameru na QR kód zobrazený v Odoo</li>
       <li class="step">
-        Aplikace se automaticky spoji se serverem a zacne posilat heartbeaty
+        Aplikace se automaticky spojí se serverem a začne posílat heartbeaty
       </li>
     </ol>
 
-    <h3>QR kod obsahuje</h3>
+    <h3>QR kód obsahuje</h3>
     <pre><code>{
     "type": "sms_gateway",
     "url": "https://vas-odoo-server.cz",
@@ -437,202 +438,202 @@ eas build --profile production-apk --platform android</code></pre>
 }</code></pre>
 
     <div class="success">
-      <strong>Overeni:</strong> Po sparovani by se mel stav telefonu v Odoo
-      zmenit na <span class="badge badge-green">Online</span>. Pokud ne,
-      zkontrolujte sitove pripojeni a cas heartbeat timeout.
+      <strong>Ověření:</strong> Po spárování by se měl stav telefonu v Odoo
+      změnit na <span class="badge badge-green">Online</span>. Pokud ne,
+      zkontrolujte síťové připojení a čas heartbeat timeout.
     </div>
 
     <!-- ==================== 6. KAMPANE ==================== -->
-    <h2 id="6-kampane">6. Nastaveni SMS kampane</h2>
+    <h2 id="6-kampane">6. Nastavení SMS kampaně</h2>
 
-    <h3>Vytvoreni kampane</h3>
+    <h3>Vytvoření kampaně</h3>
     <ol>
       <li class="step">
-        Prejdete do <strong>Email Marketing &gt; SMS Marketing</strong>
+        Přejděte do <strong>Email Marketing &gt; SMS Marketing</strong>
       </li>
-      <li class="step">Kliknete <strong>Novy</strong></li>
+      <li class="step">Klikněte <strong>Nový</strong></li>
       <li class="step">
         Nastavte:
         <ul>
-          <li><strong>Subject:</strong> Nazev kampane (interni)</li>
+          <li><strong>Subject:</strong> Název kampaně (interní)</li>
           <li>
-            <strong>Recipients:</strong> Vyberte model (napr. Kontakty) a filtr
+            <strong>Recipients:</strong> Vyberte model (např. Kontakty) a filtr
           </li>
-          <li><strong>Body:</strong> Text SMS zpravy</li>
+          <li><strong>Body:</strong> Text SMS zprávy</li>
         </ul>
       </li>
     </ol>
 
-    <h3>Priklad SMS textu</h3>
+    <h3>Příklad SMS textu</h3>
     <pre><code>Ahoj {{ object.name }}! Mate 20% slevu na vse.
 Nakupte na https://www.example.cz/akce
 STOP pro odhlaseni</code></pre>
 
     <div class="note">
-      <strong>Automaticka nahrada:</strong> Modul automaticky nahradi vsechny
-      URL v SMS za kratke trackovaci odkazy (napr.
-      <code>https://vas-server.cz/r/ABC123/s/42</code>). Puvodni odhlasovaci
-      odkazy se nahradi textem <strong>STOP pro odhlaseni</strong>.
+      <strong>Automatická náhrada:</strong> Modul automaticky nahradí všechny
+      URL v SMS za krátké trackovací odkazy (např.
+      <code>https://vas-server.cz/r/ABC123/s/42</code>). Původní odhlašovací
+      odkazy se nahradí textem <strong>STOP pro odhlášení</strong>.
     </div>
 
-    <h3>Filtrovani prijemcu</h3>
-    <p>Pouzijte Odoo domain filtr pro vyber prijemcu:</p>
+    <h3>Filtrování příjemců</h3>
+    <p>Použijte Odoo domain filtr pro výběr příjemců:</p>
     <table>
       <tr>
-        <th>Priklad filtru</th>
+        <th>Příklad filtru</th>
         <th>Popis</th>
       </tr>
       <tr>
         <td><code>[("category_id", "in", [10])]</code></td>
-        <td>Kontakty s kategorii ID 10</td>
+        <td>Kontakty s kategorií ID 10</td>
       </tr>
       <tr>
         <td><code>[("country_id.code", "=", "CZ")]</code></td>
-        <td>Ceske kontakty</td>
+        <td>České kontakty</td>
       </tr>
       <tr>
         <td><code>[("customer_rank", ">", 0)]</code></td>
-        <td>Pouze zakazniky</td>
+        <td>Pouze zákazníky</td>
       </tr>
       <tr>
         <td><code>[("opt_out", "=", False)]</code></td>
-        <td>Pouze ti, co se neodhlasili</td>
+        <td>Pouze ti, co se neodhlásili</td>
       </tr>
     </table>
 
     <!-- ==================== 7. FILTROVANI DOMENY ==================== -->
-    <h2 id="7-filtrovani">7. Filtrovani domeny pro telefony</h2>
+    <h2 id="7-filtrovani">7. Filtrování domény pro telefony</h2>
 
     <p>
-      Kazdy gateway telefon muze mit nastaven
-      <strong>Partner Domain Filter</strong>. Tento filtr urcuje, ktere SMS se
-      budou prirazovat danemu telefonu na zaklade partnera prijemce.
+      Každý gateway telefon může mít nastaven
+      <strong>Partner Domain Filter</strong>. Tento filtr určuje, které SMS se
+      budou přiřazovat danému telefonu na základě partnera příjemce.
     </p>
 
     <h3>Jak to funguje</h3>
     <ol>
       <li>
-        Kdyz <code>sms.sms._send()</code> prirazuje SMS do fronty, hleda
-        dostupne telefony
+        Když <code>sms.sms._send()</code> přiřazuje SMS do fronty, hledá
+        dostupné telefony
       </li>
       <li>
-        Pro kazdy telefon s nastavenym <code>domain_filter</code> se overi, zda
-        partner prijemce odpovida filtru
+        Pro každý telefon s nastaveným <code>domain_filter</code> se ověří, zda
+        partner příjemce odpovídá filtru
       </li>
       <li>
-        Telefon <strong>bez filtru</strong> prijima SMS pro
-        <strong>vsechny</strong> partnery
+        Telefon <strong>bez filtru</strong> přijímá SMS pro
+        <strong>všechny</strong> partnery
       </li>
       <li>
-        Telefon <strong>s filtrem</strong> prijima pouze SMS kde partner
-        odpovida domene
+        Telefon <strong>s filtrem</strong> přijímá pouze SMS kde partner
+        odpovídá doméně
       </li>
     </ol>
 
-    <h3>Priklady pouziti</h3>
+    <h3>Příklady použití</h3>
     <table>
       <tr>
-        <th>Scenar</th>
+        <th>Scénář</th>
         <th>Domain Filter</th>
-        <th>Vysvetleni</th>
+        <th>Vysvětlení</th>
       </tr>
       <tr>
-        <td>Telefon pro VIP zakazniky</td>
+        <td>Telefon pro VIP zákazníky</td>
         <td><code>[("category_id", "in", [10])]</code></td>
-        <td>Pouze zakaznici s kategorii "VIP" (ID 10)</td>
+        <td>Pouze zákazníci s kategorií "VIP" (ID 10)</td>
       </tr>
       <tr>
         <td>Telefon pro Prahu</td>
         <td><code>[("state_id.name", "=", "Praha")]</code></td>
-        <td>Pouze zakaznici z Prahy</td>
+        <td>Pouze zákazníci z Prahy</td>
       </tr>
       <tr>
-        <td>Telefon pro vsechny</td>
-        <td><em>(prazdne)</em></td>
-        <td>Prijima SMS pro vsechny partnery</td>
+        <td>Telefon pro všechny</td>
+        <td><em>(prázdné)</em></td>
+        <td>Přijímá SMS pro všechny partnery</td>
       </tr>
       <tr>
         <td>Telefon pro firmy</td>
         <td><code>[("is_company", "=", True)]</code></td>
-        <td>Pouze firmy, ne fyzicke osoby</td>
+        <td>Pouze firmy, ne fyzické osoby</td>
       </tr>
     </table>
 
     <div class="warning">
-      <strong>Pozor:</strong> Pokud zadny telefon neodpovida filtru pro daneho
-      partnera, SMS se oznaci jako chyba
-      (<code>failure_type='sms_server'</code>). Doporucujeme mit alespon jeden
+      <strong>Pozor:</strong> Pokud žádný telefon neodpovídá filtru pro daného
+      partnera, SMS se označí jako chyba
+      (<code>failure_type='sms_server'</code>). Doporučujeme mít alespoň jeden
       telefon bez filtru jako fallback.
     </div>
 
     <!-- ==================== 8. ODESLANI ==================== -->
-    <h2 id="8-odeslani">8. Spusteni odeslani</h2>
+    <h2 id="8-odeslani">8. Spuštění odesílání</h2>
 
-    <h3>Automaticke odeslani (kampan)</h3>
+    <h3>Automatické odesílání (kampaň)</h3>
     <ol>
-      <li class="step">Vytvorte a nastavte kampan (viz sekce 6)</li>
+      <li class="step">Vytvořte a nastavte kampaň (viz sekce 6)</li>
       <li class="step">
-        Kliknete <strong>Send</strong> nebo <strong>Schedule</strong>
+        Klikněte <strong>Send</strong> nebo <strong>Schedule</strong>
       </li>
       <li class="step">
-        Odoo vytvori <code>sms.sms</code> zaznamy ve stavu <code>outgoing</code>
+        Odoo vytvoří <code>sms.sms</code> záznamy ve stavu <code>outgoing</code>
       </li>
       <li class="step">
         Cron job (<em>SMS: SMS Queue Manager</em>) pickuje outgoing SMS
       </li>
       <li class="step">
-        <code>_send()</code> priradi kazde SMS gateway telefonu a zmeni stav na
+        <code>_send()</code> přiřadí každé SMS gateway telefonu a změní stav na
         <code>pending</code>
       </li>
-      <li class="step">Mobilni aplikace si vyzvedne pending SMS pres API</li>
-      <li class="step">Aplikace odesle SMS a potvrdi stav (sent/error)</li>
+      <li class="step">Mobilní aplikace si vyzvedne pending SMS přes API</li>
+      <li class="step">Aplikace odešle SMS a potvrdí stav (sent/error)</li>
     </ol>
 
-    <h3>Manualni odeslani (Force Create SMS Queue)</h3>
-    <p>Pokud se SMS nevytvorily automaticky:</p>
+    <h3>Manuální odesílání (Force Create SMS Queue)</h3>
+    <p>Pokud se SMS nevytvořily automaticky:</p>
     <ol>
-      <li class="step">Otevrete kampan</li>
-      <li class="step">Kliknete <strong>Force Create SMS Queue</strong></li>
+      <li class="step">Otevřete kampaň</li>
+      <li class="step">Klikněte <strong>Force Create SMS Queue</strong></li>
       <li class="step">
-        System vytvori SMS zaznamy pro vsechny zbyvajici prijemce
+        Systém vytvoří SMS záznamy pro všechny zbývající příjemce
       </li>
     </ol>
 
-    <h3>Pauzovani kampane</h3>
-    <p>Kampan lze pozastavit bez zruseni:</p>
+    <h3>Pozastavení kampaně</h3>
+    <p>Kampaň lze pozastavit bez zrušení:</p>
     <ol>
-      <li class="step">Otevrete kampan v rezimu <em>Sending</em></li>
-      <li class="step">Prepnete prepinac <strong>Paused</strong> na aktivni</li>
+      <li class="step">Otevřete kampaň v režimu <em>Sending</em></li>
+      <li class="step">Přepněte přepínač <strong>Paused</strong> na aktivní</li>
       <li class="step">
-        SMS ve fronte se nebudou odesilat, ale zustanou prirazeny
+        SMS ve frontě se nebudou odesílat, ale zůstanou přiřazeny
       </li>
-      <li class="step">Pro obnoveni vypnete prepinac Paused</li>
+      <li class="step">Pro obnovení vypněte přepínač Paused</li>
     </ol>
 
     <div class="flow-diagram">
-      Stavy SMS: outgoing ──▶ pending (prirazeno telefonu) ──▶ processing
-      (telefon vyzvedl) │ ├──▶ sending (telefon odesila) │ │ │ ├──▶ sent
-      (uspesne odeslano) ✓ │ └──▶ error (chyba odeslani) ✗ │ └──▶ error (chyba
-      odeslani) ✗ Pokud je kampan pauzovana: outgoing ──▶ (preskoceno, zustava
+      Stavy SMS: outgoing ──▶ pending (přiřazeno telefonu) ──▶ processing
+      (telefon vyzvedl) │ ├──▶ sending (telefon odesílá) │ │ │ ├──▶ sent
+      (úspěšně odesláno) ✓ │ └──▶ error (chyba odeslání) ✗ │ └──▶ error (chyba
+      odeslání) ✗ Pokud je kampaň pozastavená: outgoing ──▶ (přeskočeno, zůstává
       outgoing)
     </div>
 
     <!-- ==================== 9. ODKAZY ==================== -->
-    <h2 id="9-odkazy">9. Jak funguji odkazy a tracking</h2>
+    <h2 id="9-odkazy">9. Jak fungují odkazy a tracking</h2>
 
-    <h3>Automaticka konverze odkazu</h3>
+    <h3>Automatická konverze odkazů</h3>
     <p>
-      Vsechny URL v SMS tele jsou automaticky prevadeny na kratke trackovaci
+      Všechny URL v SMS těle jsou automaticky převáděny na krátké trackovací
       odkazy:
     </p>
 
     <table>
       <tr>
-        <th>Faze</th>
-        <th>Priklad</th>
+        <th>Fáze</th>
+        <th>Příklad</th>
       </tr>
       <tr>
-        <td>Puvodni text</td>
+        <td>Původní text</td>
         <td><code>Nakupte na https://www.example.cz/akce</code></td>
       </tr>
       <tr>
@@ -640,7 +641,7 @@ STOP pro odhlaseni</code></pre>
         <td><code>Nakupte na https://vas-server.cz/r/ABC123</code></td>
       </tr>
       <tr>
-        <td>Po prirazeni SMS ID</td>
+        <td>Po přiřazení SMS ID</td>
         <td><code>Nakupte na https://vas-server.cz/r/ABC123/s/42</code></td>
       </tr>
     </table>
@@ -648,34 +649,34 @@ STOP pro odhlaseni</code></pre>
     <h3>Jak tracking funguje</h3>
     <ol>
       <li class="step">
-        <strong>Vytvoreni odkazu:</strong> Odoo vytvori
-        <code>link.tracker</code> zaznam s kratky kodem a UTM parametry
+        <strong>Vytvoření odkazu:</strong> Odoo vytvoří
+        <code>link.tracker</code> záznam s krátkým kódem a UTM parametry
       </li>
       <li class="step">
-        <strong>Pridani SMS ID:</strong> Ke kazdemu odkazu se prida
-        <code>/s/{sms_id}</code> pro identifikaci konkretniho prijemce
+        <strong>Přidání SMS ID:</strong> Ke každému odkazu se přidá
+        <code>/s/{sms_id}</code> pro identifikaci konkrétního příjemce
       </li>
       <li class="step">
-        <strong>Kliknuti prijemce:</strong> Prijemce klikne na link ve SMS
-        zprave
+        <strong>Kliknutí příjemce:</strong> Příjemce klikne na link ve SMS
+        zprávě
       </li>
       <li class="step">
-        <strong>Server zaznamenava:</strong>
+        <strong>Server zaznamenává:</strong>
         <ul>
-          <li>IP adresa a zeme klikajiciho</li>
-          <li>Cas kliknuti</li>
-          <li>Propojeni s <code>mailing.trace</code> (ktery prijemce klikl)</li>
+          <li>IP adresa a země klikajícího</li>
+          <li>Čas kliknutí</li>
+          <li>Propojení s <code>mailing.trace</code> (který příjemce klikl)</li>
         </ul>
       </li>
       <li class="step">
-        <strong>Presmerovani:</strong> Server presmeruje na puvodni URL s UTM
+        <strong>Přesměrování:</strong> Server přesměruje na původní URL s UTM
         parametry:
         <pre><code>https://www.example.cz/akce?utm_campaign=Q1_2025&amp;utm_medium=sms&amp;utm_source=kampan</code></pre>
       </li>
     </ol>
 
     <h3>UTM parametry</h3>
-    <p>Automaticky pridavane pri presmerovani:</p>
+    <p>Automaticky přidávané při přesměrování:</p>
     <table>
       <tr>
         <th>Parametr</th>
@@ -684,7 +685,7 @@ STOP pro odhlaseni</code></pre>
       </tr>
       <tr>
         <td><code>utm_campaign</code></td>
-        <td>Nazev kampane</td>
+        <td>Název kampaně</td>
         <td>mailing.mailing.campaign_id</td>
       </tr>
       <tr>
@@ -694,155 +695,154 @@ STOP pro odhlaseni</code></pre>
       </tr>
       <tr>
         <td><code>utm_source</code></td>
-        <td>Nazev zdroje</td>
+        <td>Název zdroje</td>
         <td>mailing.mailing.source_id</td>
       </tr>
     </table>
 
     <div class="note">
-      <strong>Google Analytics:</strong> Diky UTM parametrum muzete sledovat
-      navstevnost z SMS kampani primo v Google Analytics (Acquisition &gt;
+      <strong>Google Analytics:</strong> Díky UTM parametrům můžete sledovat
+      návštěvnost z SMS kampaní přímo v Google Analytics (Acquisition &gt;
       Campaigns).
     </div>
 
     <!-- ==================== 10. ODHLASENI ==================== -->
-    <h2 id="10-odhlaseni">10. Odhlaseni a blacklist (GDPR)</h2>
+    <h2 id="10-odhlaseni">10. Odhlášení a blacklist (GDPR)</h2>
 
-    <h3>Jak funguje odhlaseni</h3>
-    <p>System podporuje dva zpusoby odhlaseni z SMS kampani:</p>
+    <h3>Jak funguje odhlášení</h3>
+    <p>Systém podporuje dva způsoby odhlášení z SMS kampaní:</p>
 
-    <h4>Zpusob 1: STOP zprava (doporuceny)</h4>
+    <h4>Způsob 1: STOP zpráva (doporučený)</h4>
     <ol>
-      <li>Na konci kazde SMS je text: <strong>STOP pro odhlaseni</strong></li>
+      <li>Na konci každé SMS je text: <strong>STOP pro odhlášení</strong></li>
       <li>
-        Prijemce odpovi SMS zpravou obsahujici slovo <strong>STOP</strong>
+        Příjemce odpoví SMS zprávou obsahující slovo <strong>STOP</strong>
       </li>
-      <li>Mobilni aplikace detekuje prihozeni SMS se slovem STOP</li>
+      <li>Mobilní aplikace detekuje příchozí SMS se slovem STOP</li>
       <li>
-        Aplikace posle informaci na Odoo endpoint
+        Aplikace pošle informaci na Odoo endpoint
         <code>/sms-gateway/inbound</code>
       </li>
-      <li>Odoo prida cislo prijemce na <code>phone.blacklist</code></li>
-      <li>Vsechny budouci kampane automaticky preskoci blacklistovana cisla</li>
+      <li>Odoo přidá číslo příjemce na <code>phone.blacklist</code></li>
+      <li>Všechny budoucí kampaně automaticky přeskočí blacklistovaná čísla</li>
     </ol>
 
-    <h4>Zpusob 2: Webovy odkaz (standardni Odoo)</h4>
+    <h4>Způsob 2: Webový odkaz (standardní Odoo)</h4>
     <p>
-      Odoo standardne generuje odhlasovaci URL ve formatu
-      <code>/sms/{mailing_id}/{trace_code}</code>. Nas modul tyto URL
-      <strong>nahrazuje</strong> textem "STOP pro odhlaseni", protoze:
+      Odoo standardně generuje odhlašovací URL ve formátu
+      <code>/sms/{mailing_id}/{trace_code}</code>. Náš modul tyto URL
+      <strong>nahrazuje</strong> textem "STOP pro odhlášení", protože:
     </p>
     <ul>
-      <li>URL zabira prilis mista v SMS (160 znaku limit)</li>
-      <li>Textove "STOP" je jednodussi pro uzivatele</li>
-      <li>Odpovida standardni praxi SMS marketingu</li>
+      <li>URL zabírá příliš místa v SMS (160 znaků limit)</li>
+      <li>Textové "STOP" je jednodušší pro uživatele</li>
+      <li>Odpovídá standardní praxi SMS marketingu</li>
     </ul>
 
     <div class="danger">
-      <strong>GDPR povinnost:</strong> Podle GDPR musi byt kazda marketingova
-      SMS zprava opatrena moznosti odhlaseni. Modul automaticky pridava "STOP
-      pro odhlaseni" na konec zpravy.
+      <strong>GDPR povinnost:</strong> Podle GDPR musí být každá marketingová
+      SMS zpráva opatřena možností odhlášení. Modul automaticky přidává "STOP
+      pro odhlášení" na konec zprávy.
       <strong>Neodstranujte tuto informaci!</strong>
     </div>
 
     <h3>Blacklist model</h3>
     <p>
-      Odoo pouziva model <code>phone.blacklist</code> z modulu
+      Odoo používá model <code>phone.blacklist</code> z modulu
       <code>phone_validation</code>:
     </p>
     <ul>
       <li>
-        Cisla jsou ukladana v E.164 formatu (napr. <code>+420777123456</code>)
+        Čísla jsou ukládána v E.164 formátu (např. <code>+420777123456</code>)
       </li>
-      <li>Duplicity jsou automaticky detekovany</li>
-      <li>Blacklistovana cisla jsou preskocena pri vytvareni SMS zaznamu</li>
+      <li>Duplicity jsou automaticky detekovány</li>
+      <li>Blacklistovaná čísla jsou přeskočena při vytváření SMS záznamů</li>
       <li>
-        Spravce muze cislo z blacklistu odebrat (napr. pokud zakaznik znovu
-        souhlasi)
+        Správce může číslo z blacklistu odebrat (např. pokud zákazník znovu
+        souhlasí)
       </li>
     </ul>
 
-    <h3>Kde najit blacklist</h3>
+    <h3>Kde najít blacklist</h3>
     <p>
       <strong>SMS Marketing &gt; Configuration &gt; Phone Blacklist</strong>
     </p>
 
     <!-- ==================== 11. STATISTIKY ==================== -->
-    <h2 id="11-statistiky">11. Statistiky a vykon kampane</h2>
+    <h2 id="11-statistiky">11. Statistiky a výkon kampaně</h2>
 
-    <h3>Sledovane metriky</h3>
+    <h3>Sledované metriky</h3>
     <table>
       <tr>
         <th>Metrika</th>
         <th>Popis</th>
-        <th>Jak se meri</th>
+        <th>Jak se měří</th>
       </tr>
       <tr>
         <td><strong>Sent</strong></td>
-        <td>Pocet uspesne odeslanych SMS</td>
+        <td>Počet úspěšně odeslaných SMS</td>
         <td>sms.sms ve stavu <code>sent</code></td>
       </tr>
       <tr>
         <td><strong>Delivered</strong></td>
-        <td>Dorucene SMS</td>
+        <td>Doručené SMS</td>
         <td>= sent + opened + replied</td>
       </tr>
       <tr>
         <td><strong>Clicked</strong></td>
-        <td>Prijemci co klikli na odkaz</td>
+        <td>Příjemci co klikli na odkaz</td>
         <td>mailing.trace s <code>links_click_datetime</code></td>
       </tr>
       <tr>
         <td><strong>Click Rate</strong></td>
-        <td>Procento kliknuti</td>
-        <td>(unikatni kliknuti / celkem odeslano) × 100</td>
+        <td>Procento kliknutí</td>
+        <td>(unikátní kliknutí / celkem odesláno) × 100</td>
       </tr>
       <tr>
         <td><strong>Bounced</strong></td>
-        <td>Neplatna cisla</td>
+        <td>Neplatná čísla</td>
         <td>mailing.trace ve stavu <code>bounce</code></td>
       </tr>
       <tr>
         <td><strong>Failed</strong></td>
-        <td>Chyba odeslani</td>
+        <td>Chyba odeslání</td>
         <td>mailing.trace ve stavu <code>error</code></td>
       </tr>
     </table>
 
-    <h3>Kde najit statistiky</h3>
+    <h3>Kde najít statistiky</h3>
     <ol>
       <li>
-        <strong>Prehled kampane:</strong> Otevrete kampan - v zahlavi jsou
-        pocitadla Sent/Clicked/Bounced
+        <strong>Přehled kampaně:</strong> Otevřete kampaň - v záhlaví jsou
+        počítadla Sent/Clicked/Bounced
       </li>
       <li>
-        <strong>Detailni statistiky:</strong> Kliknete na pocitadlo pro
-        zobrazeni seznamu zaznamu
+        <strong>Detailní statistiky:</strong> Klikněte na počítadlo pro
+        zobrazení seznamu záznamů
       </li>
       <li>
         <strong>Link Tracker:</strong>
-        <em>Email Marketing &gt; Link Tracker</em> - prehled vsech trackovanych
-        odkazu s poctem kliknuti
+        <em>Email Marketing &gt; Link Tracker</em> - přehled všech trackovacích odkazů s počtem kliknutí
       </li>
       <li>
         <strong>Gateway telefony:</strong>
         <em>SMS Gateway &gt; Gateway Phones</em> - sent_today, sent_total,
-        pending, error pocitadla
+        pending, error počítadla
       </li>
     </ol>
 
-    <h3>Link Tracker - detailni analyza</h3>
-    <p>Kazdy odkaz v SMS ma vlastni <code>link.tracker</code> zaznam:</p>
+    <h3>Link Tracker - detailní analýza</h3>
+    <p>Každý odkaz v SMS má vlastní <code>link.tracker</code> záznam:</p>
     <ul>
       <li>
-        <strong>Celkovy pocet kliknuti</strong> - kolikrat byl odkaz kliknut
-        (vcetne opakovanych)
+        <strong>Celkový počet kliknutí</strong> - kolikrát byl odkaz kliknut
+        (včetně opakovaných)
       </li>
       <li>
-        <strong>Unikatni kliknuti</strong> - kolik ruznych prijemcu kliklo
+        <strong>Unikátní kliknutí</strong> - kolik různých příjemců kliklo
       </li>
-      <li><strong>Zeme</strong> - geolokovane podle IP adresy</li>
-      <li><strong>Casova osa</strong> - kdyz se klikalo (peak hours)</li>
+      <li><strong>Země</strong> - geolokovane podle IP adresy</li>
+      <li><strong>Časová osa</strong> - když se klikalo (peak hours)</li>
     </ul>
 
     <!-- ==================== 12. LIMITY ==================== -->
@@ -859,15 +859,15 @@ STOP pro odhlaseni</code></pre>
         <td><strong>Daily Limit</strong></td>
         <td>sms.gateway.phone</td>
         <td>
-          Max SMS za den na telefon. Pocitadlo <code>sent_today</code> se
-          resetuje o pulnoci.
+          Max SMS za den na telefon. Počítadlo <code>sent_today</code> se
+          resetuje o půlnoci.
         </td>
       </tr>
       <tr>
         <td><strong>SMS per Minute</strong></td>
         <td>sms.gateway.phone</td>
         <td>
-          Max SMS za minutu. Aplikace pocita delay mezi SMS:
+          Max SMS za minutu. Aplikace počítá delay mezi SMS:
           <code>60000 / rate_limit</code> ms.
         </td>
       </tr>
@@ -875,8 +875,8 @@ STOP pro odhlaseni</code></pre>
         <td><strong>Android SMS limit</strong></td>
         <td>OS Android</td>
         <td>
-          Android standardne omezuje na ~30 SMS za 30 minut. Muze byt zmenen v
-          nastaveni.
+          Android standardně omezuje na ~30 SMS za 30 minut. Může být změněn v
+          nastavení.
         </td>
       </tr>
     </table>
@@ -884,52 +884,51 @@ STOP pro odhlaseni</code></pre>
     <h3>Jak funguje rate limiting</h3>
     <ol>
       <li>
-        Server nastavuje <code>rate_limit</code> na kazdem gateway telefonu
-        (napr. 100 SMS/min)
+        Server nastavuje <code>rate_limit</code> na každém gateway telefonu
+        (např. 100 SMS/min)
       </li>
-      <li>Mobilni aplikace ziska rate_limit z heartbeat odpovedi</li>
+      <li>Mobilní aplikace získá rate_limit z heartbeat odpovědi</li>
       <li>
-        Mezi kazdou SMS aplikace pocka
+        Mezi každou SMS aplikace počká
         <code>60000 / rate_limit</code> milisekund
       </li>
       <li>
-        Pokud telefon dosahne <code>daily_limit</code>, neni mu prirazena zadna
-        dalsi SMS
+        Pokud telefon dosáhne <code>daily_limit</code>, není mu přiřazena žádná
+        další SMS
       </li>
     </ol>
 
     <div class="warning">
-      <strong>Android omezeni:</strong> Na nekterych Android zarizeni je
-      hardwarovy limit ~30 SMS za 30 minut. Pro vetsi objemy doporucujeme pouzit
-      vice telefonu nebo zmenit nastaveni ADB:
+      <strong>Android omezení:</strong> Na některých Android zařízeních je
+      hardwarový limit ~30 SMS za 30 minut. Pro větší objemy doporučujeme použít
+      více telefonů nebo změnit nastavení ADB:
       <pre><code>adb shell settings put global sms_outgoing_check_max_count 10000</code></pre>
     </div>
 
     <!-- ==================== 13. DUAL SIM ==================== -->
     <h2 id="13-dual-sim">13. Dual SIM podpora</h2>
 
-    <p>System podporuje telefony s dvema SIM kartami:</p>
+    <p>Systém podporuje telefony se dvěma SIM kartami:</p>
     <ul>
       <li>
-        Kazdy gateway telefon muze mit dve cisla: <code>phone_number</code> a
+        Každý gateway telefon může mít dvě čísla: <code>phone_number</code> a
         <code>phone_number_2</code>
       </li>
       <li>
-        Aplikace automaticky detekuje obe SIM karty pomoci nativniho
+        Aplikace automaticky detekuje obě SIM karty pomocí nativního
         <code>SimManager</code> modulu
       </li>
       <li>
-        Heartbeat posila obe cisla, server pocita pending SMS pro kazde cislo
-        zvlast
+        Heartbeat posílá obě čísla, server počítá pending SMS pro každé číslo zvlášť
       </li>
       <li>
-        Pri odeslani se SMS posila pres SIM slot odpovidajici prirazemu cislu
+        Při odesílání se SMS posílá přes SIM slot odpovídající přiřazenému číslu
       </li>
     </ul>
 
     <div class="note">
-      <strong>Poznamka:</strong> Ne vsechny Android telefony umoznuji vyber SIM
-      slotu pro odchozi SMS programove. Na nekterych zarizeni se pouzije vychozi
+      <strong>Poznámka:</strong> Ne všechny Android telefony umožňují výběr SIM
+      slotu pro odchozí SMS programově. Na některých zařízeních se použije výchozí
       SIM karta.
     </div>
 
@@ -937,12 +936,12 @@ STOP pro odhlaseni</code></pre>
     <h2 id="14-api">14. API reference</h2>
 
     <p>
-      Vsechny endpointy vyzaduji hlavicku <code>X-API-Key</code> s platnym API
-      klicem gateway telefonu.
+      Všechny endpointy vyžadují hlavičku <code>X-API-Key</code> s platným API
+      klíčem gateway telefonu.
     </p>
 
     <h3>POST /sms-gateway/heartbeat</h3>
-    <p>Odeslani heartbeatu a ziskani stavu fronty.</p>
+    <p>Odeslání heartbeatu a získání stavu fronty.</p>
     <pre><code>// Request
 {
     "phone_numbers": ["+420777123456", "+420608987654"],
@@ -958,7 +957,7 @@ STOP pro odhlaseni</code></pre>
 }</code></pre>
 
     <h3>POST /sms-gateway/pending</h3>
-    <p>Ziskani SMS cekajicich na odeslani.</p>
+    <p>Získání SMS čekajících na odeslání.</p>
     <pre><code>// Request
 {"phone_numbers": ["+420777123456"], "limit": 20}
 
@@ -977,7 +976,7 @@ STOP pro odhlaseni</code></pre>
 }</code></pre>
 
     <h3>POST /sms-gateway/confirm/{sms_id}</h3>
-    <p>Potvrzeni stavu odeslani SMS.</p>
+    <p>Potvrzení stavu odeslání SMS.</p>
     <pre><code>// Request - uspech
 {"status": "sent"}
 
@@ -991,7 +990,7 @@ STOP pro odhlaseni</code></pre>
 {"success": true}</code></pre>
 
     <h3>POST /sms-gateway/inbound</h3>
-    <p>Nahlaseni prichozi SMS (pro STOP detekci). Zprava se ulozi do modelu <code>sms.gateway.inbound</code> a pokud obsahuje STOP, cislo se prida na blacklist.</p>
+    <p>Nahlášení příchozí SMS (pro STOP detekci). Zpráva se uloží do modelu <code>sms.gateway.inbound</code> a pokud obsahuje STOP, číslo se přidá na blacklist.</p>
     <pre><code>// Request
 {
     "from_number": "+420999888777",
@@ -1008,9 +1007,9 @@ STOP pro odhlaseni</code></pre>
 
     <h3>POST /sms-gateway/inbound-batch</h3>
     <p>
-      Hromadne nahlaseni vice prichozich SMS najednou. Od v1.2.0 aplikace posila <strong>vsechny</strong> prijate
-      SMS (nejen STOP) na server. Server provadi deduplikaci podle kombinace <code>from_number + to_number + message + received_at</code>,
-      takze opakovane odeslani stejnych zprav (napr. pri rescan inboxu) nevytvori duplicity.
+      Hromadné nahlášení více příchozích SMS najednou. Od v1.2.0 aplikace posílá <strong>všechny</strong> přijaté
+      SMS (nejen STOP) na server. Server provádí deduplikaci podle kombinace <code>from_number + to_number + message + received_at</code>,
+      takže opakované odeslání stejných zpráv (např. při rescan inboxu) nevytvoří duplicity.
     </p>
     <pre><code>// Request
 {
@@ -1038,13 +1037,13 @@ STOP pro odhlaseni</code></pre>
 }</code></pre>
 
     <div class="note">
-      <strong>Chatter integrace:</strong> Kazda prichozi SMS se automaticky zapise do
-      chatteru partnera v Odoo jako formatovana HTML poznamka (blockquote s textem zpravy).
-      Pokud zprava obsahuje STOP, prida se vizualni stitek STOP.
+      <strong>Chatter integrace:</strong> Každá příchozí SMS se automaticky zapíše do
+      chatteru partnera v Odoo jako formátovaná HTML poznámka (blockquote s textem zprávy).
+      Pokud zpráva obsahuje STOP, přidá se vizuální štítek STOP.
     </div>
 
     <h3>Model: sms.gateway.inbound</h3>
-    <p>Vsechny prichozi SMS se ukladaji do modelu <code>sms.gateway.inbound</code>:</p>
+    <p>Všechny příchozí SMS se ukládají do modelu <code>sms.gateway.inbound</code>:</p>
     <table>
       <tr>
         <th>Pole</th>
@@ -1054,37 +1053,37 @@ STOP pro odhlaseni</code></pre>
       <tr>
         <td><code>from_number</code></td>
         <td>Char</td>
-        <td>Cislo odeslatele (E.164)</td>
+        <td>Číslo odesílatele (E.164)</td>
       </tr>
       <tr>
         <td><code>to_number</code></td>
         <td>Char</td>
-        <td>Cislo gateway telefonu, na ktere SMS prisla</td>
+        <td>Číslo gateway telefonu, na které SMS přišla</td>
       </tr>
       <tr>
         <td><code>message</code></td>
         <td>Text</td>
-        <td>Obsah SMS zpravy</td>
+        <td>Obsah SMS zprávy</td>
       </tr>
       <tr>
         <td><code>received_at</code></td>
         <td>Datetime</td>
-        <td>Cas prijmu zpravy na telefonu</td>
+        <td>Čas příjmu zprávy na telefonu</td>
       </tr>
       <tr>
         <td><code>partner_id</code></td>
         <td>Many2one</td>
-        <td>Nalezeny partner podle cisla odeslatele (muze byt prazdne)</td>
+        <td>Nalezený partner podle čísla odesílatele (může být prázdné)</td>
       </tr>
       <tr>
         <td><code>is_stop</code></td>
         <td>Boolean</td>
-        <td>Zda zprava obsahuje klicove slovo STOP</td>
+        <td>Zda zpráva obsahuje klíčové slovo STOP</td>
       </tr>
       <tr>
         <td><code>is_blacklisted</code></td>
         <td>Boolean</td>
-        <td>Zda je cislo odeslatele na blacklistu</td>
+        <td>Zda je číslo odesílatele na blacklistu</td>
       </tr>
       <tr>
         <td><code>gateway_phone_id</code></td>
@@ -1115,7 +1114,7 @@ STOP pro odhlaseni</code></pre>
 }</code></pre>
 
     <h3>POST /sms-gateway/register-fcm</h3>
-    <p>Registrace FCM tokenu pro push notifikace. Telefon posle svuj FCM token po sparovani nebo kdyz se token obnovi.</p>
+    <p>Registrace FCM tokenu pro push notifikace. Telefon pošle svůj FCM token po spárování nebo když se token obnoví.</p>
     <pre><code>// Request
 {
     "fcm_token": "dK3xP9...dlouhy_firebase_token"
@@ -1134,7 +1133,7 @@ STOP pro odhlaseni</code></pre>
 }</code></pre>
 
     <h3>POST /sms-gateway/confirm-batch</h3>
-    <p>Hromadne potvrzeni stavu vice SMS najednou. Efektivnejsi nez jednotlive <code>/confirm/{sms_id}</code> volani.</p>
+    <p>Hromadné potvrzení stavu více SMS najednou. Efektivnější než jednotlivé <code>/confirm/{sms_id}</code> volání.</p>
     <pre><code>// Request
 {
     "results": [
@@ -1151,119 +1150,119 @@ STOP pro odhlaseni</code></pre>
 }</code></pre>
 
     <!-- ==================== 14b. MARKETING MODELY ==================== -->
-    <h2 id="14b-marketing-modely">14b. Marketing modely (segmenty a sablony)</h2>
+    <h2 id="14b-marketing-modely">14b. Marketing modely (segmenty a šablony)</h2>
 
     <p>
       Od verze <strong>v18.0.2.2.0</strong> modul obsahuje modely pro SMS marketing
-      primo z mobilni aplikace. Admin definuje segmenty a sablony v Odoo,
-      operator je pouziva z appky bez pristupu do backendu.
+      přímo z mobilní aplikace. Admin definuje segmenty a šablony v Odoo,
+      operátor je používá z appky bez přístupu do backendu.
     </p>
 
     <h3>Model: sms.marketing.segment</h3>
-    <p>Definuje skupinu prijemcu (napr. &bdquo;Neobjednali 3 mesice&ldquo;).</p>
+    <p>Definuje skupinu příjemců (např. &bdquo;Neobjednali 3 měsíce&ldquo;).</p>
     <table>
       <tr><th>Pole</th><th>Typ</th><th>Popis</th></tr>
-      <tr><td><code>name</code></td><td>Char</td><td>Nazev segmentu (prekladatelny)</td></tr>
+      <tr><td><code>name</code></td><td>Char</td><td>Název segmentu (překladatelný)</td></tr>
       <tr><td><code>code</code></td><td>Char, unique</td><td>Slug (<code>no_order_3m</code>, <code>one_order_only</code>, <code>new_customers_30d</code>)</td></tr>
-      <tr><td><code>domain_filter</code></td><td>Char</td><td>Deklarativni Odoo domena, napr. <code>[("country_id.code", "=", "CZ")]</code>. Pokud je nastavena, pouzije se misto code-based logiky.</td></tr>
-      <tr><td><code>sequence</code></td><td>Integer</td><td>Poradi v seznamu</td></tr>
-      <tr><td><code>active</code></td><td>Boolean</td><td>Aktivni/neaktivni</td></tr>
-      <tr><td><code>description</code></td><td>Text</td><td>Popis zobrazeny v appce</td></tr>
+      <tr><td><code>domain_filter</code></td><td>Char</td><td>Deklarativní Odoo doména, např. <code>[("country_id.code", "=", "CZ")]</code>. Pokud je nastavena, použije se místo code-based logiky.</td></tr>
+      <tr><td><code>sequence</code></td><td>Integer</td><td>Pořadí v seznamu</td></tr>
+      <tr><td><code>active</code></td><td>Boolean</td><td>Aktivní/neaktivní</td></tr>
+      <tr><td><code>description</code></td><td>Text</td><td>Popis zobrazený v appce</td></tr>
     </table>
 
-    <h4>Vychozi segmenty (data)</h4>
+    <h4>Výchozí segmenty (data)</h4>
     <table>
-      <tr><th>Code</th><th>Nazev</th><th>Logika</th></tr>
-      <tr><td><code>no_order_3m</code></td><td>Neobjednali 3 mesice</td><td>SQL: partneri s objednavkou, ale zadnou za 90 dni</td></tr>
-      <tr><td><code>one_order_only</code></td><td>Jedina objednavka</td><td>SQL: partneri s presne 1 potvrzenou objednavkou</td></tr>
-      <tr><td><code>new_customers_30d</code></td><td>Novi zakaznici (30 dni)</td><td>Domain: <code>[("create_date", ">=", today - 30d)]</code></td></tr>
+      <tr><th>Code</th><th>Název</th><th>Logika</th></tr>
+      <tr><td><code>no_order_3m</code></td><td>Neobjednali 3 měsíce</td><td>SQL: partneři s objednávkou, ale žádnou za 90 dní</td></tr>
+      <tr><td><code>one_order_only</code></td><td>Jediná objednávka</td><td>SQL: partneři s přesně 1 potvrzenou objednávkou</td></tr>
+      <tr><td><code>new_customers_30d</code></td><td>Noví zákazníci (30 dní)</td><td>Domain: <code>[("create_date", ">=", today - 30d)]</code></td></tr>
     </table>
 
-    <h4>Klicove metody</h4>
+    <h4>Klíčové metody</h4>
     <table>
       <tr><th>Metoda</th><th>Popis</th></tr>
       <tr>
         <td><code>_get_domain()</code></td>
-        <td>Vrati zakladni Odoo domain segmentu. Pouzije <code>domain_filter</code> nebo dispatchuje na <code>_domain_{code}()</code>.</td>
+        <td>Vrátí základní Odoo domain segmentu. Použije <code>domain_filter</code> nebo dispatchuje na <code>_domain_{code}()</code>.</td>
       </tr>
       <tr>
         <td><code>_get_full_domain(phone, exclude_contacted_days)</code></td>
-        <td>Single source of truth &mdash; sklada kompletni domain: segment + blacklist + phone filter + exclusion kontaktovanych.</td>
+        <td>Single source of truth &mdash; skládá kompletní domain: segment + blacklist + phone filter + exclusion kontaktovaných.</td>
       </tr>
       <tr>
         <td><code>_get_storable_domain(phone, exclude_contacted_days)</code></td>
-        <td>Vraci domain vhodnou pro ulozeni do <code>mailing_domain</code>. Deklarativni segmenty se ulozi jako citelna domena; SQL segmenty se pre-resolvi na <code>('id', 'in', [...])</code>.</td>
+        <td>Vrací domain vhodnou pro uložení do <code>mailing_domain</code>. Deklarativní segmenty se uloží jako čitelná doména; SQL segmenty se pre-resolví na <code>('id', 'in', [...])</code>.</td>
       </tr>
       <tr>
         <td><code>_resolve_recipient_ids(phone, exclude_days, limit)</code></td>
-        <td>Resolvi domain na seznam partner ID. Pouziva se pro pocty a preview.</td>
+        <td>Resolví domain na seznam partner ID. Používá se pro počty a preview.</td>
       </tr>
       <tr>
         <td><code>_get_recipient_count(phone, exclude_days)</code></td>
-        <td>Spocita pocet odpovidajicich partneru.</td>
+        <td>Spočítá počet odpovídajících partnerů.</td>
       </tr>
       <tr>
         <td><code>_get_exclusion_domain(days)</code></td>
-        <td>Vrati deklarativni domain leaf <code>('stats_last_sms_days', '&gt;', days)</code> vylucujici partnery kontaktovane v poslednich N dnech. Pokud je <code>days &lt;= 0</code>, vraci prazdny seznam (filtr ignorovan). Od v18.0.2.3.0 je plne deklarativni &mdash; zadny SQL na <code>mailing_trace</code>.</td>
+        <td>Vrátí deklarativní domain leaf <code>('stats_last_sms_days', '&gt;', days)</code> vylučující partnery kontaktované v posledních N dnech. Pokud je <code>days &lt;= 0</code>, vrací prázdný seznam (filtr ignorován). Od v18.0.2.3.0 je plně deklarativní &mdash; žádný SQL na <code>mailing_trace</code>.</td>
       </tr>
     </table>
 
     <div class="note">
       <strong>Domain compositing (v18.0.2.3.0+):</strong> <code>_get_storable_domain()</code>
-      kombinuje 3 deklarativni filtry do jedne ulozene domeny:
+      kombinuje 3 deklarativní filtry do jedné uložené domény:
       <ol>
         <li>segment <code>domain_filter</code></li>
         <li>phone <code>domain_filter</code> z <code>sms.gateway.phone</code></li>
-        <li><code>('stats_last_sms_days', '&gt;', exclude_contacted_days)</code> ze sablony</li>
+        <li><code>('stats_last_sms_days', '&gt;', exclude_contacted_days)</code> ze šablony</li>
       </ol>
-      Vsechny 3 podminky musi prijemce splnit soucasne. Domena je ulozena v
+      Všechny 3 podmínky musí příjemce splnit současně. Doména je uložena v
       <code>mailing.mailing.mailing_domain</code> jako pure declarative Odoo domain &mdash;
-      Odoo ji znovu vyhodnocuje pri kazdem odeslani, bez runtime SQL dotazu.
-      Exclusion leaf vyuziva computed field <code>res.partner.stats_last_sms_days</code>
-      s vlastnim <code>_search_stats_last_sms_days()</code> handlerem (v18.0.2.4.0+),
-      ktery pro operatory <code>&gt;</code>/<code>&gt;=</code> vraci OR vetev:
-      partneri se stats row splnujici datum <em>nebo</em> partneri bez stats row
-      (<code>('stats_id', '=', False)</code>). Tim je zajisteno, ze brand-new partneri
-      bez jakekoliv SMS historie splnuji podminku &bdquo;nekontaktovan v poslednich N dnech&ldquo;.
-      Predchozi <code>fields.Integer(related='stats_id.last_sms_sent_days')</code> varianta
-      NEfungovala, protoze Odoo prevadel search na LEFT JOIN pres O2m, ktery NULL radky
+      Odoo ji znovu vyhodnocuje při každém odeslání, bez runtime SQL dotazů.
+      Exclusion leaf využívá computed field <code>res.partner.stats_last_sms_days</code>
+      s vlastním <code>_search_stats_last_sms_days()</code> handlerem (v18.0.2.4.0+),
+      který pro operátory <code>&gt;</code>/<code>&gt;=</code> vrací OR větev:
+      partneři se stats row splňující datum <em>nebo</em> partneři bez stats row
+      (<code>('stats_id', '=', False)</code>). Tím je zajištěno, že brand-new partneři
+      bez jakékoliv SMS historie splňují podmínku &bdquo;nekontaktován v posledních N dnech&ldquo;.
+      Předchozí <code>fields.Integer(related='stats_id.last_sms_sent_days')</code> varianta
+      NEfungovala, protože Odoo převáděl search na LEFT JOIN přes O2m, který NULL řádky
       filtroval ven (viz changelog v18.0.2.4.0).
     </div>
 
     <h3>Model: sms.marketing.template</h3>
-    <p>SMS sablona prirazena ke gateway telefonu.</p>
+    <p>SMS šablona přiřazena ke gateway telefonu.</p>
     <table>
       <tr><th>Pole</th><th>Typ</th><th>Popis</th></tr>
-      <tr><td><code>name</code></td><td>Char</td><td>Nazev sablony</td></tr>
-      <tr><td><code>body</code></td><td>Text</td><td>Text SMS (muze obsahovat <code>{{object.name}}</code>)</td></tr>
-      <tr><td><code>phone_id</code></td><td>Many2one &rarr; sms.gateway.phone</td><td>Prirazeny telefon</td></tr>
-      <tr><td><code>segment_ids</code></td><td>Many2many &rarr; sms.marketing.segment</td><td>Povolene segmenty</td></tr>
-      <tr><td><code>default_limit</code></td><td>Integer (100)</td><td>Vychozi navrh poctu prijemcu</td></tr>
-      <tr><td><code>max_limit</code></td><td>Integer (500)</td><td>Hard cap na pocet prijemcu</td></tr>
-      <tr><td><code>exclude_contacted_days</code></td><td>Integer (0)</td><td>Vyloucit partnery kontaktovane v poslednich N dnech</td></tr>
+      <tr><td><code>name</code></td><td>Char</td><td>Název šablony</td></tr>
+      <tr><td><code>body</code></td><td>Text</td><td>Text SMS (může obsahovat <code>{{object.name}}</code>)</td></tr>
+      <tr><td><code>phone_id</code></td><td>Many2one &rarr; sms.gateway.phone</td><td>Přiřazený telefon</td></tr>
+      <tr><td><code>segment_ids</code></td><td>Many2many &rarr; sms.marketing.segment</td><td>Povolené segmenty</td></tr>
+      <tr><td><code>default_limit</code></td><td>Integer (100)</td><td>Výchozí návrh počtu příjemců</td></tr>
+      <tr><td><code>max_limit</code></td><td>Integer (500)</td><td>Hard cap na počet příjemců</td></tr>
+      <tr><td><code>exclude_contacted_days</code></td><td>Integer (0)</td><td>Vyloučit partnery kontaktované v posledních N dnech</td></tr>
     </table>
 
-    <h3>Nova pole na mailing.mailing</h3>
+    <h3>Nová pole na mailing.mailing</h3>
     <table>
       <tr><th>Pole</th><th>Typ</th><th>Popis</th></tr>
-      <tr><td><code>gateway_phone_forced_id</code></td><td>Many2one &rarr; sms.gateway.phone</td><td>Vynuceny telefon pro vsechny SMS v kampani</td></tr>
-      <tr><td><code>recipient_limit</code></td><td>Integer</td><td>Max pocet prijemcu</td></tr>
-      <tr><td><code>marketing_template_id</code></td><td>Many2one &rarr; sms.marketing.template</td><td>Zpetny odkaz na sablonu</td></tr>
-      <tr><td><code>created_from_app</code></td><td>Boolean</td><td>Vytvoreno z mobilni appky</td></tr>
-      <tr><td><code>paused</code></td><td>Boolean</td><td>Pozastavena kampan (neodesila se, ale SMS jsou ve fronte)</td></tr>
+      <tr><td><code>gateway_phone_forced_id</code></td><td>Many2one &rarr; sms.gateway.phone</td><td>Vynucený telefon pro všechny SMS v kampani</td></tr>
+      <tr><td><code>recipient_limit</code></td><td>Integer</td><td>Max počet příjemců</td></tr>
+      <tr><td><code>marketing_template_id</code></td><td>Many2one &rarr; sms.marketing.template</td><td>Zpětný odkaz na šablonu</td></tr>
+      <tr><td><code>created_from_app</code></td><td>Boolean</td><td>Vytvořeno z mobilní appky</td></tr>
+      <tr><td><code>paused</code></td><td>Boolean</td><td>Pozastavená kampaň (neodesílá se, ale SMS jsou ve frontě)</td></tr>
     </table>
 
     <!-- ==================== 14c. CAMPAIGN API ==================== -->
-    <h2 id="14c-campaign-api">14c. Campaign API (mobilni appka)</h2>
+    <h2 id="14c-campaign-api">14c. Campaign API (mobilní appka)</h2>
 
     <p>
-      Endpointy pro mobilni appku umoznujici vytvorit a sledovat SMS kampane
-      bez pristupu do Odoo backendu. Vsechny endpointy: <strong>POST</strong>,
-      auth pres <code>X-API-Key</code>, JSON body/response.
+      Endpointy pro mobilní appku umožňující vytvořit a sledovat SMS kampaně
+      bez přístupu do Odoo backendu. Všechny endpointy: <strong>POST</strong>,
+      auth přes <code>X-API-Key</code>, JSON body/response.
     </p>
 
     <h3>POST /sms-gateway/campaign/templates</h3>
-    <p>Vrati sablony prirazene k telefonu identifikovanemu API klicem.</p>
+    <p>Vrátí šablony přiřazené k telefonu identifikovanému API klíčem.</p>
     <pre><code>// Response
 {
     "success": true,
@@ -1284,7 +1283,7 @@ STOP pro odhlaseni</code></pre>
 }</code></pre>
 
     <h3>POST /sms-gateway/campaign/filters</h3>
-    <p>Pro kazdý segment spocita pocet odpovidajicich prijemcu (vcetne phone domain filtru a exclusion).</p>
+    <p>Pro každý segment spočítá počet odpovídajících příjemců (včetně phone domain filtru a exclusion).</p>
     <pre><code>// Request
 {"template_id": 1}
 
@@ -1303,7 +1302,7 @@ STOP pro odhlaseni</code></pre>
 }</code></pre>
 
     <h3>POST /sms-gateway/campaign/preview</h3>
-    <p>Nahled kampane &mdash; pocet prijemcu a renderovany text s ukázkovym partnerem.</p>
+    <p>Náhled kampaně &mdash; počet příjemců a renderovaný text s ukázkovým partnerem.</p>
     <pre><code>// Request
 {"template_id": 1, "segment_id": 1, "limit": 200}
 
@@ -1317,7 +1316,7 @@ STOP pro odhlaseni</code></pre>
 }</code></pre>
 
     <h3>POST /sms-gateway/campaign/create</h3>
-    <p>Vytvori <code>mailing.mailing</code> s plnym trackingem. Prijima volitelny <code>custom_body</code> (uprava textu z appky) a <code>send_now</code> prepinac.</p>
+    <p>Vytvoří <code>mailing.mailing</code> s plným trackingem. Přijímá volitelný <code>custom_body</code> (úprava textu z appky) a <code>send_now</code> přepínač.</p>
     <pre><code>// Request
 {
     "template_id": 1,
@@ -1336,19 +1335,19 @@ STOP pro odhlaseni</code></pre>
 }</code></pre>
 
     <div class="note">
-      <strong>send_now:</strong> Pokud <code>send_now=false</code>, kampan se vytvori ve stavu
-      <code>in_queue</code> s <code>paused=true</code>. SMS jsou ve fronte, ale neodesílají se
-      dokud operator nestiskne &bdquo;Odeslat ihned&ldquo; v appce (endpoint <code>assign-sim</code>).
+      <strong>send_now:</strong> Pokud <code>send_now=false</code>, kampaň se vytvoří ve stavu
+      <code>in_queue</code> s <code>paused=true</code>. SMS jsou ve frontě, ale neodesílají se
+      dokud operátor nestiskne &bdquo;Odeslat ihned&ldquo; v appce (endpoint <code>assign-sim</code>).
     </div>
 
     <div class="note">
-      <strong>Domain storage:</strong> Pro segmenty s deklarativnim <code>domain_filter</code>
-      se do <code>mailing_domain</code> ulozi citelna domena (napr. <code>[("country_id.code", "=", "CZ"), ...]</code>).
-      Pro SQL segmenty se pre-resolvi na kompaktni <code>[("id", "in", [1, 2, 3, ...])]</code>.
+      <strong>Domain storage:</strong> Pro segmenty s deklarativním <code>domain_filter</code>
+      se do <code>mailing_domain</code> uloží čitelná doména (např. <code>[("country_id.code", "=", "CZ"), ...]</code>).
+      Pro SQL segmenty se pre-resolví na kompaktní <code>[("id", "in", [1, 2, 3, ...])]</code>.
     </div>
 
     <h3>POST /sms-gateway/campaign/assign-sim</h3>
-    <p>Priradi gateway telefon a SIM k SMS v kampani. Pouziva stejnou logiku jako akce &bdquo;Send via Gateway&ldquo; v Odoo.</p>
+    <p>Přiřadí gateway telefon a SIM k SMS v kampani. Používá stejnou logiku jako akce &bdquo;Send via Gateway&ldquo; v Odoo.</p>
     <pre><code>// Request — jedina SIM (nebo auto-prirazeni bez SIM cisla)
 {
     "campaign_id": 42,
@@ -1371,18 +1370,18 @@ STOP pro odhlaseni</code></pre>
 }</code></pre>
 
     <div class="note">
-      <strong>Co assign-sim dela:</strong>
+      <strong>Co assign-sim dělá:</strong>
       <ul>
-        <li>Najde SMS ve stavu <code>outgoing</code>/<code>error</code> (neprirazene) a <code>pending</code> bez SIM</li>
-        <li>Nastavi <code>sms_provider='gateway'</code>, <code>gateway_phone_id</code>, <code>gateway_sim_number</code></li>
-        <li>V rezimu <code>split</code> rozdeluje SMS round-robin mezi vsechny SIM</li>
+        <li>Najde SMS ve stavu <code>outgoing</code>/<code>error</code> (nepřiřazené) a <code>pending</code> bez SIM</li>
+        <li>Nastaví <code>sms_provider='gateway'</code>, <code>gateway_phone_id</code>, <code>gateway_sim_number</code></li>
+        <li>V režimu <code>split</code> rozděluje SMS round-robin mezi všechny SIM</li>
         <li>Unpausne kampan: <code>state='sending', paused=False</code></li>
-        <li>Odesle FCM wake pro okamzite odeslani</li>
+        <li>Odešle FCM wake pro okamžité odeslání</li>
       </ul>
     </div>
 
     <h3>POST /sms-gateway/campaign/list</h3>
-    <p>Seznam kampani vytvorených z appky pro dany telefon.</p>
+    <p>Seznam kampaní vytvořených z appky pro daný telefon.</p>
     <pre><code>// Response
 {
     "success": true,
@@ -1406,7 +1405,7 @@ STOP pro odhlaseni</code></pre>
 }</code></pre>
 
     <h3>POST /sms-gateway/campaign/status/{mailing_id}</h3>
-    <p>Detail kampane s marketingovymi statistikami.</p>
+    <p>Detail kampaně s marketingovými statistikami.</p>
     <pre><code>// Response
 {
     "success": true,
@@ -1425,71 +1424,71 @@ STOP pro odhlaseni</code></pre>
     "created_at": "2026-04-04 10:30:00"
 }</code></pre>
 
-    <h4>Vysvetleni statistik</h4>
+    <h4>Vysvětlení statistik</h4>
     <table>
       <tr><th>Pole</th><th>Popis</th><th>Zdroj</th></tr>
-      <tr><td><code>clicked</code></td><td>Unikatni prijemci co klikli</td><td><code>mailing.trace</code> s <code>links_click_datetime</code></td></tr>
-      <tr><td><code>total_clicks</code></td><td>Celkovy pocet kliknuti (vcetne opakovanych)</td><td><code>link.tracker.click</code> pres UTM campaign</td></tr>
-      <tr><td><code>order_count</code></td><td>Pocet objednavek z kampane</td><td><code>sale.order</code> s <code>campaign_id</code> = UTM kampan</td></tr>
-      <tr><td><code>revenue</code></td><td>Celkovy prijem z objednavek</td><td>Soucet <code>amount_total</code> z matchujicich objednavek</td></tr>
-      <tr><td><code>optout</code></td><td>Pocet odhlasenych (STOP)</td><td><code>mailing.trace</code> ve stavu <code>cancel</code></td></tr>
+      <tr><td><code>clicked</code></td><td>Unikátní příjemci co klikli</td><td><code>mailing.trace</code> s <code>links_click_datetime</code></td></tr>
+      <tr><td><code>total_clicks</code></td><td>Celkový počet kliknutí (včetně opakovaných)</td><td><code>link.tracker.click</code> pres UTM campaign</td></tr>
+      <tr><td><code>order_count</code></td><td>Počet objednávek z kampaně</td><td><code>sale.order</code> s <code>campaign_id</code> = UTM kampan</td></tr>
+      <tr><td><code>revenue</code></td><td>Celkový příjem z objednávek</td><td>Součet <code>amount_total</code> z matchujících objednávek</td></tr>
+      <tr><td><code>optout</code></td><td>Počet odhlášených (STOP)</td><td><code>mailing.trace</code> ve stavu <code>cancel</code></td></tr>
     </table>
 
     <!-- ==================== 15. TROUBLESHOOTING ==================== -->
-    <h2 id="15-troubleshooting">15. Reseni problemu</h2>
+    <h2 id="15-troubleshooting">15. Řešení problémů</h2>
 
     <table>
       <tr>
-        <th>Problem</th>
-        <th>Pricina</th>
-        <th>Reseni</th>
+        <th>Problém</th>
+        <th>Příčina</th>
+        <th>Řešení</th>
       </tr>
       <tr>
-        <td>Telefon je stale Offline</td>
-        <td>Heartbeat nedochazi na server</td>
+        <td>Telefon je stále Offline</td>
+        <td>Heartbeat nedochází na server</td>
         <td>
           <ul>
-            <li>Zkontrolujte sitove pripojeni telefonu</li>
-            <li>Overte spravnost API klice (znovu naskenujte QR)</li>
-            <li>Zkontrolujte URL serveru (musi byt HTTPS)</li>
-            <li>Zvyste heartbeat_timeout na gateway telefonu</li>
+            <li>Zkontrolujte síťové připojení telefonu</li>
+            <li>Ověřte správnost API klíče (znovu naskenujte QR)</li>
+            <li>Zkontrolujte URL serveru (musí být HTTPS)</li>
+            <li>Zvyšte heartbeat_timeout na gateway telefonu</li>
           </ul>
         </td>
       </tr>
       <tr>
-        <td>SMS se neodesilaji</td>
-        <td>Aplikace nema opravneni SEND_SMS</td>
+        <td>SMS se neodesílají</td>
+        <td>Aplikace nemá oprávnění SEND_SMS</td>
         <td>
-          Otevre nastaveni Android &gt; Aplikace &gt; SMS Gateway &gt; Opravneni
+          Otevře nastavení Android &gt; Aplikace &gt; SMS Gateway &gt; Oprávnění
           &gt; povolit SMS
         </td>
       </tr>
       <tr>
-        <td>SMS ve fronte ale zadny telefon neprijima</td>
-        <td>Zadny telefon neodpovida domain_filter</td>
+        <td>SMS ve frontě ale žádný telefon nepřijímá</td>
+        <td>Žádný telefon neodpovídá domain_filter</td>
         <td>
-          Zkontrolujte domain_filter na gateway telefonech. Alespon jeden by mel
-          byt bez filtru.
+          Zkontrolujte domain_filter na gateway telefonech. Alespoň jeden by měl
+          být bez filtru.
         </td>
       </tr>
       <tr>
-        <td>Vsechny SMS maji stav error</td>
-        <td>Zadny gateway telefon neni online</td>
-        <td>Ujistete se ze aplikace bezi, je sparovana a posila heartbeaty</td>
+        <td>Všechny SMS mají stav error</td>
+        <td>Žádný gateway telefon není online</td>
+        <td>Ujistěte se že aplikace běží, je spárovaná a posílá heartbeaty</td>
       </tr>
       <tr>
-        <td>Daily limit dosazeny prilis brzo</td>
-        <td>Pocitadlo sent_today</td>
+        <td>Daily limit dosažený příliš brzo</td>
+        <td>Počítadlo sent_today</td>
         <td>
-          Zvyste daily_limit nebo pridejte dalsi telefony. Reset je o pulnoci
+          Zvyšte daily_limit nebo přidejte další telefony. Reset je o půlnoci
           (cron).
         </td>
       </tr>
       <tr>
-        <td>Android blokuje SMS po 30 zpravach</td>
-        <td>Hardwarovy limit Androidu</td>
+        <td>Android blokuje SMS po 30 zprávách</td>
+        <td>Hardwarový limit Androidu</td>
         <td>
-          Pouzijte ADB prikaz:
+          Použijte ADB příkaz:
           <code
             >adb shell settings put global sms_outgoing_check_max_count
             10000</code
@@ -1497,76 +1496,76 @@ STOP pro odhlaseni</code></pre>
         </td>
       </tr>
       <tr>
-        <td>STOP neprida cislo na blacklist</td>
-        <td>Aplikace nema opravneni RECEIVE_SMS</td>
-        <td>Povolte opravneni RECEIVE_SMS v nastaveni Android</td>
+        <td>STOP nepřidá číslo na blacklist</td>
+        <td>Aplikace nemá oprávnění RECEIVE_SMS</td>
+        <td>Povolte oprávnění RECEIVE_SMS v nastavení Android</td>
       </tr>
       <tr>
-        <td>Odkazy v SMS nefunguji</td>
-        <td>Spatna konfigurace web.base.url</td>
+        <td>Odkazy v SMS nefungují</td>
+        <td>Špatná konfigurace web.base.url</td>
         <td>
-          V Odoo nastavte spravne System Parameters &gt; web.base.url (musi byt
-          verejne dostupne)
+          V Odoo nastavte správně System Parameters &gt; web.base.url (musí být
+          veřejně dostupné)
         </td>
       </tr>
       <tr>
-        <td>Kampan se neoznaci jako Done</td>
-        <td>Nektera SMS stale pending</td>
+        <td>Kampaň se neoznačí jako Done</td>
+        <td>Některé SMS stále pending</td>
         <td>
-          Zkontrolujte, ze vsechny SMS jsou ve stavu sent nebo error. Mozna je
-          kampan pauzovana.
+          Zkontrolujte, že všechny SMS jsou ve stavu sent nebo error. Možná je
+          kampaň pozastavená.
         </td>
       </tr>
       <tr>
-        <td>SMS se neodesilaji pri zamknute obrazovce</td>
-        <td>Android ukonci aplikaci kvuli optimalizaci baterie</td>
+        <td>SMS se neodesílají při zamknuté obrazovce</td>
+        <td>Android ukončí aplikaci kvůli optimalizaci baterie</td>
         <td>
           <ul>
-            <li>Vypnete Battery Optimization pro SMS Gateway (Nastaveni &gt; Aplikace &gt; SMS Gateway &gt; Baterie &gt; Neomezovat)</li>
-            <li>Na MIUI/HarmonyOS: pridejte do Autostart a zakaste DuraSpeed / Battery saver</li>
-            <li>Overete, ze AlarmManager ma opravneni <code>SCHEDULE_EXACT_ALARM</code></li>
+            <li>Vypněte Battery Optimization pro SMS Gateway (Nastavení &gt; Aplikace &gt; SMS Gateway &gt; Baterie &gt; Neomezovat)</li>
+            <li>Na MIUI/HarmonyOS: přidejte do Autostart a zakažte DuraSpeed / Battery saver</li>
+            <li>Ověřte, že AlarmManager má oprávnění <code>SCHEDULE_EXACT_ALARM</code></li>
           </ul>
         </td>
       </tr>
       <tr>
-        <td>STOP SMS chybi v blacklistu</td>
-        <td>InboundSmsWorker selhal nebo neni sit</td>
+        <td>STOP SMS chybí v blacklistu</td>
+        <td>InboundSmsWorker selhal nebo není síť</td>
         <td>
           <ul>
-            <li>Zkontrolujte, ze WorkManager ma pristup k siti (Nastaveni &gt; Datove pripojeni)</li>
-            <li>Overete opravneni <code>RECEIVE_SMS</code></li>
+            <li>Zkontrolujte, že WorkManager má přístup k síti (Nastavení &gt; Datové připojení)</li>
+            <li>Ověřte oprávnění <code>RECEIVE_SMS</code></li>
             <li>V logu aplikace hledejte chyby InboundSmsWorker</li>
-            <li>Zkontrolujte, ze endpoint <code>/sms-gateway/inbound</code> je dostupny z telefonu</li>
-            <li>Pouzijte tlacitko <strong>Znovu prohledat prijate SMS</strong> v Nastaveni &gt; Sluzba pro retroaktivni odeslani vsech prijatych SMS za poslednich 30 dni</li>
+            <li>Zkontrolujte, že endpoint <code>/sms-gateway/inbound</code> je dostupný z telefonu</li>
+            <li>Použijte tlačítko <strong>Znovu prohledat přijaté SMS</strong> v Nastavení &gt; Služba pro retroaktivní odeslání všech přijatých SMS za posledních 30 dní</li>
           </ul>
         </td>
       </tr>
       <tr>
-        <td>Prichozi SMS nedochazeji na server</td>
-        <td>InboundSmsWorker pouzival spatnou autentifikaci (Authorization: Bearer misto X-API-Key)</td>
+        <td>Příchozí SMS nedochází na server</td>
+        <td>InboundSmsWorker používal špatnou autentifikaci (Authorization: Bearer místo X-API-Key)</td>
         <td>
           <ul>
-            <li><strong>Fix v1.2.0:</strong> InboundSmsWorker nyni pouziva spravne hlavicku <code>X-API-Key</code> (stejne jako ostatni endpointy)</li>
+            <li><strong>Fix v1.2.0:</strong> InboundSmsWorker nyní používá správně hlavičku <code>X-API-Key</code> (stejně jako ostatní endpointy)</li>
             <li>Aktualizujte aplikaci na v1.2.0+</li>
-            <li>Po aktualizaci pouzijte <strong>Znovu prohledat prijate SMS</strong> pro odeslani chybejicich zprav z minulosti</li>
+            <li>Po aktualizaci použijte <strong>Znovu prohledat přijaté SMS</strong> pro odeslání chybějících zpráv z minulosti</li>
           </ul>
         </td>
       </tr>
       <tr>
-        <td>FCM push nedochazi</td>
-        <td>FCM neni spravne nakonfigurovano</td>
+        <td>FCM push nedochází</td>
+        <td>FCM není správně nakonfigurováno</td>
         <td>
           <ul>
-            <li>Overete <code>sms_gateway.fcm_enabled = True</code> v System Parameters</li>
-            <li>Zkontrolujte, ze <code>sms_gateway.fcm_credentials_json</code> nebo <code>sms_gateway.fcm_credentials_path</code> je nastaveno</li>
-            <li>Overete instalaci: <code>pip list | grep firebase-admin</code></li>
-            <li>Zkontrolujte, ze telefon ma platny FCM token (endpoint <code>/sms-gateway/register-fcm</code>)</li>
+            <li>Ověřte <code>sms_gateway.fcm_enabled = True</code> v System Parameters</li>
+            <li>Zkontrolujte, že <code>sms_gateway.fcm_credentials_json</code> nebo <code>sms_gateway.fcm_credentials_path</code> je nastaveno</li>
+            <li>Ověřte instalaci: <code>pip list | grep firebase-admin</code></li>
+            <li>Zkontrolujte, že telefon má platný FCM token (endpoint <code>/sms-gateway/register-fcm</code>)</li>
           </ul>
         </td>
       </tr>
     </table>
 
-    <h3>Diagnosticke prikazy (curl)</h3>
+    <h3>Diagnostické příkazy (curl)</h3>
     <pre><code># Test heartbeat
 curl -X POST https://vas-server.cz/sms-gateway/heartbeat \
   -H "Content-Type: application/json" \
@@ -1590,26 +1589,26 @@ curl -X POST https://vas-server.cz/sms-gateway/inbound \
 
     <p>
       Od verze v18.0.2.0.0 modul podporuje <strong>Firebase Cloud Messaging (FCM)</strong>
-      pro okamzite probuzeni telefonu pri novych SMS ve fronte. Misto cekani na dalsi
-      polling interval telefon obdrzi push notifikaci a okamzite si vyzvedne cekajici SMS.
+      pro okamžité probuzení telefonu při nových SMS ve frontě. Místo čekání na další
+      polling interval telefon obdrží push notifikaci a okamžitě si vyzvedne čekající SMS.
     </p>
 
     <h3>Architektura</h3>
     <div class="flow-diagram">
 Odoo Server                    Google FCM                   Android App
     │                              │                            │
-    │  1. Nova SMS ve fronte       │                            │
+    │  1. Nová SMS ve frontě       │                            │
     │──────────────────────────────▶                            │
     │  send_fcm_wake()             │                            │
     │  (data message)              │  2. Push notification      │
     │                              │───────────────────────────▶│
     │                              │                            │  3. FcmMessageHandler
-    │                              │                            │     probudi aplikaci
+    │                              │                            │     probudí aplikaci
     │  4. GET /sms-gateway/pending │                            │
     │◀──────────────────────────────────────────────────────────│
     │  5. SMS data                 │                            │
     │──────────────────────────────────────────────────────────▶│
-    │                              │                            │  6. Odesle SMS
+    │                              │                            │  6. Odešle SMS
     </div>
 
     <h3>Konfigurace na strane Odoo</h3>
@@ -1622,34 +1621,34 @@ Odoo Server                    Google FCM                   Android App
       <tr>
         <td><code>sms_gateway.fcm_enabled</code></td>
         <td>Boolean</td>
-        <td>Zapne/vypne FCM push notifikace. Vychozi: <code>False</code></td>
+        <td>Zapne/vypne FCM push notifikace. Výchozí: <code>False</code></td>
       </tr>
       <tr>
         <td><code>sms_gateway.fcm_credentials_json</code></td>
         <td>Text (JSON)</td>
-        <td>Inline obsah Firebase service account JSON souboru. Ma prednost pred <code>fcm_credentials_path</code>.</td>
+        <td>Inline obsah Firebase service account JSON souboru. Má přednost před <code>fcm_credentials_path</code>.</td>
       </tr>
       <tr>
         <td><code>sms_gateway.fcm_credentials_path</code></td>
         <td>Text (cesta)</td>
-        <td>Absolutni cesta k Firebase service account JSON souboru na serveru. Pouzije se pokud <code>fcm_credentials_json</code> neni nastaven.</td>
+        <td>Absolutní cesta k Firebase service account JSON souboru na serveru. Použije se pokud <code>fcm_credentials_json</code> není nastaven.</td>
       </tr>
     </table>
 
-    <h3>Python zavislost</h3>
+    <h3>Python závislost</h3>
     <pre><code>pip install firebase-admin</code></pre>
     <p>
-      Knihovna <code>firebase-admin</code> je automaticky nainstalovana pri instalaci modulu
-      (deklarovana v <code>external_dependencies</code> manifestu). Pokud instalace selze
-      (napr. chybi systemove knihovny), FCM funkce se ticha deaktivuje a telefony
-      pokracuji v polling rezimu.
+      Knihovna <code>firebase-admin</code> je automaticky nainstalována při instalaci modulu
+      (deklarována v <code>external_dependencies</code> manifestu). Pokud instalace selže
+      (např. chybí systémové knihovny), FCM funkce se tiše deaktivuje a telefony
+      pokračují v polling režimu.
     </p>
 
     <h3>Implementace: <code>tools/fcm_service.py</code></h3>
     <p>
-      Hlavni funkce <code>send_fcm_wake(phone)</code> odesle FCM data message na registrovany
-      telefon. Data message (na rozdil od notification message) probudi aplikaci i na pozadi
-      bez zobrazeni notifikace uzivateli.
+      Hlavní funkce <code>send_fcm_wake(phone)</code> odešle FCM data message na registrovaný
+      telefon. Data message (na rozdíl od notification message) probudí aplikaci i na pozadí
+      bez zobrazení notifikace uživateli.
     </p>
     <pre><code># Format FCM data message
 {
@@ -1665,142 +1664,142 @@ Odoo Server                    Google FCM                   Android App
       </tr>
       <tr>
         <td><code>type</code></td>
-        <td>Vzdy <code>"sms_pending"</code> — aplikace podle typu rozhodne akci</td>
+        <td>Vždy <code>"sms_pending"</code> — aplikace podle typu rozhodne akci</td>
       </tr>
       <tr>
         <td><code>phone_id</code></td>
-        <td>ID zaznamu <code>sms.gateway.phone</code> v Odoo</td>
+        <td>ID záznamu <code>sms.gateway.phone</code> v Odoo</td>
       </tr>
       <tr>
         <td><code>timestamp</code></td>
-        <td>Unix timestamp odeslani — pro deduplication na strane aplikace</td>
+        <td>Unix timestamp odeslání — pro deduplication na straně aplikace</td>
       </tr>
     </table>
 
-    <h3>Zpetna kompatibilita</h3>
+    <h3>Zpětná kompatibilita</h3>
     <div class="success">
-      <strong>Bezpecny upgrade:</strong> Telefony bez registrovaneho FCM tokenu (pole
-      <code>fcm_token</code> na <code>sms.gateway.phone</code>) pokracuji v polling rezimu
-      bez jakekoliv zmeny chovani. FCM je ciste aditivni vylepseni — zadny existujici
-      telefon neprestane fungovat.
+      <strong>Bezpečný upgrade:</strong> Telefony bez registrovaného FCM tokenu (pole
+      <code>fcm_token</code> na <code>sms.gateway.phone</code>) pokračují v polling režimu
+      bez jakékoliv změny chování. FCM je čistě aditivní vylepšení — žádný existující
+      telefon nepřestane fungovat.
     </div>
 
     <!-- ==================== 17. POZADI A SPOLEHLIVOST ==================== -->
-    <h2 id="17-pozadi">17. Pozadi a spolehlivost (Android)</h2>
+    <h2 id="17-pozadi">17. Pozadí a spolehlivost (Android)</h2>
 
     <p>
-      Android agresivne omezuje pozadi aplikaci kvuli uspore baterie. Tato sekce
-      dokumentuje strategie pouzite v SMS Gateway aplikaci pro spolehlivy provoz
-      i pri zamknute obrazovce a Doze rezimu.
+      Android agresivně omezuje pozadí aplikací kvůli úspoře baterie. Tato sekce
+      dokumentuje strategie použité v SMS Gateway aplikaci pro spolehlivý provoz
+      i při zamknuté obrazovce a Doze režimu.
     </p>
 
     <h3>AlarmManager vs ScheduledExecutorService</h3>
     <p>
-      Pro pravidelny polling (heartbeat + vyzvedavani SMS) aplikace pouziva
-      <strong>AlarmManager</strong> s presnym budenim namisto
+      Pro pravidelný polling (heartbeat + vyzvedávání SMS) aplikace používá
+      <strong>AlarmManager</strong> s přesným buzením namísto
       <code>ScheduledExecutorService</code> nebo <code>Handler.postDelayed()</code>.
     </p>
     <table>
       <tr>
-        <th>Pristup</th>
-        <th>Chovani v Doze</th>
+        <th>Přístup</th>
+        <th>Chování v Doze</th>
         <th>MIUI/HarmonyOS</th>
       </tr>
       <tr>
         <td><code>ScheduledExecutorService</code></td>
         <td>Zastaven po ~1 min v Doze</td>
-        <td>Agresivne ukoncen</td>
+        <td>Agresivně ukončen</td>
       </tr>
       <tr>
         <td><code>Handler.postDelayed</code></td>
         <td>Zastaven po ~1 min v Doze</td>
-        <td>Agresivne ukoncen</td>
+        <td>Agresivně ukončen</td>
       </tr>
       <tr>
         <td><strong><code>AlarmManager.setExactAndAllowWhileIdle</code></strong></td>
-        <td>Probudi zarizeni z Doze</td>
-        <td>Funguje i na MIUI (s vyjimkou baterie)</td>
+        <td>Probudí zařízení z Doze</td>
+        <td>Funguje i na MIUI (s výjimkou baterie)</td>
       </tr>
     </table>
     <div class="warning">
-      <strong>Opravneni:</strong> Od Android 12 (API 31) je nutne opravneni
+      <strong>Oprávnění:</strong> Od Android 12 (API 31) je nutné oprávnění
       <code>SCHEDULE_EXACT_ALARM</code> nebo <code>USE_EXACT_ALARM</code>.
-      Aplikace o nej zada automaticky pri prvnim spusteni.
+      Aplikace o něj žádá automaticky při prvním spuštění.
     </div>
 
-    <h3>WorkManager pro prichozi SMS</h3>
+    <h3>WorkManager pro příchozí SMS</h3>
     <p>
-      Zpracovani prichozich SMS (detekce STOP) pouziva <strong>WorkManager</strong>
-      (<code>InboundSmsWorker</code>) namisto primych HTTP volani z BroadcastReceiveru.
-      Duvody:
+      Zpracování příchozích SMS (detekce STOP) používá <strong>WorkManager</strong>
+      (<code>InboundSmsWorker</code>) namísto přímých HTTP volání z BroadcastReceiveru.
+      Důvody:
     </p>
     <ul>
-      <li>BroadcastReceiver ma casovy limit ~10 sekund — sitovy pozadavek muze selhat</li>
-      <li>WorkManager automaticky retryuje pri neuspechu (exponential backoff)</li>
-      <li>WorkManager respektuje sitove podminky (constraint: <code>NetworkType.CONNECTED</code>)</li>
-      <li>Prezije restart zarizeni</li>
+      <li>BroadcastReceiver má časový limit ~10 sekund — síťový požadavek může selhat</li>
+      <li>WorkManager automaticky retryuje při neúspěchu (exponential backoff)</li>
+      <li>WorkManager respektuje síťové podmínky (constraint: <code>NetworkType.CONNECTED</code>)</li>
+      <li>Přežije restart zařízení</li>
     </ul>
 
     <h3>WakeLock strategie</h3>
     <p>
-      Aplikace pouziva <code>PowerManager.WakeLock</code> na dvou mistech
-      pro zabraneni uspaní CPU behem kritickych operaci:
+      Aplikace používá <code>PowerManager.WakeLock</code> na dvou místech
+      pro zabránění uspání CPU během kritických operací:
     </p>
     <table>
       <tr>
         <th>Komponenta</th>
         <th>WakeLock tag</th>
-        <th>Trvani</th>
-        <th>Ucel</th>
+        <th>Trvání</th>
+        <th>Účel</th>
       </tr>
       <tr>
         <td><code>FcmMessageHandler</code></td>
         <td><code>sms-gateway:fcm-wake</code></td>
         <td>Max 60 sekund</td>
-        <td>Drzi CPU vzhuru behem poll + odeslani SMS po FCM wake</td>
+        <td>Drží CPU vzhůru během poll + odeslání SMS po FCM wake</td>
       </tr>
       <tr>
         <td><code>SmsBroadcastReceiver</code></td>
         <td><code>sms-gateway:inbound-sms</code></td>
         <td>Max 30 sekund</td>
-        <td>Drzi CPU behem zpracovani prichozi SMS a enqueue do WorkManager</td>
+        <td>Drží CPU během zpracování příchozí SMS a enqueue do WorkManager</td>
       </tr>
     </table>
 
-    <h3>IMPORTANCE_HIGH notifikacni kanal</h3>
+    <h3>IMPORTANCE_HIGH notifikační kanál</h3>
     <p>
-      Foreground service notifikace pouziva kanal s <code>IMPORTANCE_HIGH</code>.
-      To zajistuje, ze Android nezabije sluzbu ani pri nedostatku pameti. Uzivatel
-      vidi trvalou notifikaci ve stavovem radku (pozadavek Androidu pro foreground
+      Foreground service notifikace používá kanál s <code>IMPORTANCE_HIGH</code>.
+      To zajišťuje, že Android nezabije službu ani při nedostatku paměti. Uživatel
+      vidí trvalou notifikaci ve stavovém řádku (požadavek Androidu pro foreground
       service).
     </p>
 
-    <h3>Vyjimka z optimalizace baterie</h3>
+    <h3>Výjimka z optimalizace baterie</h3>
     <p>
-      Pri prvnim spusteni aplikace zada uzivatele o vyjimku z optimalizace baterie
-      (<code>REQUEST_IGNORE_BATTERY_OPTIMIZATIONS</code>). Bez teto vyjimky muze
+      Při prvním spuštění aplikace žádá uživatele o výjimku z optimalizace baterie
+      (<code>REQUEST_IGNORE_BATTERY_OPTIMIZATIONS</code>). Bez této výjimky může
       Android:
     </p>
     <ul>
-      <li>Odlozit AlarmManager alarmy v Doze (sdruzi je do maintenance window)</li>
-      <li>Omezit sitovy pristup na pozadi</li>
-      <li>Ukoncit foreground service po delsi neaktivite (MIUI, Samsung)</li>
+      <li>Odložit AlarmManager alarmy v Doze (sdruží je do maintenance window)</li>
+      <li>Omezit síťový přístup na pozadí</li>
+      <li>Ukončit foreground service po delší neaktivitě (MIUI, Samsung)</li>
     </ul>
     <div class="note">
-      <strong>Kontrola:</strong> V aplikaci v sekci Nastaveni je indikator stavu
-      optimalizace baterie. Pokud sviti cervene, uzivatel musi rucne pridat vyjimku.
+      <strong>Kontrola:</strong> V aplikaci v sekci Nastavení je indikátor stavu
+      optimalizace baterie. Pokud svítí červeně, uživatel musí ručně přidat výjimku.
     </div>
 
-    <h3>Rescan Inbox (nativni metoda)</h3>
+    <h3>Rescan Inbox (nativní metoda)</h3>
     <p>
-      Aplikace od v1.2.0 obsahuje nativni metodu <code>SmsModule.rescanInbox(days)</code>,
-      ktera precte SMS inbox za poslednich N dni (vychozi: 30) a vsechny nalezene zpravy
-      odesle na server pres endpoint <code>/sms-gateway/inbound-batch</code>.
+      Aplikace od v1.2.0 obsahuje nativní metodu <code>SmsModule.rescanInbox(days)</code>,
+      která přečte SMS inbox za posledních N dní (výchozí: 30) a všechny nalezené zprávy
+      odešle na server přes endpoint <code>/sms-gateway/inbound-batch</code>.
     </p>
     <p>
-      Tato funkce je dostupna uzivateli pres tlacitko
-      <strong>Znovu prohledat prijate SMS</strong> v Nastaveni &gt; Sluzba.
-      Server provadi deduplikaci, takze je bezpecne spustit rescan opakavane.
+      Tato funkce je dostupná uživateli přes tlačítko
+      <strong>Znovu prohledat přijaté SMS</strong> v Nastavení &gt; Služba.
+      Server provádí deduplikaci, takže je bezpečné spustit rescan opakovaně.
     </p>
     <pre><code>// React Native volani
 import { NativeModules } from 'react-native';
@@ -1809,11 +1808,11 @@ const messages = await NativeModules.SmsModule.rescanInbox(30);
 
 // Nasledne se zpravy odeslou pres inbound-batch endpoint</code></pre>
 
-    <h3>WRITE_SECURE_SETTINGS opravneni</h3>
+    <h3>WRITE_SECURE_SETTINGS oprávnění</h3>
     <p>
-      Pro zvyseni nativniho Android limitu na pocet odchozich SMS je potreba udelit
-      aplikaci opravneni <code>WRITE_SECURE_SETTINGS</code>. Toto opravneni nelze
-      udelit z GUI telefonu &mdash; vyzaduje ADB pripojeni:
+      Pro zvýšení nativního Android limitu na počet odchozích SMS je potřeba udělit
+      aplikaci oprávnění <code>WRITE_SECURE_SETTINGS</code>. Toto oprávnění nelze
+      udělit z GUI telefonu &mdash; vyžaduje ADB připojení:
     </p>
     <pre><code># Primo pres ADB
 adb shell pm grant com.varyshop.smsgatewayapp android.permission.WRITE_SECURE_SETTINGS
@@ -1821,30 +1820,30 @@ adb shell pm grant com.varyshop.smsgatewayapp android.permission.WRITE_SECURE_SE
 # Nebo pri buildu ze zdrojaku
 yarn grant-permission</code></pre>
     <div class="warning">
-      <strong>Bez tohoto opravneni</strong> Android muze blokovat odesilani po prekroceni
-      nativniho limitu (~30 SMS za 30 minut). S opravnenim aplikace automaticky zvysi limit.
+      <strong>Bez tohoto oprávnění</strong> Android může blokovat odesílání po překročení
+      nativního limitu (~30 SMS za 30 minut). S oprávněním aplikace automaticky zvýší limit.
     </div>
 
     <h3>Heartbeat safety net</h3>
     <p>
-      I s FCM muze dojit k situaci, kdy push notifikace nedorazi (napr. docasny vypadek
-      Google sluzeb). Proto aplikace udrzuje <strong>heartbeat safety net</strong>:
+      I s FCM může dojít k situaci, kdy push notifikace nedorazí (např. dočasný výpadek
+      Google služeb). Proto aplikace udržuje <strong>heartbeat safety net</strong>:
     </p>
     <ol>
-      <li>Kazdy heartbeat vraci <code>pending_count</code> pro kazde cislo</li>
-      <li>Pokud <code>pending_count &gt; 0</code>, aplikace okamzite spusti poll cyklus</li>
-      <li>Heartbeat interval je typicky 60 sekund — maximalni zpozdeni pri vypadku FCM je tedy 1 minuta</li>
-      <li>Tento mechanismus funguje nezavisle na FCM a zajistuje doruceni i bez push notifikaci</li>
+      <li>Každý heartbeat vrací <code>pending_count</code> pro každé číslo</li>
+      <li>Pokud <code>pending_count &gt; 0</code>, aplikace okamžitě spustí poll cyklus</li>
+      <li>Heartbeat interval je typicky 60 sekund — maximální zpoždění při výpadku FCM je tedy 1 minuta</li>
+      <li>Tento mechanismus funguje nezávisle na FCM a zajišťuje doručení i bez push notifikací</li>
     </ol>
 
     <div class="flow-diagram">
 FCM push (okamzite)  ──▶  Poll + Send
         │
-        │ (pokud FCM selze)
+        │ (pokud FCM selže)
         │
 Heartbeat (60s)      ──▶  pending_count > 0?  ──▶  Poll + Send
                                 │
-                                └── pending_count == 0  ──▶  Zadna akce
+                                └── pending_count == 0  ──▶  Žádná akce
     </div>
 
     <div class="note">
@@ -1858,108 +1857,108 @@ Heartbeat (60s)      ──▶  pending_count > 0?  ──▶  Poll + Send
 
     <h3>v18.0.2.6.0 / App v1.5.0 (2026-04-06)</h3>
     <ul>
-      <li><strong>SMS limit enforcement:</strong> Endpoint <code>/sms-gateway/pending</code> nyni kontroluje zbyvajici denni/mesicni kapacitu telefonu pred vydanim SMS. Pokud je limit vyčerpan, aktivni kampane se automaticky pausnou a odpoved obsahuje <code>limit_reached: true</code></li>
-      <li><strong>Pause/Resume kampane:</strong> Nove endpointy <code>POST /campaign/pause/&lt;id&gt;</code> a <code>POST /campaign/resume/&lt;id&gt;</code>. Paused kampan zustavá ve stavu <code>sending</code> s <code>paused=True</code> &mdash; jeji SMS se nevyzvedavaji v pending endpointu (filtr <code>m.paused = false</code> v pickup query). Resume nastavi <code>paused=False</code> a kampan pokracuje</li>
-      <li><strong>Archivace kampane:</strong> Novy endpoint <code>POST /campaign/archive/&lt;id&gt;</code> nastavi <code>active=False</code>. V appce dostupne pouze v pokrocilem modu pro dokoncene kampane</li>
-      <li><strong>Filtry v seznamu kampani:</strong> Vychozi pohled zobrazuje pouze <code>in_queue</code>, <code>sending</code> a <code>paused</code> kampane. Pridány přepinace &bdquo;Dokoncene&ldquo; a &bdquo;Archivovane&ldquo; (archivovane jen v pokrocilem modu). API parametry <code>include_done</code> a <code>include_archived</code> v <code>/campaign/list</code></li>
-      <li><strong>Fix:</strong> Tlacitko &bdquo;Odeslat ihned&ldquo; se nyni zobrazuje <em>pouze</em> pokud je kampan ve stavu <code>in_queue</code> &mdash; driv se znovu objevovalo po opusteni a navratu na obrazovku</li>
-      <li><strong>App UI:</strong> Cervene tlacitko &bdquo;Pozastavit odesilani&ldquo; pri aktivnim odesilani, zlute &bdquo;Pokracovat v odesilani&ldquo; pri paused stavu. Status badge zobrazuje &bdquo;Pozastaveno&ldquo; s amber barvou</li>
+      <li><strong>SMS limit enforcement:</strong> Endpoint <code>/sms-gateway/pending</code> nyní kontroluje zbývající denní/měsíční kapacitu telefonu před vydáním SMS. Pokud je limit vyčerpán, aktivní kampaně se automaticky pausnou a odpověď obsahuje <code>limit_reached: true</code></li>
+      <li><strong>Pause/Resume kampane:</strong> Nové endpointy <code>POST /campaign/pause/&lt;id&gt;</code> a <code>POST /campaign/resume/&lt;id&gt;</code>. Paused kampaň zůstává ve stavu <code>sending</code> s <code>paused=True</code> &mdash; její SMS se nevyzvedávají v pending endpointu (filtr <code>m.paused = false</code> v pickup query). Resume nastaví <code>paused=False</code> a kampaň pokračuje</li>
+      <li><strong>Archivace kampane:</strong> Nový endpoint <code>POST /campaign/archive/&lt;id&gt;</code> nastaví <code>active=False</code>. V appce dostupné pouze v pokročilém módu pro dokončené kampaně</li>
+      <li><strong>Filtry v seznamu kampani:</strong> Výchozí pohled zobrazuje pouze <code>in_queue</code>, <code>sending</code> a <code>paused</code> kampaně. Přidány přepínače &bdquo;Dokončené&ldquo; a &bdquo;Archivované&ldquo; (archivované jen v pokročilém módu). API parametry <code>include_done</code> a <code>include_archived</code> v <code>/campaign/list</code></li>
+      <li><strong>Fix:</strong> Tlačítko &bdquo;Odeslat ihned&ldquo; se nyní zobrazuje <em>pouze</em> pokud je kampaň ve stavu <code>in_queue</code> &mdash; dříve se znovu objevovalo po opuštění a návratu na obrazovku</li>
+      <li><strong>App UI:</strong> Červené tlačítko &bdquo;Pozastavit odesílání&ldquo; při aktivním odesílání, žluté &bdquo;Pokračovat v odesílání&ldquo; při paused stavu. Status badge zobrazuje &bdquo;Pozastaveno&ldquo; s amber barvou</li>
     </ul>
 
     <h3>v18.0.2.5.0 (2026-04-05)</h3>
     <ul>
-      <li><strong>Sentinel -1 pro &bdquo;nikdy kontaktovane&ldquo;:</strong> <code>stats_last_sms_days</code> (na <code>res.partner</code> i <code>res.partner.stats</code>) nyni vraci <code>-1</code> pokud partner nema <code>last_sms_sent_date</code>. Driv vracelo <code>0</code>, coz UI nerozlisovalo od &bdquo;kontaktovan dnes&ldquo; &mdash; operator nevedel ktery je ktery. Hodnota <code>-1</code> dava jednoznacny signal v form view i v exportech. Search sémantika zustava identicka (<code>&gt; N</code> stale zahrnuje nikdy kontaktovane partnery pres OR vetev, takze kampane s <code>exclude_contacted_days &gt; 0</code> zahrnou brand-new partnery a vyloucí jen ty kontaktovane v poslednich N dnech).</li>
-      <li><strong>Edge test na kopii produkcni DB:</strong> Overeno ze vsechny 3 scenare chovaji korektne: dnes kontaktovan &rarr; <code>days=0</code>, nikdy kontaktovan &rarr; <code>days=-1</code>, pred 3 dny kontaktovan &rarr; <code>days=3</code>. Search leaf <code>('stats_last_sms_days', '&gt;', 30)</code>: today <code>match=0</code>, never <code>match=1</code>, 3d_ago <code>match=0</code> &mdash; presne podle zameru (kampan zahrne nikdy-kontaktovane + stare, vyloucí dnes + nedavne).</li>
+      <li><strong>Sentinel -1 pro &bdquo;nikdy kontaktované&ldquo;:</strong> <code>stats_last_sms_days</code> (na <code>res.partner</code> i <code>res.partner.stats</code>) nyní vrací <code>-1</code> pokud partner nemá <code>last_sms_sent_date</code>. Dříve vracelo <code>0</code>, což UI nerozlišovalo od &bdquo;kontaktován dnes&ldquo; &mdash; operátor nevěděl který je který. Hodnota <code>-1</code> dává jednoznačný signál v form view i v exportech. Search sémantika zůstává identická (<code>&gt; N</code> stále zahrnuje nikdy kontaktované partnery přes OR větev, takže kampaně s <code>exclude_contacted_days &gt; 0</code> zahrnou brand-new partnery a vyloučí jen ty kontaktované v posledních N dnech).</li>
+      <li><strong>Edge test na kopii produkční DB:</strong> Ověřeno že všechny 3 scénáře chovají korektně: dnes kontaktován &rarr; <code>days=0</code>, nikdy kontaktován &rarr; <code>days=-1</code>, před 3 dny kontaktován &rarr; <code>days=3</code>. Search leaf <code>('stats_last_sms_days', '&gt;', 30)</code>: today <code>match=0</code>, never <code>match=1</code>, 3d_ago <code>match=0</code> &mdash; přesně podle záměru (kampaň zahrne nikdy-kontaktované + staré, vyloučí dnes + nedávné).</li>
     </ul>
 
     <h3>v18.0.2.4.0 (2026-04-05)</h3>
     <ul>
-      <li><strong>Critical fix &mdash; NULL-aware exclusion filter:</strong> <code>res.partner.stats_last_sms_days</code> byla <code>related</code> field pres O2m <code>stats_id</code>, takze Odoo pri search prevadel domenu na <code>LEFT JOIN res_partner_stats</code> a NULL radky (partneri bez stats row) <em>vypadavali</em>. Kampan s <code>exclude_contacted_days=30</code> tak nedostala ani jedno nikdy-nekontaktovaneho partnera &mdash; presny opak zamysleneho chovani.
+      <li><strong>Critical fix &mdash; NULL-aware exclusion filter:</strong> <code>res.partner.stats_last_sms_days</code> byla <code>related</code> field přes O2m <code>stats_id</code>, takže Odoo při search převáděl doménu na <code>LEFT JOIN res_partner_stats</code> a NULL řádky (partneři bez stats row) <em>vypadávali</em>. Kampaň s <code>exclude_contacted_days=30</code> tak nedostala ani jednoho nikdy-nekontaktovaného partnera &mdash; přesný opak zamýšleného chování.
         <ul>
-          <li>Pole je ted computed + ma vlastni <code>_search_stats_last_sms_days</code> handler</li>
-          <li>Pro operatory <code>&gt;</code>/<code>&gt;=</code> vraci <code>OR</code> vetev: partneri se stats row splnujici datum <em>nebo</em> partneri bez stats row (<code>('stats_id', '=', False)</code>)</li>
-          <li>Overeno na kopii produkcni DB (24&nbsp;974 partneru): pred fixem <code>('stats_last_sms_days','&gt;',30)</code> vratilo 5&nbsp;026 partneru, po fixu 14&nbsp;467 (9&nbsp;441 nikdy kontaktovanych + 5&nbsp;026 starych)</li>
+          <li>Pole je teď computed + má vlastní <code>_search_stats_last_sms_days</code> handler</li>
+          <li>Pro operátory <code>&gt;</code>/<code>&gt;=</code> vrací <code>OR</code> větev: partneři se stats row splňující datum <em>nebo</em> partneři bez stats row (<code>('stats_id', '=', False)</code>)</li>
+          <li>Ověřeno na kopii produkční DB (24&nbsp;974 partnerů): před fixem <code>('stats_last_sms_days','&gt;',30)</code> vrátilo 5&nbsp;026 partnerů, po fixu 14&nbsp;467 (9&nbsp;441 nikdy kontaktovaných + 5&nbsp;026 starých)</li>
         </ul>
       </li>
-      <li><strong>Perf test @ scale:</strong> Pending endpoint CTE query otestovan na 10&nbsp;000 pending SMS + 41&nbsp;456 SMS traces na kopii produkcni DB. <code>EXPLAIN ANALYZE</code>: 8.98 ms execution (limit=20), parcialni index <code>mailing_trace_sms_res_id_write_date_idx</code> je index-only scan, 20 lookupu misto sekvencniho skenu &mdash; potvrzuje proveditelnost na cilovych 100k+/10k+ scale targetech.</li>
-      <li><strong>Bulk recompute test:</strong> <code>_update_last_sms_sent</code> zpracoval 14&nbsp;750 partneru za 1.19 s pres <code>execute_values</code> bulk UPDATE.</li>
+      <li><strong>Perf test @ scale:</strong> Pending endpoint CTE query otestován na 10&nbsp;000 pending SMS + 41&nbsp;456 SMS traces na kopii produkční DB. <code>EXPLAIN ANALYZE</code>: 8.98 ms execution (limit=20), parciální index <code>mailing_trace_sms_res_id_write_date_idx</code> je index-only scan, 20 lookupů místo sekvenčního skenu &mdash; potvrzuje proveditelnost na cílových 100k+/10k+ scale targetech.</li>
+      <li><strong>Bulk recompute test:</strong> <code>_update_last_sms_sent</code> zpracoval 14&nbsp;750 partnerů za 1.19 s přes <code>execute_values</code> bulk UPDATE.</li>
     </ul>
 
     <h3>v18.0.2.3.0 / App v1.4.0 (2026-04-05)</h3>
     <ul>
-      <li><strong>SQLite-based SMS status persistence:</strong> Nahrazena in-memory batch fronta perzistentni SQLite WAL &mdash; status SMS se zapisuje <em>pred</em> HTTP syncem, takze pady appky nezpusobi ztratu dat</li>
-      <li><strong>Sync s exponential backoff:</strong> Retry podle <code>sync_attempts</code> (0&ndash;2 vzdy, 3&ndash;5 ~30s, 6&ndash;9 ~5min, 10+ ~30min)</li>
-      <li><strong>Reconcile endpoint:</strong> Novy <code>POST /sms-gateway/reconcile</code> &mdash; vraci <code>already_confirmed_ids</code>, <code>stuck_ids</code>, <code>not_found_ids</code> pro synchronizaci pri startu appky</li>
-      <li><strong>Hourly housekeeping:</strong> Automaticke mazani starych zaznamu z lokalni DB (max 1&times; za hodinu)</li>
-      <li><strong>Heartbeat <code>unsynced_count</code>:</strong> Server loguje varovani pokud nesynchronizovanych SMS &gt; 10</li>
-      <li><strong>Zadne duplicitni SMS &mdash; 6 race conditions opraveno:</strong>
+      <li><strong>SQLite-based SMS status persistence:</strong> Nahrazena in-memory batch fronta perzistentní SQLite WAL &mdash; status SMS se zapisuje <em>před</em> HTTP syncem, takže pády appky nezpůsobí ztrátu dat</li>
+      <li><strong>Sync s exponential backoff:</strong> Retry podle <code>sync_attempts</code> (0&ndash;2 vždy, 3&ndash;5 ~30s, 6&ndash;9 ~5min, 10+ ~30min)</li>
+      <li><strong>Reconcile endpoint:</strong> Nový <code>POST /sms-gateway/reconcile</code> &mdash; vrací <code>already_confirmed_ids</code>, <code>stuck_ids</code>, <code>not_found_ids</code> pro synchronizaci při startu appky</li>
+      <li><strong>Hourly housekeeping:</strong> Automatické mazání starých záznamů z lokální DB (max 1&times; za hodinu)</li>
+      <li><strong>Heartbeat <code>unsynced_count</code>:</strong> Server loguje varování pokud nesynchronizovaných SMS &gt; 10</li>
+      <li><strong>Žádné duplicitní SMS &mdash; 6 race conditions opraveno:</strong>
         <ul>
-          <li><code>AtomicBoolean isPollingActive</code> chrani pred prekryvajicimi se poll cykly</li>
-          <li><code>SELECT ... FOR UPDATE</code> v <code>_update_gateway_status</code> zabranuje TOCTOU race</li>
-          <li><code>sentReceiver</code>: <code>getOrPut</code> &rarr; null-check (ignoruje pozdni callbacky po sweepu)</li>
-          <li><code>sweepStaleTrackers</code> vyzaduje striktni rovnost <code>sentParts == totalParts &amp;&amp; failedParts == 0</code></li>
-          <li>Cron <code>_cron_reset_stuck_gateway_sms</code> resetuje SMS uvizle &gt; 30 min zpet na <code>pending</code></li>
-          <li>Opraveny trace_status hodnoty <code>'failed'</code> &rarr; <code>'error'</code> (valid Odoo selection)</li>
+          <li><code>AtomicBoolean isPollingActive</code> chrání před překrývajícími se poll cykly</li>
+          <li><code>SELECT ... FOR UPDATE</code> v <code>_update_gateway_status</code> zabraňuje TOCTOU race</li>
+          <li><code>sentReceiver</code>: <code>getOrPut</code> &rarr; null-check (ignoruje pozdní callbacky po sweepu)</li>
+          <li><code>sweepStaleTrackers</code> vyžaduje striktní rovnost <code>sentParts == totalParts &amp;&amp; failedParts == 0</code></li>
+          <li>Cron <code>_cron_reset_stuck_gateway_sms</code> resetuje SMS uvízlé &gt; 30 min zpět na <code>pending</code></li>
+          <li>Opravené trace_status hodnoty <code>'failed'</code> &rarr; <code>'error'</code> (valid Odoo selection)</li>
         </ul>
       </li>
-      <li><strong>Simple Mode v appce:</strong> Novy prepinac v nastaveni pro netechnicke zamestnance &mdash; skryva:
+      <li><strong>Simple Mode v appce:</strong> Nový přepínač v nastavení pro netechnické zaměstnance &mdash; skrývá:
         <ul>
-          <li>Tab &bdquo;Zpravy&ldquo; (Messages)</li>
-          <li>Dashboard: FCM/Poll badge, mesicni limit, month/total/rate statistiky</li>
-          <li>Settings: polling/heartbeat intervaly, SMS limity, URL/API klic, odpojit tlacitko, build cislo</li>
-          <li>Campaigns: cela sekce &bdquo;Vysledky kampane&ldquo; (CTR, prijem, kliknuti, objednavky, odhlaseni)</li>
+          <li>Tab &bdquo;Zprávy&ldquo; (Messages)</li>
+          <li>Dashboard: FCM/Poll badge, měsíční limit, month/total/rate statistiky</li>
+          <li>Settings: polling/heartbeat intervaly, SMS limity, URL/API klíč, odpojit tlačítko, build číslo</li>
+          <li>Campaigns: celá sekce &bdquo;Výsledky kampaně&ldquo; (CTR, příjem, kliknutí, objednávky, odhlášení)</li>
         </ul>
       </li>
-      <li><strong>Deklarativni exclusion filter:</strong> <code>_get_exclusion_domain()</code> nyni vraci
-        <code>('stats_last_sms_days', '&gt;', days)</code> misto SQL dotazu nad <code>mailing_trace</code>.
-        Exclusion je soucasti ulozeneho <code>mailing_domain</code> a Odoo ho aplikuje v jednom search dotazu
-        spolu se segmentem a phone filtrem &mdash; odpadaji obri <code>('id', 'not in', [...])</code> klauzule
+      <li><strong>Deklarativní exclusion filter:</strong> <code>_get_exclusion_domain()</code> nyní vrací
+        <code>('stats_last_sms_days', '&gt;', days)</code> místo SQL dotazu nad <code>mailing_trace</code>.
+        Exclusion je součástí uloženého <code>mailing_domain</code> a Odoo ho aplikuje v jednom search dotazu
+        spolu se segmentem a phone filtrem &mdash; odpadají obří <code>('id', 'not in', [...])</code> klauzule
         a runtime SQL v <code>mailing.mailing._get_recipients()</code>
       </li>
-      <li><strong>Odfiltrovane counts v segmentech:</strong> Endpoint <code>/campaign/filters</code> nyni pro kazdy segment zobrazuje
-        pocet prijemcu uz po odecteni <code>exclude_contacted_days</code> (diky deklarativni leaf se propaguje automaticky)
+      <li><strong>Odfiltrované counts v segmentech:</strong> Endpoint <code>/campaign/filters</code> nyní pro každý segment zobrazuje
+        počet příjemců už po odečtení <code>exclude_contacted_days</code> (díky deklarativní leaf se propaguje automaticky)
       </li>
-      <li><strong>Fix:</strong> <code>_search_last_sms_sent_days</code> pro operatory <code>&gt;</code>/<code>&gt;=</code> nyni zahrnuje partnery bez SMS historie (<code>last_sms_sent_date IS NULL</code>)</li>
-      <li><strong>Fix:</strong> <code>res.partner.stats.last_sms_sent_date</code> se nyni aktualizuje v realnem case pri kazdem uspesnem odeslani SMS (<code>_touch_last_sms_sent</code> volany z <code>sms.sms._update_gateway_status</code>). Driv se pole aktualizovalo jen nocnim cronem, coz zpusobovalo duplicitni SMS stejnym prijemcum v ramci jednoho dne &mdash; exclusion filtr videl zastarale hodnoty</li>
-      <li><strong>Fix:</strong> Nocni cron <code>_update_last_sms_sent</code> nyni citi z <code>mailing_trace</code> stavy <code>('pending', 'sent', 'open', 'reply')</code> misto pouze <code>'sent'</code> (v Odoo 18 <code>'sent'</code> znamena &bdquo;doruceno&ldquo;, nikoliv &bdquo;odeslano&ldquo;)</li>
-      <li><strong>Just-in-time exclusion pri pickup:</strong> Endpoint <code>/sms-gateway/pending</code> nyni <em>tesne pred</em> vydanim SMS telefonu canceluje zaznamy, jejichz prijemce byl mezitim kontaktovan jinou kampani v ramci <code>exclude_contacted_days</code> okna. Resi race condition: kampan A vytvorena v 10:00 s 10&nbsp;000 prijemci, pred dokoncenim odeslani B posle SMS nekterym z tychz prijemcu v 11:00. Kontrola je optimalizovana pro velke databaze (100k+ kontaktu, 10k+ na kampan):
+      <li><strong>Fix:</strong> <code>_search_last_sms_sent_days</code> pro operátory <code>&gt;</code>/<code>&gt;=</code> nyní zahrnuje partnery bez SMS historie (<code>last_sms_sent_date IS NULL</code>)</li>
+      <li><strong>Fix:</strong> <code>res.partner.stats.last_sms_sent_date</code> se nyní aktualizuje v reálném čase při každém úspěšném odeslání SMS (<code>_touch_last_sms_sent</code> volaný z <code>sms.sms._update_gateway_status</code>). Dříve se pole aktualizovalo jen nočním cronem, což způsobovalo duplicitní SMS stejným příjemcům v rámci jednoho dne &mdash; exclusion filtr viděl zastaralé hodnoty</li>
+      <li><strong>Fix:</strong> Noční cron <code>_update_last_sms_sent</code> nyní čítá z <code>mailing_trace</code> stavy <code>('pending', 'sent', 'open', 'reply')</code> místo pouze <code>'sent'</code> (v Odoo 18 <code>'sent'</code> znamená &bdquo;doručeno&ldquo;, nikoliv &bdquo;odesláno&ldquo;)</li>
+      <li><strong>Just-in-time exclusion při pickup:</strong> Endpoint <code>/sms-gateway/pending</code> nyní <em>těsně před</em> vydáním SMS telefonu canceluje záznamy, jejichž příjemce byl mezitím kontaktován jinou kampaní v rámci <code>exclude_contacted_days</code> okna. Řeší race condition: kampaň A vytvořena v 10:00 s 10&nbsp;000 příjemci, před dokončením odesílání B pošle SMS některým z týchž příjemců v 11:00. Kontrola je optimalizována pro velké databáze (100k+ kontaktů, 10k+ na kampaň):
         <ul>
-          <li>Pre-check CTE omezuje kandidatni sadu na <em>prvnich <code>limit</code> SMS</em> (typicky 20) serazenych <code>ORDER BY id ASC</code> &mdash; stejne jako pickup query. Nekontroluje celou kampan, pouze dalsi batch</li>
+          <li>Pre-check CTE omezuje kandidátní sadu na <em>prvních <code>limit</code> SMS</em> (typicky 20) seřazených <code>ORDER BY id ASC</code> &mdash; stejně jako pickup query. Nekontroluje celou kampaň, pouze další batch</li>
           <li>EXISTS poddotaz nad <code>mailing_trace</code> s filtrem <code>mt.mass_mailing_id != s.mailing_id</code> (ne self)</li>
-          <li>Parcialni index <code>mailing_trace_sms_res_id_write_date_idx</code> vytvoreny v <code>post_init_hook</code> na sloupcich <code>(res_id, write_date)</code> s WHERE klauzuli <code>trace_type='sms' AND trace_status IN ('pending','sent','open','reply')</code> &mdash; EXISTS je index-only scan</li>
-          <li>Cena na poll: ~<code>limit</code> index lookups (<code>&lt;1 ms</code>) misto sekvencniho skenu celeho <code>mailing_trace</code></li>
-          <li>Zrusene SMS dostanou <code>failure_type='sms_duplicate'</code> &mdash; viditelne v Odoo UI</li>
+          <li>Parciální index <code>mailing_trace_sms_res_id_write_date_idx</code> vytvořený v <code>post_init_hook</code> na sloupcích <code>(res_id, write_date)</code> s WHERE klauzulí <code>trace_type='sms' AND trace_status IN ('pending','sent','open','reply')</code> &mdash; EXISTS je index-only scan</li>
+          <li>Cena na poll: ~<code>limit</code> index lookupů (<code>&lt;1 ms</code>) místo sekvenčního skenu celého <code>mailing_trace</code></li>
+          <li>Zrušené SMS dostanou <code>failure_type='sms_duplicate'</code> &mdash; viditelné v Odoo UI</li>
         </ul>
       </li>
-      <li><strong>Nova serverova akce:</strong> <code>Recompute Last SMS Sent</code> na modelu <code>res.partner</code> (dostupna z list/form view) &mdash; manualni prepocet <code>last_sms_sent_date</code> z <code>mailing_trace</code>. Paralelne k existujici akci <code>Recompute Order Stats</code></li>
-      <li><strong>Form partnera:</strong> Order Stats tab nyni zobrazuje pole <code>stats_last_sms_sent</code> a <code>stats_last_sms_days</code>, takze je videt proc je partner v/mimo exclusion filtr</li>
-      <li><strong>Fix:</strong> Campaign sent count mismatch (Odoo 593 vs phone 334) &mdash; endpoint <code>campaign/status</code>/<code>campaign/list</code> nyni pocita <code>trace_status IN ('pending', 'sent', 'open', 'reply')</code> stejne jako Odoo UI</li>
-      <li><strong>Fix:</strong> Redundantni tlacitko &bdquo;Odeslat ihned&ldquo; se po uspesnem <code>send_now=true</code> uz nezobrazuje</li>
-      <li><strong>Stuck SMS cron:</strong> Timeout posunut z 10 na 30 minut pro backwards compatibility s pomalymi rate limity stare appky</li>
+      <li><strong>Nová serverová akce:</strong> <code>Recompute Last SMS Sent</code> na modelu <code>res.partner</code> (dostupná z list/form view) &mdash; manuální přepočet <code>last_sms_sent_date</code> z <code>mailing_trace</code>. Paralelně k existující akci <code>Recompute Order Stats</code></li>
+      <li><strong>Form partnera:</strong> Order Stats tab nyní zobrazuje pole <code>stats_last_sms_sent</code> a <code>stats_last_sms_days</code>, takže je vidět proč je partner v/mimo exclusion filtr</li>
+      <li><strong>Fix:</strong> Campaign sent count mismatch (Odoo 593 vs phone 334) &mdash; endpoint <code>campaign/status</code>/<code>campaign/list</code> nyní počítá <code>trace_status IN ('pending', 'sent', 'open', 'reply')</code> stejně jako Odoo UI</li>
+      <li><strong>Fix:</strong> Redundantní tlačítko &bdquo;Odeslat ihned&ldquo; se po úspěšném <code>send_now=true</code> už nezobrazuje</li>
+      <li><strong>Stuck SMS cron:</strong> Timeout posunut z 10 na 30 minut pro backwards compatibility s pomalými rate limity staré appky</li>
     </ul>
 
     <h3>v18.0.2.2.0 / App v1.3.0 (2026-04-04)</h3>
     <ul>
-      <li><strong>Campaign Wizard v appce:</strong> Novy tab &bdquo;Kampane&ldquo; &mdash; operator vybere sablonu, segment, pocet prijemcu a odesle kampan primo z telefonu</li>
-      <li><strong>Marketing segmenty:</strong> <code>sms.marketing.segment</code> s deklarativnimi i SQL-based domenami (3 vychozi segmenty)</li>
-      <li><strong>Marketing sablony:</strong> <code>sms.marketing.template</code> prirazene ke gateway telefonum</li>
-      <li><strong>Campaign API:</strong> 7 novych endpointu (templates, filters, preview, create, assign-sim, list, status)</li>
-      <li><strong>Uprava textu SMS:</strong> Operator muze pred odeslanim upravit text sablony primo v nahledu</li>
-      <li><strong>Volba odeslani:</strong> &bdquo;Odeslat ihned&ldquo; vs &bdquo;Do fronty&ldquo; pri vytvareni kampane</li>
-      <li><strong>SIM vyber:</strong> Automaticke prirazeni pro jednu SIM, vyber/rozdeleni pro dual SIM</li>
-      <li><strong>Marketing statistiky:</strong> Kliknuti, objednavky, prijem z kampane, odhlaseni &mdash; v appce i API</li>
-      <li><strong>Domain optimalizace:</strong> Deklarativni segmenty se ukladaji jako citelna domena; SQL segmenty se pre-resolvi na kompaktni <code>('id', 'in', [...])</code></li>
+      <li><strong>Campaign Wizard v appce:</strong> Nový tab &bdquo;Kampaně&ldquo; &mdash; operátor vybere šablonu, segment, počet příjemců a odešle kampaň přímo z telefonu</li>
+      <li><strong>Marketing segmenty:</strong> <code>sms.marketing.segment</code> s deklarativními i SQL-based doménami (3 výchozí segmenty)</li>
+      <li><strong>Marketing šablony:</strong> <code>sms.marketing.template</code> přiřazené ke gateway telefonům</li>
+      <li><strong>Campaign API:</strong> 7 nových endpointů (templates, filters, preview, create, assign-sim, list, status)</li>
+      <li><strong>Úprava textu SMS:</strong> Operátor může před odesláním upravit text šablony přímo v náhledu</li>
+      <li><strong>Volba odeslani:</strong> &bdquo;Odeslat ihned&ldquo; vs &bdquo;Do fronty&ldquo; při vytváření kampaně</li>
+      <li><strong>SIM výběr:</strong> Automatické přiřazení pro jednu SIM, výběr/rozdělení pro dual SIM</li>
+      <li><strong>Marketing statistiky:</strong> Kliknutí, objednávky, příjem z kampaně, odhlášení &mdash; v appce i API</li>
+      <li><strong>Domain optimalizace:</strong> Deklarativní segmenty se ukládají jako čitelná doména; SQL segmenty se pre-resolví na kompaktní <code>('id', 'in', [...])</code></li>
       <li><strong>Phone domain compositing:</strong> <code>sms.gateway.phone.domain_filter</code> se automaticky kombinuje s doménou segmentu v <code>_get_full_domain()</code></li>
-      <li><strong>Exclusion:</strong> Partneri kontaktovani v poslednich N dnech se vylucuji pres <code>mailing_trace</code></li>
-      <li><strong>Fix:</strong> <code>email_from</code> NOT NULL chyba pri vytvareni SMS kampane</li>
-      <li><strong>Fix:</strong> Filtrovani prazdnych telefonnich cisel (prazdny string nebyl odfiltrovany)</li>
+      <li><strong>Exclusion:</strong> Partneři kontaktovaní v posledních N dnech se vylučují přes <code>mailing_trace</code></li>
+      <li><strong>Fix:</strong> <code>email_from</code> NOT NULL chyba při vytváření SMS kampaně</li>
+      <li><strong>Fix:</strong> Filtrování prázdných telefonních čísel (prázdný string nebyl odfiltrován)</li>
       <li><strong>Fix:</strong> <code>gateway_phone_forced_id</code> jako fallback v <code>sms.sms._send()</code></li>
     </ul>
 
     <h3>v18.0.2.1.0 / App v1.2.0</h3>
     <ul>
-      <li>Prichozi SMS tab a inbound historie</li>
-      <li>Rescan inbox (nativni metoda)</li>
+      <li>Příchozí SMS tab a inbound historie</li>
+      <li>Rescan inbox (nativní metoda)</li>
       <li>Batch inbound endpoint s deduplikaci</li>
       <li>FCM push notifikace</li>
       <li>Dual SIM podpora</li>

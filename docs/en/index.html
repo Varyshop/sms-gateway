@@ -1,0 +1,1851 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.8;
+        color: #1f2937;
+        margin: 0;
+        padding: 0;
+        background: #f8fafc;
+      }
+
+      /* ===== LAYOUT: sidebar + main ===== */
+      .page-wrapper {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar navigation */
+      .sidebar {
+        width: 260px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        background: #fff;
+        border-right: 1px solid #e5e7eb;
+        padding: 24px 0;
+        z-index: 10;
+      }
+      .sidebar-logo {
+        padding: 0 20px 16px;
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 12px;
+      }
+      .sidebar-logo h2 {
+        margin: 0;
+        font-size: 1.15em;
+        color: #111827;
+        border: none;
+        padding: 0;
+      }
+      .sidebar-logo small {
+        color: #6b7280;
+        font-size: 0.8em;
+      }
+      .sidebar nav {
+        padding: 0 8px;
+      }
+      .sidebar nav a {
+        display: block;
+        padding: 7px 14px;
+        margin: 1px 0;
+        color: #6b7280;
+        text-decoration: none;
+        font-size: 0.85em;
+        border-radius: 6px;
+        transition: all 0.15s ease;
+        line-height: 1.4;
+      }
+      .sidebar nav a:hover {
+        color: #1f2937;
+        background: #f3f4f6;
+      }
+      .sidebar nav a.active {
+        color: #1e40af;
+        background: #eff6ff;
+        font-weight: 600;
+      }
+      .sidebar nav .nav-group {
+        margin-top: 16px;
+        padding: 0 14px;
+        font-size: 0.7em;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9ca3af;
+        margin-bottom: 4px;
+      }
+
+      /* Main content */
+      .main-content {
+        flex: 1;
+        max-width: 820px;
+        padding: 32px 40px 80px;
+        margin: 0 auto;
+      }
+
+      /* ===== TYPOGRAPHY ===== */
+      h1 {
+        color: #111827;
+        border-bottom: 3px solid #2563eb;
+        padding-bottom: 12px;
+        font-size: 2em;
+        margin-bottom: 8px;
+        margin-top: 0;
+      }
+      .subtitle {
+        color: #6b7280;
+        font-size: 1.1em;
+        margin-bottom: 32px;
+      }
+      h2 {
+        color: #111827;
+        margin-top: 48px;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 8px;
+        font-size: 1.5em;
+        scroll-margin-top: 24px;
+      }
+      h3 {
+        color: #374151;
+        margin-top: 28px;
+        font-size: 1.15em;
+      }
+      strong {
+        color: #111827;
+      }
+
+      /* ===== COMPONENTS ===== */
+      .highlight-box {
+        background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+        border: 1px solid #bfdbfe;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin: 20px 0;
+      }
+      .info {
+        background: #eff6ff;
+        border-left: 4px solid #3b82f6;
+        padding: 14px 18px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+      }
+      .tip {
+        background: #ecfdf5;
+        border-left: 4px solid #10b981;
+        padding: 14px 18px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+      }
+      .warning {
+        background: #fffbeb;
+        border-left: 4px solid #f59e0b;
+        padding: 14px 18px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+      }
+      .danger {
+        background: #fef2f2;
+        border-left: 4px solid #ef4444;
+        padding: 14px 18px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+      }
+      ol.steps {
+        counter-reset: step;
+        list-style: none;
+        padding-left: 0;
+      }
+      ol.steps > li {
+        counter-increment: step;
+        padding: 10px 0 10px 48px;
+        position: relative;
+        border-left: 2px solid #e5e7eb;
+        margin-left: 16px;
+      }
+      ol.steps > li:last-child {
+        border-left-color: transparent;
+      }
+      ol.steps > li::before {
+        content: counter(step);
+        position: absolute;
+        left: -15px;
+        top: 8px;
+        width: 28px;
+        height: 28px;
+        background: #2563eb;
+        color: #fff;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 0.85em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .path {
+        display: inline-block;
+        background: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        padding: 2px 10px;
+        border-radius: 6px;
+        font-size: 0.9em;
+        color: #374151;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .btn {
+        display: inline-block;
+        background: #e0e7ff;
+        border: 1px solid #c7d2fe;
+        padding: 3px 12px;
+        border-radius: 6px;
+        font-size: 0.85em;
+        color: #3730a3;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .field-table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 14px 0;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .field-table th {
+        background: #f8fafc;
+        font-weight: 600;
+        text-align: left;
+        padding: 10px 14px;
+        border-bottom: 2px solid #e2e8f0;
+        color: #475569;
+        font-size: 0.9em;
+      }
+      .field-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: top;
+      }
+      .field-table tr:last-child td {
+        border-bottom: none;
+      }
+      .field-table tr:hover td {
+        background: #f8fafc;
+      }
+      .status {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.8em;
+      }
+      .status-green {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .status-red {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .flow {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+      }
+      .flow-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 8px 0;
+        flex-wrap: wrap;
+      }
+      .flow-box {
+        background: #fff;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px 16px;
+        text-align: center;
+        min-width: 120px;
+      }
+      .flow-box strong {
+        display: block;
+        font-size: 0.85em;
+        color: #374151;
+      }
+      .flow-box small {
+        color: #6b7280;
+        font-size: 0.8em;
+      }
+      .flow-arrow {
+        font-size: 1.4em;
+        color: #9ca3af;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 16px 0;
+      }
+      .two-col > div {
+        background: #fff;
+        border-radius: 10px;
+        padding: 16px;
+        border: 1px solid #e2e8f0;
+      }
+      .faq-q {
+        font-weight: 700;
+        color: #1e40af;
+        margin-top: 20px;
+        margin-bottom: 4px;
+      }
+      .faq-a {
+        margin-bottom: 16px;
+        padding-left: 16px;
+        border-left: 2px solid #e5e7eb;
+      }
+      hr {
+        border: none;
+        border-top: 1px solid #e5e7eb;
+        margin: 40px 0;
+      }
+
+      /* ===== MOBILE: hide sidebar, show hamburger ===== */
+      .mobile-header {
+        display: none;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: #fff;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 16px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .mobile-header h2 {
+        margin: 0;
+        font-size: 1em;
+        color: #111827;
+        border: none;
+        padding: 0;
+      }
+      .mobile-header button {
+        background: none;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 1.2em;
+        color: #374151;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 15;
+      }
+
+      @media (max-width: 860px) {
+        .mobile-header {
+          display: flex;
+        }
+        .sidebar {
+          position: fixed;
+          left: -280px;
+          top: 0;
+          height: 100vh;
+          transition: left 0.25s ease;
+          z-index: 20;
+          box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar.open {
+          left: 0;
+        }
+        .sidebar-overlay.open {
+          display: block;
+        }
+        .main-content {
+          padding: 20px 16px 60px;
+        }
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+        h2 {
+          scroll-margin-top: 72px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Mobile header -->
+    <div class="mobile-header">
+      <h2>Varyshop SMS</h2>
+      <button onclick="toggleSidebar()" aria-label="Menu">&#9776;</button>
+    </div>
+    <div
+      class="sidebar-overlay"
+      id="sidebarOverlay"
+      onclick="toggleSidebar()"
+    ></div>
+
+    <div class="page-wrapper">
+      <!-- ===== SIDEBAR ===== -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+          <h2>Varyshop SMS</h2>
+          <small>User Guide</small>
+        </div>
+        <nav id="sidebarNav">
+          <div class="nav-group">Basic information</div>
+          <a href="#jak-to-funguje" data-section="jak-to-funguje"
+            >How it works</a
+          >
+          <a href="#co-potrebujete" data-section="co-potrebujete"
+            >What you need</a
+          >
+
+          <div class="nav-group">Settings</div>
+          <a href="#nastaveni-v-Varyshop" data-section="nastaveni-v-Varyshop"
+            >Admin settings</a
+          >
+          <a href="#pridani-telefonu" data-section="pridani-telefonu"
+            >Adding a phone</a
+          >
+          <a href="#instalace-aplikace" data-section="instalace-aplikace"
+            >App installation</a
+          >
+          <a href="#sparovani" data-section="sparovani">Phone pairing</a>
+
+          <div class="nav-group">Campaigns</div>
+          <a href="#prvni-kampan" data-section="prvni-kampan"
+            >Your first campaign</a
+          >
+          <a href="#kampan-z-appky" data-section="kampan-z-appky"
+            >Campaign from mobile app</a
+          >
+          <a href="#jak-se-odesilaji" data-section="jak-se-odesilaji"
+            >How SMS are sent</a
+          >
+          <a href="#pozastaveni" data-section="pozastaveni"
+            >Pausing a campaign</a
+          >
+
+          <div class="nav-group">Advanced features</div>
+          <a href="#vice-telefonu" data-section="vice-telefonu"
+            >Multiple phones</a
+          >
+          <a href="#filtrovani" data-section="filtrovani">SMS routing</a>
+          <a href="#limity" data-section="limity">Limits and speed</a>
+          <a href="#dual-sim" data-section="dual-sim">Dual SIM</a>
+
+          <div class="nav-group">Tracking and GDPR</div>
+          <a href="#odkazy" data-section="odkazy">Links and clicks</a>
+          <a href="#odhlaseni" data-section="odhlaseni">Unsubscribe and STOP</a>
+          <a href="#prichozi-sms" data-section="prichozi-sms">Incoming SMS</a>
+          <a href="#statistiky" data-section="statistiky">Statistics</a>
+
+          <div class="nav-group">Advanced settings</div>
+          <a href="#fcm" data-section="fcm">FCM Push notifications</a>
+          <a href="#background" data-section="background">Background and reliability</a>
+
+          <div class="nav-group">Help</div>
+          <a href="#overeni" data-section="overeni">Verification</a>
+          <a href="#casty-dotazy" data-section="casty-dotazy">FAQ</a>
+
+          <div class="nav-group" style="margin-top:24px; border-top:1px solid #e5e7eb; padding-top:16px">Other pages</div>
+          <a href="developer.html" style="color:#2563eb; font-weight:600">API &amp; Developer Docs</a>
+          <a href="https://github.com/Varyshop/sms-gateway-app/releases" style="color:#059669; font-weight:600" target="_blank">Download APK</a>
+          <a href="https://github.com/Varyshop/sms-gateway" target="_blank">GitHub</a>
+          <a href="../index.html">Česká verze</a>
+        </nav>
+      </aside>
+
+      <!-- ===== MAIN CONTENT ===== -->
+      <main class="main-content">
+        <h1>Varyshop SMS</h1>
+        <p class="subtitle">
+          Send SMS campaigns directly from your Android phones &mdash; no
+          external provider, no per-SMS fees.
+        </p>
+
+        <div class="highlight-box">
+          <strong>What does this module do?</strong><br />
+          Instead of paying for every SMS sent through a cloud service, you use
+          your own Android phone(s) as an SMS gateway. The phone connects to your
+          system, automatically picks up messages from the queue and sends them as
+          regular SMS. You can use multiple phones at once &mdash; the system
+          automatically distributes the load.
+        </div>
+
+        <div class="highlight-box">
+          <strong>New in v1.3.0: Campaigns from the mobile app</strong><br />
+          The new <strong>Campaigns</strong> tab lets you create and send SMS campaigns
+          directly from your phone. Select a template, a customer segment, edit the text
+          and send &mdash; including statistics (clicks, orders, revenue).
+          <a href="#kampan-z-appky">More info &darr;</a>
+        </div>
+
+        <!-- ==================== JAK TO FUNGUJE ==================== -->
+        <h2 id="jak-to-funguje">How it works</h2>
+
+        <p>The entire system consists of three parts that work together:</p>
+
+        <div class="flow">
+          <div class="flow-row">
+            <div class="flow-box" style="border-color: #2563eb">
+              <strong>1. Your Varyshop instance</strong>
+              <small>Creates campaigns and an SMS queue</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #059669">
+              <strong>2. App on the phone</strong>
+              <small>Picks up SMS from the queue and sends them</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #d97706">
+              <strong>3. Recipient</strong>
+              <small>Receives a regular SMS message</small>
+            </div>
+          </div>
+        </div>
+
+        <p>In practice, it looks like this:</p>
+        <ol class="steps">
+          <li>
+            In the admin panel, you create an SMS campaign and click
+            <span class="btn">Send</span>
+          </li>
+          <li>Varyshop prepares the SMS messages and adds them to the queue</li>
+          <li>
+            The app on your Android phone checks every few seconds:
+            <em>&ldquo;Do you have anything for me to send?&rdquo;</em>
+          </li>
+          <li>
+            When it finds a new message, it sends it as a regular SMS from your
+            phone number
+          </li>
+          <li>
+            After sending, it reports back to Varyshop:
+            <em>&ldquo;Sent&rdquo;</em> or
+            <em>&ldquo;Failed&rdquo;</em>
+          </li>
+        </ol>
+
+        <div class="tip">
+          <strong>Why does it work this way?</strong> Because you send SMS from
+          your own number, you don't pay any SMS service fees. You only pay the
+          standard SMS price according to your carrier plan. With most unlimited
+          plans, it's essentially free.
+        </div>
+
+        <!-- ==================== CO POTREBUJETE ==================== -->
+        <h2 id="co-potrebujete">What you need</h2>
+
+        <div class="two-col">
+          <div>
+            <strong>On the Varyshop side:</strong>
+            <ul>
+              <li>
+                A Varyshop instance with Odoo 18 and the Varyshop SMS module
+                installed (your admin will set this up)
+              </li>
+              <li>Access to the <em>Email Marketing</em> section</li>
+            </ul>
+          </div>
+          <div>
+            <strong>On the phone side:</strong>
+            <ul>
+              <li>An Android phone (version 12 or newer)</li>
+              <li>A SIM card with an active SMS plan</li>
+              <li>Internet connection (Wi-Fi or mobile data)</li>
+              <li>The Varyshop SMS app (your admin will install it)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ==================== NASTAVENI V Varyshop ==================== -->
+        <h2 id="nastaveni-v-Varyshop">Settings in Varyshop admin panel</h2>
+
+        <p>
+          After the module is installed (done by your technician), you'll find a
+          new section in the menu:
+        </p>
+
+        <p>
+          <span class="path"
+            >Email Marketing &rarr; Varyshop SMS &rarr; Gateway Phones</span
+          >
+        </p>
+
+        <p>Here you will manage all phones connected to your system.</p>
+
+        <div class="info">
+          <strong>Where do I find the settings?</strong> If you have the module
+          installed, you'll see a <em>Varyshop SMS</em> item under the main
+          <em>Email Marketing</em> menu. If you don't see it, contact your admin
+          &mdash; the module may not be installed yet or you may not have
+          sufficient permissions.
+        </div>
+
+        <!-- ==================== PRIDANI TELEFONU ==================== -->
+        <h2 id="pridani-telefonu">Adding a phone</h2>
+
+        <p>
+          Every physical phone you want to use for sending must be registered in
+          the Varyshop admin panel.
+        </p>
+
+        <ol class="steps">
+          <li>
+            Go to
+            <span class="path"
+              >Email Marketing &rarr; Varyshop SMS &rarr; Gateway Phones</span
+            >
+          </li>
+          <li>Click <span class="btn">New</span></li>
+          <li>
+            Fill in the basic details:
+            <table class="field-table">
+              <tr>
+                <th>Field</th>
+                <th>What to enter</th>
+                <th>Example</th>
+              </tr>
+              <tr>
+                <td><strong>Name</strong></td>
+                <td>Give the phone a name so you can identify it later</td>
+                <td>Samsung &ndash; O2</td>
+              </tr>
+              <tr>
+                <td><strong>Phone number</strong></td>
+                <td>The SIM card number in international format</td>
+                <td>+420777123456</td>
+              </tr>
+              <tr>
+                <td><strong>Second number</strong></td>
+                <td>If the phone has two SIMs, enter the second one (optional)</td>
+                <td>+420608987654</td>
+              </tr>
+              <tr>
+                <td><strong>Daily limit</strong></td>
+                <td>Maximum number of SMS the phone can send per day</td>
+                <td>500</td>
+              </tr>
+              <tr>
+                <td><strong>SMS per minute</strong></td>
+                <td>Maximum sending speed</td>
+                <td>100</td>
+              </tr>
+            </table>
+          </li>
+          <li>
+            Click <span class="btn">Generate API Key</span> &mdash; a QR code
+            will appear that you'll use for pairing
+          </li>
+          <li>Save the record</li>
+        </ol>
+
+        <div class="tip">
+          <strong>How many phones do I need?</strong> One is enough to start.
+          If you plan to send thousands of SMS daily, we recommend adding more
+          phones &mdash; the system automatically distributes the load.
+        </div>
+
+        <!-- ==================== INSTALACE APLIKACE ==================== -->
+        <h2 id="instalace-aplikace">Installing the app on your phone</h2>
+
+        <p>
+          You need to install the <strong>Varyshop SMS</strong> app on your
+          Android phone.
+        </p>
+
+        <h3>Downloading the APK</h3>
+        <p>
+          The app is not on Google Play. Download the APK file directly from
+          <a href="https://github.com/Varyshop/sms-gateway-app/releases" target="_blank"><strong>GitHub Releases</strong></a>:
+        </p>
+        <ol class="steps">
+          <li>On your phone, open the link to <a href="https://github.com/Varyshop/sms-gateway-app/releases" target="_blank">Releases</a> and download the latest <strong>.apk</strong> file</li>
+          <li>Open the downloaded file &mdash; if a warning appears, allow <em>Install from unknown sources</em></li>
+          <li>Complete the installation</li>
+        </ol>
+
+        <div class="info">
+          <strong>Why isn't it on Google Play?</strong> The app uses
+          <code>SEND_SMS</code> and <code>READ_SMS</code> permissions, which
+          require a special review on the Play Store. Installing the APK directly
+          from GitHub Releases is the intended distribution method.
+        </div>
+
+        <p>After launching the app, you will be asked for the following permissions:</p>
+
+        <table class="field-table">
+          <tr>
+            <th>Permission</th>
+            <th>Why we need it</th>
+          </tr>
+          <tr>
+            <td><strong>Send SMS</strong></td>
+            <td>So the app can send SMS messages from your number</td>
+          </tr>
+          <tr>
+            <td><strong>Receive SMS</strong></td>
+            <td>So the app can capture replies containing the word STOP (unsubscribe)</td>
+          </tr>
+          <tr>
+            <td><strong>Camera</strong></td>
+            <td>To scan the QR code during pairing</td>
+          </tr>
+          <tr>
+            <td><strong>Phone information</strong></td>
+            <td>To detect your SIM card numbers</td>
+          </tr>
+          <tr>
+            <td><strong>Notifications</strong></td>
+            <td>To display sending status and background service status (Android 13+ asks in a dialog)</td>
+          </tr>
+        </table>
+
+        <p>
+        <div class="warning">
+          <strong>Increasing the SMS limit (WRITE_SECURE_SETTINGS):</strong> To increase
+          the native Android limit on outgoing SMS, the app needs the
+          <code>WRITE_SECURE_SETTINGS</code> permission. This cannot be granted from
+          the phone &mdash; you need to connect the phone to a computer via USB and run:
+          <pre><code>adb shell pm grant com.varyshop.smsgatewayapp android.permission.WRITE_SECURE_SETTINGS</code></pre>
+          If you're building from source, you can use: <code>yarn grant-permission</code>
+        </div>
+
+        <p>
+          In addition to these permissions, the app will also show a dialog for
+          <strong>battery optimization exemption</strong>. This exemption is
+          essential so that Android doesn't put the app to sleep in the background
+          and SMS are reliably sent even when the screen is locked. See the
+          <a href="#background">Background and reliability</a> section for more.
+        </p>
+
+        <div class="warning">
+          <strong>Important:</strong> All permissions must be granted, otherwise
+          the app will not work properly. Also allow the battery optimization
+          exemption &mdash; without it, Android may stop sending SMS in the
+          background. If you accidentally denied a permission, you can grant it
+          later in
+          <em
+            >Phone Settings &rarr; Apps &rarr; Varyshop SMS &rarr;
+            Permissions</em
+          >.
+        </div>
+
+        <!-- ==================== SPAROVANI ==================== -->
+        <h2 id="sparovani">Pairing the phone with Varyshop admin</h2>
+
+        <p>
+          After installing the app, you need to connect it to your Varyshop
+          system. This is done once using a QR code.
+        </p>
+
+        <ol class="steps">
+          <li>
+            In the Varyshop admin panel, open your phone record (where you
+            clicked <em>Generate API Key</em>) &mdash; you'll see a QR code
+          </li>
+          <li>On the phone, open the <strong>Varyshop SMS</strong> app</li>
+          <li>
+            Go to the <strong>Settings</strong> tab (gear icon at the bottom)
+          </li>
+          <li>Tap <span class="btn">Scan QR Code</span></li>
+          <li>
+            Point the phone camera at the QR code displayed on the screen in the
+            Varyshop admin panel
+          </li>
+          <li>The app will confirm successful pairing &mdash; done!</li>
+        </ol>
+
+        <div class="tip">
+          <strong>How do I know it works?</strong> After successful pairing, the
+          phone status in Varyshop admin will change from
+          <span class="status status-red">Offline</span> to
+          <span class="status status-green">Online</span>. This means the
+          phone is connected and ready to send SMS.
+        </div>
+
+        <div class="warning">
+          <strong>Phone stays Offline?</strong> Check:
+          <ul style="margin-bottom: 0">
+            <li>Does the phone have an internet connection? (Wi-Fi or mobile data)</li>
+            <li>
+              Is the app running on the phone? (not closed, not in power saving mode)
+            </li>
+            <li>
+              Is the server address correct? (you can see the URL in the app settings)
+            </li>
+          </ul>
+        </div>
+
+        <!-- ==================== PRVNI KAMPAN ==================== -->
+        <h2 id="prvni-kampan">Your first SMS campaign</h2>
+
+        <p>
+          Once you have at least one phone
+          <span class="status status-green">Online</span>, you can send your
+          first campaign.
+        </p>
+
+        <ol class="steps">
+          <li>
+            Go to
+            <span class="path">Email Marketing &rarr; SMS Marketing</span>
+          </li>
+          <li>Click <span class="btn">New</span></li>
+          <li>
+            Fill in the campaign:
+            <table class="field-table">
+              <tr>
+                <th>Field</th>
+                <th>What to enter</th>
+              </tr>
+              <tr>
+                <td><strong>Name</strong></td>
+                <td>Internal campaign name (the customer won't see it)</td>
+              </tr>
+              <tr>
+                <td><strong>Recipients</strong></td>
+                <td>
+                  Who will receive the SMS &mdash; select a contact group or
+                  set up a filter
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Message text</strong></td>
+                <td>
+                  The actual SMS text (max 160 characters for a single SMS,
+                  longer messages will be split)
+                </td>
+              </tr>
+            </table>
+          </li>
+          <li>Review the message preview</li>
+          <li>
+            Click <span class="btn">Send</span> (for immediate sending) or
+            <span class="btn">Schedule</span> (for sending at a specific time)
+          </li>
+        </ol>
+
+        <h3>SMS text example</h3>
+        <div
+          style="
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 10px;
+            padding: 16px;
+            font-family: monospace;
+            margin: 12px 0;
+          "
+        >
+          Hi {{ object.name }}! Get 20% off our entire range until the end of
+          the week. Shop at https://www.example.com/sale
+        </div>
+
+        <div class="info">
+          <strong>Personalization:</strong> Use
+          <code>{{ object.name }}</code> to insert each recipient's name into the
+          text. You can find more fields via the dynamic content button in the
+          message editor.
+        </div>
+
+        <!-- ==================== KAMPAN Z APPKY ==================== -->
+        <h2 id="kampan-z-appky">Campaign from mobile app</h2>
+
+        <p>
+          <strong>New in v1.3.0:</strong> You can create campaigns directly
+          from the mobile app without accessing the Odoo backend. Just open
+          the <strong>Campaigns</strong> tab in the app.
+        </p>
+
+        <h3>Prerequisites</h3>
+        <ul>
+          <li>
+            At least one <strong>SMS template</strong> must be created in the
+            admin panel and assigned to your phone
+            (<span class="path">SMS Gateway &rarr; Marketing Templates</span>)
+          </li>
+          <li>
+            The template must have assigned <strong>segments</strong>
+            (recipient groups)
+          </li>
+        </ul>
+
+        <h3>Wizard in the app (3 steps)</h3>
+        <ol class="steps">
+          <li>
+            <strong>Select template</strong> &mdash; templates assigned to
+            your phone will be displayed. Select one by tapping.
+          </li>
+          <li>
+            <strong>Segment and count</strong> &mdash; select a segment
+            (e.g. &ldquo;Haven't ordered in 3 months&rdquo;) and set the number
+            of recipients. For each segment, you can see how many customers match the filter.
+          </li>
+          <li>
+            <strong>Preview and confirm</strong> &mdash; you'll see an SMS
+            preview with a sample name. You can edit the text before sending.
+            Choose <strong>Send now</strong> or
+            <strong>Add to queue</strong>.
+          </li>
+        </ol>
+
+        <h3>Sending and tracking</h3>
+        <p>
+          After creating the campaign, a status card is displayed with real-time
+          counters (sent / pending / errors). If you chose &ldquo;Add to queue&rdquo;,
+          you can send the SMS later with the
+          <strong>Send now</strong> button.
+        </p>
+        <p>
+          On phones with two SIM cards, the app will offer a choice:
+          send via one SIM or split between both.
+        </p>
+
+        <h3>Marketing statistics</h3>
+        <p>
+          After sending a campaign, the app displays:
+        </p>
+        <ul>
+          <li><strong>Clicked</strong> &mdash; how many recipients clicked a link</li>
+          <li><strong>Orders</strong> &mdash; number of orders from the campaign (UTM tracking)</li>
+          <li><strong>Revenue</strong> &mdash; total revenue from orders</li>
+          <li><strong>Unsubscribed</strong> &mdash; number of STOP replies</li>
+          <li><strong>CTR, Conversion, Unsubscribe %</strong> &mdash; percentage metrics</li>
+        </ul>
+
+        <div class="info">
+          <strong>Tip:</strong> Segments and templates are set up by the admin in Odoo.
+          The operator in the app only selects and sends &mdash; they cannot change
+          filters or recipients outside the configured segments.
+        </div>
+
+        <!-- ==================== JAK SE ODESILAJI ==================== -->
+        <h2 id="jak-se-odesilaji">How SMS are sent</h2>
+
+        <p>After clicking <em>Send</em>, the following happens:</p>
+
+        <div class="flow">
+          <div class="flow-row">
+            <div class="flow-box">
+              <strong>Prepared</strong>
+              <small>Varyshop creates an SMS for each recipient</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #2563eb">
+              <strong>In queue</strong>
+              <small>SMS is assigned to one of your phones</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #d97706">
+              <strong>Sending</strong>
+              <small>Phone has picked up the SMS and is sending</small>
+            </div>
+            <span class="flow-arrow">&rarr;</span>
+            <div class="flow-box" style="border-color: #059669">
+              <strong>Sent</strong>
+              <small>Successfully sent</small>
+            </div>
+          </div>
+        </div>
+
+        <p>You can track progress in real time:</p>
+        <ul>
+          <li>
+            <strong>In the campaign</strong> &mdash; counters in the header show
+            how many SMS have been sent, how many are pending, how many failed
+          </li>
+          <li>
+            <strong>On the phone</strong> &mdash; the app shows how many SMS it
+            has sent and how many are still waiting in the queue
+          </li>
+          <li>
+            <strong>On the phone card in Varyshop admin</strong> &mdash; you can
+            see <em>Sent today</em> and <em>Pending</em>
+          </li>
+        </ul>
+
+        <!-- ==================== POZASTAVENI ==================== -->
+        <h2 id="pozastaveni">Pausing a campaign</h2>
+
+        <p>
+          If you need to temporarily stop a campaign (e.g. you noticed a mistake
+          in the text), you can pause it without canceling:
+        </p>
+
+        <ol class="steps">
+          <li>Open the campaign that is currently being sent</li>
+          <li>
+            Turn on the <span class="btn">Paused</span> toggle
+          </li>
+          <li>SMS still in the queue will not be sent</li>
+          <li>
+            SMS that have already been sent will remain sent &mdash; they cannot
+            be taken back
+          </li>
+        </ol>
+
+        <p>
+          To resume sending, simply turn off the <em>Paused</em> toggle.
+        </p>
+
+        <div class="info">
+          <strong>What if SMS were not created?</strong> Sometimes SMS for some
+          recipients are not created (e.g. due to an error). In that case, use
+          the <span class="btn">Force Create SMS Queue</span> button &mdash;
+          the system will create SMS for all recipients who don't have them yet.
+        </div>
+
+        <!-- ==================== VICE TELEFONU ==================== -->
+        <h2 id="vice-telefonu">Multiple phones and load distribution</h2>
+
+        <p>
+          You can connect any number of phones. The system automatically
+          distributes SMS evenly &mdash; each new SMS is assigned to the phone
+          that currently has the
+          <strong>least work</strong> (fewest pending SMS in its queue).
+        </p>
+
+        <h3>Example with three phones</h3>
+        <table class="field-table">
+          <tr>
+            <th>Phone</th>
+            <th>Pending in queue</th>
+            <th>Gets the next SMS?</th>
+          </tr>
+          <tr>
+            <td>Samsung &ndash; O2</td>
+            <td>15 SMS</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>Xiaomi &ndash; T-Mobile</td>
+            <td>8 SMS</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>Pixel &ndash; Vodafone</td>
+            <td style="color: #059669; font-weight: 600">3 SMS</td>
+            <td style="color: #059669; font-weight: 600">
+              Yes &mdash; has the fewest
+            </td>
+          </tr>
+        </table>
+
+        <div class="tip">
+          <strong>Recommendation:</strong> For sending more than 500 SMS daily,
+          we recommend at least 2 phones. For thousands of SMS daily, use
+          3&ndash;5 phones. The system handles it &mdash; you don't need to
+          worry about anything.
+        </div>
+
+        <!-- ==================== FILTROVANI ==================== -->
+        <h2 id="filtrovani">SMS routing to specific phones</h2>
+
+        <p>
+          Advanced feature: you can configure a specific phone to send SMS
+          <strong>only for a specific group of customers</strong>. For example,
+          you want VIP customer SMS to go from a different number than SMS for
+          other customers.
+        </p>
+
+        <h3>How to set it up</h3>
+        <ol class="steps">
+          <li>
+            Open the phone record in
+            <span class="path">Varyshop SMS &rarr; Gateway Phones</span>
+          </li>
+          <li>Find the <strong>Partner Domain Filter</strong> field</li>
+          <li>
+            Enter the condition for which customers should be routed to this
+            phone
+          </li>
+        </ol>
+
+        <h3>Examples</h3>
+        <table class="field-table">
+          <tr>
+            <th>I want the phone to send for...</th>
+            <th>What to enter in the filter</th>
+          </tr>
+          <tr>
+            <td>All customers (no restriction)</td>
+            <td><em>Leave empty</em></td>
+          </tr>
+          <tr>
+            <td>VIP customers only (category with ID 10)</td>
+            <td>[("category_id", "in", [10])]</td>
+          </tr>
+          <tr>
+            <td>Customers from Czech Republic only</td>
+            <td>[("country_id.code", "=", "CZ")]</td>
+          </tr>
+          <tr>
+            <td>Company customers only</td>
+            <td>[("is_company", "=", True)]</td>
+          </tr>
+        </table>
+
+        <div class="warning">
+          <strong>Important:</strong> If you use filters,
+          <strong>leave at least one phone without a filter</strong> (empty
+          field). It will serve as a fallback &mdash; it will receive SMS for
+          customers that don't match any other filter. If no phone matches,
+          the SMS will be marked as an error.
+        </div>
+
+        <div class="info">
+          <strong>For advanced users:</strong> The filter uses the same format
+          as filters in Varyshop views (domain notation). If you're not sure
+          about the syntax, ask your admin for help.
+        </div>
+
+        <!-- ==================== LIMITY ==================== -->
+        <h2 id="limity">Daily limits and sending speed</h2>
+
+        <p>Each phone has two limits you can configure:</p>
+
+        <table class="field-table">
+          <tr>
+            <th>Limit</th>
+            <th>What it does</th>
+            <th>Default value</th>
+          </tr>
+          <tr>
+            <td><strong>Daily limit</strong></td>
+            <td>
+              Maximum number of SMS the phone will send per day. The counter
+              automatically resets at midnight.
+            </td>
+            <td>500 SMS/day</td>
+          </tr>
+          <tr>
+            <td><strong>SMS per minute</strong></td>
+            <td>
+              How quickly the phone sends SMS in succession. A higher number
+              means faster, but there's a risk of being blocked by the carrier.
+            </td>
+            <td>100 SMS/min</td>
+          </tr>
+        </table>
+
+        <h3>What happens when a phone reaches its limit?</h3>
+        <ul>
+          <li>New SMS are automatically redirected to the next available phone</li>
+          <li>
+            If no other phone is available, the SMS will stay in the queue until
+            the next day
+          </li>
+          <li>
+            In Varyshop, you can see on the phone card how many more SMS it can
+            send today
+          </li>
+        </ul>
+
+        <div class="warning">
+          <strong>Android limit warning:</strong> Some Android devices have their
+          own limit on the number of sent SMS (typically ~30 SMS per 30 minutes).
+          If you encounter this, the app will report it as an error. Your
+          technician can resolve this in the phone settings.
+        </div>
+
+        <!-- ==================== DUAL SIM ==================== -->
+        <h2 id="dual-sim">Phones with two SIM cards</h2>
+
+        <p>
+          If your phone has two SIM cards, you can register both under a single
+          phone record in Varyshop:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Phone number</strong> &mdash; first SIM card number
+          </li>
+          <li><strong>Second number</strong> &mdash; second SIM card number</li>
+        </ul>
+
+        <p>
+          The app automatically detects both SIM cards and displays them in the
+          settings. SMS are sent via the correct SIM card based on which number
+          they were assigned to in Varyshop.
+        </p>
+
+        <div class="info">
+          <strong>In practice:</strong> One phone with two SIM cards behaves
+          like two sending phones. Each number has its own queue and its own
+          sent SMS counter.
+        </div>
+
+        <!-- ==================== ODKAZY ==================== -->
+        <h2 id="odkazy">Links in SMS and click tracking</h2>
+
+        <p>
+          If you include a link (URL) in your SMS text, the system automatically
+          shortens it and adds tracking.
+        </p>
+
+        <h3>What happens to the link</h3>
+        <table class="field-table">
+          <tr>
+            <th>Stage</th>
+            <th>How the link looks</th>
+          </tr>
+          <tr>
+            <td>As you write it</td>
+            <td>https://www.your-shop.com/spring-sale-2026</td>
+          </tr>
+          <tr>
+            <td>As the recipient receives it</td>
+            <td>https://your-admin.com/r/Ab3x (short tracking link)</td>
+          </tr>
+        </table>
+
+        <h3>What happens when the recipient clicks</h3>
+        <ol class="steps">
+          <li>The recipient clicks the short link in the SMS</li>
+          <li>Your server records the click &mdash; who clicked, when, from where</li>
+          <li>
+            The recipient is immediately redirected to the original page
+            (your-shop.com/spring-sale-2026)
+          </li>
+        </ol>
+
+        <p>
+          Thanks to this, you can
+          <strong>see in Varyshop how many people clicked the link</strong> and
+          who exactly it was. You don't need to set anything up &mdash; it
+          happens automatically.
+        </p>
+
+        <h3>Where to find link statistics</h3>
+        <p>
+          Go to
+          <span class="path">Email Marketing &rarr; Link Tracker</span> &mdash;
+          you'll see all short links, click counts, and other details.
+        </p>
+
+        <div class="tip">
+          <strong>Google Analytics:</strong> If you use Google Analytics, the
+          tracking links automatically add UTM parameters (campaign, source,
+          medium). Traffic from SMS campaigns will appear directly in your
+          Google Analytics reports.
+        </div>
+
+        <!-- ==================== ODHLASENI ==================== -->
+        <h2 id="odhlaseni">Recipient unsubscribe and STOP messages</h2>
+
+        <p>
+          By law (GDPR), every recipient must have the option to unsubscribe
+          from marketing SMS. Our system handles this automatically.
+        </p>
+
+        <h3>How it works</h3>
+        <ol class="steps">
+          <li>
+            At the end of every SMS message, there is automatically the text:
+            <strong>STOP to unsubscribe</strong>
+          </li>
+          <li>
+            If the recipient replies with an SMS containing the word
+            <strong>STOP</strong>...
+          </li>
+          <li>...the app on the phone captures this reply</li>
+          <li>
+            It automatically adds the recipient's number to the <strong>blacklist</strong>
+          </li>
+          <li>All future campaigns will automatically skip this number</li>
+        </ol>
+
+        <div class="danger">
+          <strong>GDPR requirement:</strong> The text &ldquo;STOP to unsubscribe&rdquo;
+          is added automatically and <strong>must not be removed</strong>.
+          Sending marketing SMS without the option to unsubscribe is a violation
+          of the law.
+        </div>
+
+        <h3>Where to find the blacklist</h3>
+        <p>
+          <span class="path"
+            >SMS Marketing &rarr; Configuration &rarr; Phone Blacklist</span
+          >
+        </p>
+
+        <p>Here you can:</p>
+        <ul>
+          <li>View all unsubscribed numbers</li>
+          <li>
+            Manually add a number (if your customer requests it by phone or
+            email)
+          </li>
+          <li>
+            Remove a number from the list (if the customer renews their consent
+            &mdash; e.g. in writing)
+          </li>
+        </ul>
+
+        <!-- ==================== PRICHOZI SMS ==================== -->
+        <h2 id="prichozi-sms">Incoming SMS</h2>
+
+        <p>
+          Since version 1.2.0, the app includes a new <strong>Incoming</strong>
+          tab where you can monitor all received SMS messages on your gateway phone.
+        </p>
+
+        <h3>What the Incoming tab shows</h3>
+        <ul>
+          <li><strong>Sender</strong> &mdash; the sender's number and partner name (if they exist in the system)</li>
+          <li><strong>Message text</strong> &mdash; content of the received SMS</li>
+          <li><strong>Blacklist status</strong> &mdash; whether the number is on the blacklist</li>
+          <li><strong>Date and time</strong> &mdash; when the message was received</li>
+        </ul>
+
+        <h3>Filtering</h3>
+        <p>
+          At the top of the screen, you can switch between
+          <strong>All messages</strong> and <strong>STOP only</strong>.
+          The list supports pagination for easier browsing of large volumes of messages.
+        </p>
+
+        <h3>Chatter integration</h3>
+        <p>
+          All received SMS are automatically displayed in the <strong>partner's chatter</strong>
+          in Odoo. Each incoming message is shown as a formatted note with the text
+          in a blockquote and optionally with a STOP tag if the message contained an unsubscribe keyword.
+        </p>
+
+        <h3>Re-scanning the inbox</h3>
+        <p>
+          If some incoming messages are missing, go to
+          <em>Settings &rarr; Service</em> in the app and tap
+          <span class="btn">Re-scan received SMS</span>. The app will read
+          the SMS inbox for the last 30 days and send all found messages to the server.
+          Duplicates are automatically ignored.
+        </p>
+
+        <!-- ==================== STATISTIKY ==================== -->
+        <h2 id="statistiky">Campaign statistics</h2>
+
+        <p>After sending a campaign, you'll find statistics directly in the campaign header:</p>
+
+        <table class="field-table">
+          <tr>
+            <th>Metric</th>
+            <th>What it means</th>
+          </tr>
+          <tr>
+            <td><strong>Sent</strong></td>
+            <td>Number of successfully sent SMS</td>
+          </tr>
+          <tr>
+            <td><strong>Clicked</strong></td>
+            <td>How many recipients clicked a link in the message</td>
+          </tr>
+          <tr>
+            <td><strong>Failed</strong></td>
+            <td>Number of SMS that could not be sent</td>
+          </tr>
+          <tr>
+            <td><strong>Bounced</strong></td>
+            <td>Invalid phone numbers</td>
+          </tr>
+          <tr>
+            <td><strong>Orders</strong></td>
+            <td>Number of orders created from the campaign (UTM tracking)</td>
+          </tr>
+          <tr>
+            <td><strong>Revenue</strong></td>
+            <td>Total revenue from orders attributed to the campaign</td>
+          </tr>
+          <tr>
+            <td><strong>Opt-out</strong></td>
+            <td>Number of recipients who replied STOP</td>
+          </tr>
+        </table>
+
+        <p>
+          Clicking on any metric shows a detailed list &mdash; you can see
+          exactly which contacts received the SMS, who clicked, etc.
+        </p>
+
+        <h3>Phone statistics</h3>
+        <p>
+          On each phone's card in
+          <span class="path">Varyshop SMS &rarr; Gateway Phones</span> you can see:
+        </p>
+        <ul>
+          <li>
+            <strong>Sent today</strong> &mdash; how many SMS the phone has sent
+            today (out of the daily limit)
+          </li>
+          <li>
+            <strong>Total sent</strong> &mdash; total number of SMS sent over
+            the entire period
+          </li>
+          <li>
+            <strong>Pending</strong> &mdash; how many SMS are waiting in the
+            queue to be sent
+          </li>
+          <li>
+            <strong>Errors</strong> &mdash; how many SMS failed to send
+          </li>
+        </ul>
+
+        <!-- ==================== FCM PUSH NOTIFIKACE ==================== -->
+        <h2 id="fcm">FCM Push notifications</h2>
+
+        <p>
+          By default, the phone app <strong>polls every few seconds</strong>
+          for new SMS from the queue. This works well, but there can be a delay
+          of up to 10 seconds between creating the SMS in the admin panel and
+          the start of sending.
+        </p>
+
+        <p>
+          <strong>FCM (Firebase Cloud Messaging)</strong> eliminates this delay.
+          When FCM is enabled, the admin panel sends the phone an instant
+          &ldquo;push&rdquo; impulse &mdash; the app starts sending virtually
+          immediately.
+        </p>
+
+        <h3>How to enable FCM</h3>
+        <ol class="steps">
+          <li>
+            Go to
+            <span class="path">Settings &rarr; SMS Gateway</span>
+          </li>
+          <li>
+            Turn on the <strong>FCM Push Enabled</strong> toggle
+          </li>
+          <li>
+            Upload the <strong>Firebase Service Account JSON</strong> file
+            &mdash; you can get it from the
+            <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a>
+            (Project Settings &rarr; Service accounts &rarr; Generate new private key)
+          </li>
+          <li>Save the settings</li>
+        </ol>
+
+        <div class="info">
+          <strong>One Firebase project for all instances.</strong>
+          If you run multiple Varyshop instances (e.g. for different
+          customers), one Firebase project and one Service Account JSON
+          file is sufficient. Each instance uses it independently.
+        </div>
+
+        <div class="tip">
+          <strong>What if I don't set up FCM?</strong> The app works
+          perfectly fine without FCM &mdash; it uses standard polling.
+          SMS will be sent, just with a slightly higher delay (up to 10 seconds).
+          FCM is an optional enhancement, not a requirement.
+        </div>
+
+        <!-- ==================== POZADI A SPOLEHLIVOST ==================== -->
+        <h2 id="background">Background and reliability</h2>
+
+        <p>
+          The Varyshop SMS app sends messages even when the
+          <strong>screen is locked</strong> or when you're using another
+          app. For this to work reliably, battery optimization must be
+          configured correctly.
+        </p>
+
+        <h3>Battery optimization</h3>
+        <p>
+          Android tries to save battery and may restrict background app
+          activity. For Varyshop SMS, this restriction needs to be disabled:
+        </p>
+        <ol class="steps">
+          <li>
+            Open <span class="path">Phone Settings &rarr; Battery &rarr; App battery usage</span>
+          </li>
+          <li>
+            Find the <strong>SMS Gateway</strong> app
+          </li>
+          <li>
+            Select <strong>Unrestricted</strong>
+          </li>
+        </ol>
+
+        <div class="info">
+          <strong>How to verify:</strong>
+          <span class="path">Settings &rarr; Battery &rarr; App battery usage &rarr; SMS Gateway</span>
+          &mdash; it should be set to <em>Unrestricted</em>.
+        </div>
+
+        <h3>Xiaomi / MIUI &mdash; extra steps</h3>
+        <p>
+          Xiaomi phones with MIUI have more aggressive battery management.
+          In addition to the battery optimization exemption, you also need to:
+        </p>
+        <ul>
+          <li>
+            Enable <strong>Autostart</strong>:
+            <span class="path">Settings &rarr; Apps &rarr; Permissions &rarr; Autostart</span>
+            &mdash; turn on for SMS Gateway
+          </li>
+          <li>
+            In the battery settings for the app, select <strong>No restrictions</strong>
+          </li>
+        </ul>
+
+        <div class="warning">
+          <strong>Important:</strong> If SMS are not being sent while the screen
+          is locked, battery optimization is the most common cause. Always
+          check this setting first.
+        </div>
+
+        <!-- ==================== OVERENI ==================== -->
+        <h2 id="overeni">How to verify everything works</h2>
+
+        <p>
+          Before launching your first big campaign, we recommend testing
+          everything:
+        </p>
+
+        <ol class="steps">
+          <li>
+            <strong>Check the phone status</strong><br />
+            In <span class="path">Varyshop SMS &rarr; Gateway Phones</span>,
+            at least one phone should be
+            <span class="status status-green">Online</span>
+          </li>
+          <li>
+            <strong>Send a test SMS</strong><br />
+            Create a campaign with a single recipient (e.g. yourself) and send it
+          </li>
+          <li>
+            <strong>Check delivery</strong><br />
+            Verify that the SMS arrived on the recipient's phone
+          </li>
+          <li>
+            <strong>Verify tracking</strong><br />
+            Click the link in the SMS and check in Varyshop (Link Tracker) that
+            the click was recorded
+          </li>
+          <li>
+            <strong>Test unsubscribe</strong><br />
+            Reply to the SMS with &ldquo;STOP&rdquo; and verify that your
+            number appears on the blacklist in Varyshop
+          </li>
+        </ol>
+
+        <div class="tip">
+          <strong>Everything works?</strong> Great! You can launch a full-scale
+          campaign. If something doesn't work, check the
+          <a href="#casty-dotazy">FAQ and troubleshooting</a> section below.
+        </div>
+
+        <!-- ==================== CASTE DOTAZY ==================== -->
+        <h2 id="casty-dotazy">FAQ and troubleshooting</h2>
+
+        <p class="faq-q">
+          The phone is still Offline in Varyshop, even though the app is running
+        </p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Check that the phone has an internet connection (open a browser
+              and try loading a page)
+            </li>
+            <li>
+              In the app's <em>Settings</em> tab, verify that your server's URL
+              address is displayed
+            </li>
+            <li>Try closing and reopening the app</li>
+            <li>If nothing helps, re-scan the QR code</li>
+          </ul>
+        </div>
+
+        <p class="faq-q">SMS are not being sent, they stay in the queue</p>
+        <div class="faq-a">
+          <ul>
+            <li>Is the phone <span class="status status-green">Online</span>?</li>
+            <li>
+              Is sending enabled in the app? (Dashboard &rarr; the
+              <em>Start</em> toggle)
+            </li>
+            <li>
+              Has the phone reached its daily limit? (check
+              <em>Sent today</em> vs. <em>Daily limit</em>)
+            </li>
+            <li>
+              Does the app have SMS sending permission? (Android Settings &rarr;
+              Apps &rarr; Varyshop SMS &rarr; Permissions)
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">Some SMS were marked as errors</p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              The recipient's number may be invalid (wrong format, non-existent
+              number)
+            </li>
+            <li>The phone may have lost signal during sending</li>
+            <li>Android may have blocked sending due to a limit (see below)</li>
+            <li>
+              You can try resending failed SMS with the
+              <span class="btn">Force Create SMS Queue</span> button in the campaign
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">Android blocks sending after 30 SMS</p>
+        <div class="faq-a">
+          Some Android phones have a built-in SMS limit (typically 30 per 30
+          minutes). Solutions:<br />
+          <ul>
+            <li>
+              Reduce <em>SMS per minute</em> to 1 (one SMS per minute) &mdash;
+              slower, but you won't hit the limit
+            </li>
+            <li>
+              Ask your admin to change the phone settings (technical solution)
+            </li>
+            <li>
+              Use multiple phones &mdash; the limit applies to each phone
+              separately
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">SMS are not being sent when the screen is locked</p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Most common cause: <strong>battery optimization</strong> puts the
+              app to sleep in the background. Check
+              <span class="path">Settings &rarr; Battery &rarr; App battery usage &rarr; SMS Gateway</span>
+              and set to <em>Unrestricted</em>
+            </li>
+            <li>
+              On Xiaomi/MIUI: also enable <em>Autostart</em> (see the
+              <a href="#background">Background and reliability</a> section)
+            </li>
+            <li>
+              Verify that the app has notification permissions enabled (required for the background service)
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">
+          STOP messages don't appear in the blacklist
+        </p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Verify that the app has <strong>Receive SMS</strong> permission
+              (<em>RECEIVE_SMS</em>) &mdash; without it, the app won't see replies
+            </li>
+            <li>
+              Check internet connection &mdash; the app needs to send the STOP
+              message information back to the server
+            </li>
+            <li>
+              The recipient must reply to the <strong>same number</strong> from
+              which the SMS was sent
+            </li>
+            <li>
+              The message must contain the word STOP (case doesn't matter)
+            </li>
+            <li>
+              <strong>Re-scan received SMS:</strong> In the app, go to
+              <em>Settings &rarr; Service</em> and tap the
+              <span class="btn">Re-scan received SMS</span> button. The app will
+              re-read the SMS inbox for the last 30 days and send found messages to the server
+              (with deduplication &mdash; duplicates are ignored).
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">
+          STOP message doesn't work &mdash; number is not added to the blacklist
+        </p>
+        <div class="faq-a">
+          <ul>
+            <li>Verify that the app has <em>Receive SMS</em> permission</li>
+            <li>
+              The recipient must reply to the <strong>same number</strong> from
+              which the SMS was sent
+            </li>
+            <li>
+              The message must contain the word STOP (case doesn't matter)
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">Links in SMS don't work or lead to an error</p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              The link requires your Varyshop server to be publicly accessible
+              from the internet
+            </li>
+            <li>
+              If you use HTTPS (recommended), the certificate must be valid
+            </li>
+            <li>
+              Contact your admin to check the <em>web.base.url</em> setting in
+              Varyshop
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">How do I disconnect a phone from the system?</p>
+        <div class="faq-a">
+          In the app on the phone, go to <em>Settings</em> and tap
+          <span
+            class="btn"
+            style="background: #fee2e2; color: #991b1b; border-color: #fca5a5"
+            >Disconnect</span
+          >. The phone will stop sending and will be marked as Offline in
+          Varyshop. In Varyshop, you can also delete or archive the phone record.
+        </div>
+
+        <p class="faq-q">Can I change the SMS text after I've sent the campaign?</p>
+        <div class="faq-a">
+          No. SMS that have already been sent cannot be changed &mdash; they've
+          arrived on the recipient's phone. However, you can
+          <strong>pause</strong> the campaign (Paused toggle) and edit the text.
+          SMS that haven't been sent yet will have the original text. For new
+          text, you need to create a new campaign.
+        </div>
+
+        <p class="faq-q">How many SMS can I send per day?</p>
+        <div class="faq-a">
+          It depends on the number of phones and their settings. Each phone can
+          typically send 200&ndash;1000 SMS per day (depending on your daily
+          limit setting and carrier plan). With five phones, you can send up to
+          5000 SMS per day.
+        </div>
+
+        <div class="info">
+          If you have any questions or need help with setup, contact
+          <a href="mailto:info@varyshop.eu">info@varyshop.eu</a> or the developer directly at
+          <a href="mailto:info@michalvarys.eu">info@michalvarys.eu</a>
+        </div>
+
+        <hr />
+
+        <p
+          style="
+            color: #9ca3af;
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.9em;
+          "
+        >
+          Varyshop SMS v18.0.2.2.0 &bull; VaryShop &bull; 2026
+        </p>
+      </main>
+    </div>
+
+    <script>
+      // ===== Sidebar toggle (mobile) =====
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("sidebarOverlay").classList.toggle("open");
+      }
+
+      (function () {
+        var sections = document.querySelectorAll("h2[id]");
+        var navLinks = document.querySelectorAll("#sidebarNav a[data-section]");
+        var clickLock = null;
+        var clickTimer = null;
+
+        if (!sections.length || !navLinks.length) return;
+
+        // Helper: activate a nav link by section id
+        function setActive(id) {
+          navLinks.forEach(function (l) { l.classList.remove("active"); });
+          var link = document.querySelector('#sidebarNav a[data-section="' + id + '"]');
+          if (link) {
+            link.classList.add("active");
+            // Keep sidebar nav link visible
+            var sidebar = document.getElementById("sidebar");
+            var linkRect = link.getBoundingClientRect();
+            var sidebarRect = sidebar.getBoundingClientRect();
+            if (linkRect.top < sidebarRect.top + 80 || linkRect.bottom > sidebarRect.bottom - 20) {
+              link.scrollIntoView({ block: "center", behavior: "smooth" });
+            }
+          }
+        }
+
+        // ===== Click: immediately activate + lock scroll updates for 1s =====
+        navLinks.forEach(function (link) {
+          link.addEventListener("click", function () {
+            var section = this.getAttribute("data-section");
+            setActive(section);
+            // Lock scroll-based updates while browser animates to the section
+            clickLock = section;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(function () { clickLock = null; }, 1000);
+            // Mobile: close sidebar
+            if (window.innerWidth <= 860) {
+              toggleSidebar();
+            }
+          });
+        });
+
+        // ===== Scroll: detect which section is currently in view =====
+        function getActiveSection() {
+          var offset = window.innerHeight * 0.2;
+          var active = null;
+          for (var i = sections.length - 1; i >= 0; i--) {
+            if (sections[i].getBoundingClientRect().top <= offset) {
+              active = sections[i].getAttribute("id");
+              break;
+            }
+          }
+          // At the very bottom of the page, activate last section
+          var scrollY = window.scrollY || window.pageYOffset;
+          if (window.innerHeight + scrollY >= document.body.scrollHeight - 50) {
+            active = sections[sections.length - 1].getAttribute("id");
+          }
+          return active || sections[0].getAttribute("id");
+        }
+
+        var ticking = false;
+        window.addEventListener("scroll", function () {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(function () {
+            ticking = false;
+            if (clickLock) return; // Don't override click selection during animation
+            setActive(getActiveSection());
+          });
+        }, { passive: true });
+
+        // ===== Hashchange (browser back/forward) =====
+        window.addEventListener("hashchange", function () {
+          var hash = window.location.hash.replace("#", "");
+          if (hash) {
+            setActive(hash);
+            clickLock = hash;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(function () { clickLock = null; }, 1000);
+          }
+        });
+
+        // Initial state
+        var initHash = window.location.hash.replace("#", "");
+        setActive(initHash || getActiveSection());
+      })();
+    </script>
+  </body>
+</html>
