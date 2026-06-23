@@ -37,7 +37,7 @@ done
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEPLOY_DIR="$ROOT/scripts/deploy"
 
-for f in "$ROOT/.env" "$DEPLOY_DIR/docker-compose.vps.yml" "$DEPLOY_DIR/nginx.conf.template"; do
+for f in "$ROOT/sms_modules" "$ROOT/.env" "$DEPLOY_DIR/docker-compose.vps.yml" "$DEPLOY_DIR/nginx.conf.template"; do
   [ -e "$f" ] || { echo "ERROR: required path missing: $f" >&2; exit 1; }
 done
 
@@ -83,11 +83,14 @@ done
 echo "==> 2/5 Creating remote directory $REMOTE_DIR"
 retry ssh $SSH_OPTS "$SSH_TARGET" "$SUDO mkdir -p '$REMOTE_DIR' && $SUDO chown \$(id -u):\$(id -g) '$REMOTE_DIR'"
 
-# sms_modules is baked into the image (release-1.1.0), so only the compose file and
-# .env are uploaded — no module sync needed.
-echo "==> 3/5 Uploading docker-compose and .env (rsync)"
+# The compose file mounts sms_modules over the image path, so upload the local
+# sms_modules too — this keeps the deployed modules in sync with the sms-gateway
+# submodule even when the frozen image tag is behind. __pycache__ is excluded.
+echo "==> 3/5 Uploading docker-compose, sms_modules and .env (rsync)"
 retry rsync -az -e "ssh $SSH_OPTS" \
   "$DEPLOY_DIR/docker-compose.vps.yml" "$SSH_TARGET:$REMOTE_DIR/docker-compose.yml"
+retry rsync -az --delete --exclude='__pycache__' -e "ssh $SSH_OPTS" \
+  "$ROOT/sms_modules/" "$SSH_TARGET:$REMOTE_DIR/sms_modules/"
 retry rsync -az -e "ssh $SSH_OPTS" \
   "$ROOT/.env" "$SSH_TARGET:$REMOTE_DIR/.env"
 
@@ -139,7 +142,9 @@ fi
 echo "    -> Pulling images and starting the stack"
 cd "$REMOTE_DIR"
 $SUDO $COMPOSE pull
-$SUDO $COMPOSE up -d
+# Force-recreate so an updated sms_modules bind-mount is picked up on re-deploy
+# (a changed volume's contents alone do not trigger a container recreate).
+$SUDO $COMPOSE up -d --force-recreate
 
 echo "    -> Configuring nginx reverse proxy for $DOMAIN"
 $SUDO cp "$REMOTE_DIR/nginx-sms.conf" /etc/nginx/sites-available/varyshop-sms.conf

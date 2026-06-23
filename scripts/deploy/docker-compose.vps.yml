@@ -11,11 +11,13 @@ services:
       - db
     ports:
       - "127.0.0.1:${WEB_HTTP_PORT:-8069}:8069"
-    # sms_modules is baked into the image (release-1.1.0), so it is NOT mounted —
-    # the image is the source of truth. Update modules by deploying a new tag.
+    # sms_modules is baked into the image, but the image tag (release-1.1.0) is
+    # frozen — it won't pick up changes made in the sms-gateway submodule. Mount the
+    # host copy over the image path so the deployed modules always match the repo.
     volumes:
       - ./.config:/etc/odoo
       - ./.data:/root/.local/share/Odoo
+      - ./sms_modules:/app/extra/sms/sms_modules
     environment:
       HOST: db
       USER: ${POSTGRES_USER-varyshop}

@@ -203,17 +203,19 @@ Let's Encrypt certificate, in one command from your machine:
 What it does over SSH:
 
 1. Installs Docker (+ compose), nginx and certbot if missing
-2. Uploads `scripts/deploy/docker-compose.vps.yml` (as `docker-compose.yml`) and `.env` via rsync to `remote-dir` (default `/opt/varyshop-sms`)
-3. Pulls the pre-built image (`varyshop/website:release-1.1.0`, override with `WEB_IMAGE`) and runs `docker compose up -d`
+2. Uploads `scripts/deploy/docker-compose.vps.yml` (as `docker-compose.yml`), the local `sms_modules/` and `.env` via rsync to `remote-dir` (default `/opt/varyshop-sms`)
+3. Pulls the pre-built image (`varyshop/website:release-1.1.0`, override with `WEB_IMAGE`) and runs `docker compose up -d --force-recreate`
 4. Configures an nginx reverse proxy (Odoo bound to `127.0.0.1`, `--proxy-mode` enabled) and obtains a Let's Encrypt cert with HTTP→HTTPS redirect
 
 **Requirements:** local `ssh` + `rsync`; the SSH user must be `root` or have `sudo`; the
 domain's DNS **A record must already point at the VPS IP** (certbot validates over HTTP).
 
-> The VPS compose uses the **pre-built registry image**, which already contains
-> `sms_modules` baked in — so no module upload or git clone is needed, and the image
-> is the source of truth (update modules by deploying a new tag). The `.env` file
-> (incl. the Postgres password) is uploaded; treat the remote dir as sensitive.
+> The VPS compose uses the pre-built registry image, but **mounts the uploaded
+> `sms_modules/` over the image path** (`/app/extra/sms/sms_modules`). The image tag
+> (`release-1.1.0`) is frozen and does not pick up changes made in the `sms-gateway`
+> submodule, so the bind-mount keeps the deployed modules in sync with the repo. The
+> container is force-recreated on each deploy to pick up updated modules. The `.env`
+> file (incl. the Postgres password) is uploaded; treat the remote dir as sensitive.
 
 ## How It Works
 
