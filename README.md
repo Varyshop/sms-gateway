@@ -4,6 +4,14 @@ Send SMS through physical Android phones instead of Odoo IAP. Supports multiple 
 
 **[User Guide](https://varyshop.github.io/sms-gateway/)** | **[Developer & API Docs](https://varyshop.github.io/sms-gateway/developer.html)** | **[Download APK](https://github.com/Varyshop/sms-gateway-app/releases)**
 
+## ❤️ Support this project
+
+If this project saves you money on SMS, consider supporting its development:
+
+[![Sponsor on GitHub](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/Varyshop)
+[![Ko-fi](https://img.shields.io/badge/Support-Ko--fi-ff5e5b?logo=ko-fi&logoColor=white)](https://ko-fi.com/michalvarys)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/michalvarys)
+
 ## Architecture
 
 ```
