@@ -1,0 +1,232 @@
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color: #017e84;">SMS Campaign Scheduler</h2>
+        <h3 class="oe_slogan">Automate recurring SMS campaigns &mdash; daily, weekly, or monthly &mdash; with timezone-aware scheduling and full delivery tracking.</h3>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12">
+            <h3 class="oe_slogan" style="color: #017e84;">The Problem</h3>
+            <p class="oe_mt32 text-center" style="font-size: 16px;">
+                <strong>You want to send SMS campaigns on a regular schedule, but Odoo has no built-in way to automate recurring mailings.</strong>
+            </p>
+            <p class="text-center" style="font-size: 16px;">
+                Every week you create the same campaign manually: pick a segment, write the message,
+                set the recipients, click send. It is repetitive work that is easy to forget
+                and hard to keep consistent.
+            </p>
+            <p class="text-center" style="font-size: 16px; color: #017e84;">
+                <strong>This module lets you define a schedule once and it creates the campaign automatically &mdash;
+                every day, every week, or every month, at the exact time you choose.</strong>
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">How It Works</h3>
+        <div class="oe_span4">
+            <div class="text-center" style="padding: 20px;">
+                <span style="font-size: 48px; color: #017e84;">&#x1F4CB;</span>
+                <h4><strong>Step 1: Create a Schedule</strong></h4>
+                <p>
+                    Pick a template, a segment, and a frequency. Set the day and time
+                    in your local timezone. Activate the schedule.
+                </p>
+            </div>
+        </div>
+        <div class="oe_span4">
+            <div class="text-center" style="padding: 20px;">
+                <span style="font-size: 48px; color: #017e84;">&#x23F0;</span>
+                <h4><strong>Step 2: It Runs Automatically</strong></h4>
+                <p>
+                    A cron job checks schedules every 15 minutes. When the time comes,
+                    it creates a real Odoo mass mailing campaign with fresh recipient data.
+                </p>
+            </div>
+        </div>
+        <div class="oe_span4">
+            <div class="text-center" style="padding: 20px;">
+                <span style="font-size: 48px; color: #017e84;">&#x1F4CA;</span>
+                <h4><strong>Step 3: Review the Log</strong></h4>
+                <p>
+                    Every execution is logged with recipient count, status, and a direct link
+                    to the created campaign. See exactly what was sent and when.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Scheduler Configuration</h3>
+        <div class="oe_span12 text-center">
+            <img src="screenshot_scheduler_setup.png" alt="Scheduler Configuration - SMS template, tracking, schedule, domain filter, execution log"
+                 style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"/>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Scheduler Dashboard</h3>
+        <div class="oe_span12 text-center">
+            <img src="screenshot_scheduler.png" alt="Campaign Scheduler - schedule overview and execution log"
+                 style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"/>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Key Features</h3>
+        <div class="oe_span12">
+            <table class="table" style="font-size: 15px;">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Three Frequencies</strong></td>
+                        <td>Daily, weekly (pick day of week), or monthly (pick day of month). Covers most business scheduling needs.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Timezone-Aware</strong></td>
+                        <td>Set the send time in your local timezone (e.g. Europe/Prague 09:00). The cron converts to UTC automatically &mdash; no manual calculation needed.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Live Recipient Resolution</strong></td>
+                        <td>Segment domains are resolved at execution time, not when the schedule was created. New customers matching the segment are included automatically.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Duplicate Prevention</strong></td>
+                        <td>Partners who already have unsent SMS from a previous run of the same schedule are excluded. No double messages on rapid re-triggers.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Contact-Frequency Control</strong></td>
+                        <td>Exclude partners who received an SMS in the last N days. Prevent over-contacting even with aggressive schedules.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Recipient Limit</strong></td>
+                        <td>Cap the number of recipients per execution. Useful for gradual rollouts or SIM card daily limits.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Extra Domain Filter</strong></td>
+                        <td>Add a custom Odoo domain on top of the segment filter. Example: send only to VIP customers from a broader segment.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Forced Gateway Phone</strong></td>
+                        <td>Assign a specific phone to all SMS from this schedule. Or leave empty for automatic load balancing.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Create Paused</strong></td>
+                        <td>Create campaigns in paused state &mdash; review recipients before sending. Manual resume required.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UTM Campaign Tracking</strong></td>
+                        <td>Assign a UTM campaign to track revenue from orders generated by the scheduled SMS.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Manual Trigger</strong></td>
+                        <td>"Run Now" button to execute a schedule immediately, regardless of the next scheduled time. Great for testing.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Execution Log</strong></td>
+                        <td>Every run is logged: timestamp, recipient count, success/error status, and a link to the created mailing campaign.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Schedule Lifecycle</h3>
+        <div class="oe_span12">
+            <table class="table" style="font-size: 15px;">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>What happens</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Draft</strong></td>
+                        <td>Schedule exists but does not execute. Configure everything first, then activate.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Active</strong></td>
+                        <td>The cron checks this schedule at every tick. When <em>next_run</em> is due, the campaign is created automatically.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Paused</strong></td>
+                        <td>Temporarily suspended. No campaigns are created. Resume anytime without reconfiguring.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Use Cases</h3>
+        <div class="oe_span12">
+            <ul style="font-size: 15px;">
+                <li><strong>Weekly promotion</strong> &mdash; send a marketing SMS every Monday at 10:00 to customers who have not ordered in 3 months</li>
+                <li><strong>Monthly reminder</strong> &mdash; remind loyal customers about new products on the 1st of each month</li>
+                <li><strong>Daily follow-up</strong> &mdash; send a daily SMS to new customers who signed up yesterday</li>
+                <li><strong>Gradual rollout</strong> &mdash; limit to 50 recipients per day from a segment of 1,000, ensuring consistent outreach over weeks</li>
+                <li><strong>Multi-region campaigns</strong> &mdash; separate schedules with different phones for Czech and Slovak customers</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Real-world Screenshots</h3>
+        <div class="oe_span12 text-center" style="margin-bottom: 20px;">
+            <p style="font-size: 15px; color: #6b7280; margin-bottom: 16px;">Scheduler Setup &mdash; choose template, segment, schedule, and domain filter</p>
+            <img src="Schedule-SMS-sampaign-setup.jpg" alt="Campaign Scheduler setup - template, segment, tracking, schedule, domain filter"
+                 style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 20px;"/>
+        </div>
+        <div class="oe_span12 text-center">
+            <p style="font-size: 15px; color: #6b7280; margin-bottom: 16px;">Execution Preview &mdash; schedule, domain filter, and execution log with results</p>
+            <img src="Schedule-SMS-campaign-preview.jpg" alt="Campaign Scheduler execution - next run, log with success/recipient counts"
+                 style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"/>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Requirements</h3>
+        <div class="oe_span12 text-center">
+            <p style="font-size: 15px;">
+                Odoo 18.0 Community or Enterprise<br/>
+                Depends on: <strong>SMS Gateway</strong> module (sold separately)
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Support</h3>
+        <div class="oe_span12 text-center">
+            <p style="font-size: 16px;">
+                Need help? Contact us at <a href="mailto:info@michalvarys.eu"><strong>info@michalvarys.eu</strong></a>
+            </p>
+        </div>
+    </div>
+</section>

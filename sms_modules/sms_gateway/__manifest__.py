@@ -1,14 +1,15 @@
 {
-    'name': 'SMS Gateway',
+    'name': 'SMS Gateway - Replace Odoo IAP and Send SMS via Android Phone',
     'version': '18.0.2.6.0',
-    'category': 'Marketing/SMS',
-    'summary': 'Send SMS via physical Android phones as gateway devices',
-    'description': """
-        Replaces Odoo IAP SMS with a mobile phone gateway system.
-        Multiple phones can be registered as SMS gateways with load balancing,
-        rate limiting, domain filtering, and integration with mass mailing campaigns.
-    """,
-    'author': 'VaryShop',
+    'category': 'Marketing/SMS Marketing',
+    'summary': 'Replace Odoo IAP SMS with your own Android phone - zero per-message cost, load balancing, mass mailing integration',
+    'description': 'Use your physical Android phone as an SMS gateway for Odoo 18. Register multiple phones with QR pairing, send bulk SMS campaigns through Odoo Mass Mailing, set daily and monthly limits, auto-assign messages with load balancing, and track delivery status in real time. No IAP credits needed - every SMS is sent from your own SIM card.',
+    'author': 'Michal Varys',
+    'website': 'https://michalvarys.eu',
+    'support': 'info@michalvarys.eu',
+    'license': 'OPL-1',
+    'price': 99.00,
+    'currency': 'EUR',
     'depends': ['base_setup', 'sms', 'mass_mailing_sms', 'phone_validation', 'sale', 'point_of_sale'],
     'external_dependencies': {'python': ['qrcode']},
     'data': [
@@ -24,9 +25,9 @@
         'views/sms_campaign_wizard_views.xml',
         'views/res_partner_views.xml',
     ],
+    'images': ['static/description/cover.png'],
     'installable': True,
-    'application': False,
+    'application': True,
     'auto_install': False,
-    'license': 'LGPL-3',
     'post_init_hook': 'post_init_hook',
 }

@@ -1,0 +1,370 @@
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color: #017e84;">SMS Gateway &mdash; Send SMS via Android Phone</h2>
+        <h3 class="oe_slogan">Stop paying per-message IAP fees. Use your own Android phone as an SMS gateway and send thousands of messages from your SIM card.</h3>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12">
+            <h3 class="oe_slogan" style="color: #017e84;">The Problem</h3>
+            <p class="oe_mt32 text-center" style="font-size: 16px;">
+                <strong>Odoo charges you for every single SMS through their IAP credit system.</strong>
+            </p>
+            <p class="text-center" style="font-size: 16px;">
+                For businesses sending hundreds or thousands of SMS per month &mdash; order confirmations,
+                marketing campaigns, appointment reminders &mdash; IAP costs add up quickly.
+                You already pay your mobile operator for an SMS plan. Why pay again?
+            </p>
+            <p class="text-center" style="font-size: 16px;">
+                Third-party SMS APIs (Twilio, Vonage, etc.) are cheaper than IAP but still charge per message,
+                require API setup, and add another vendor to manage. For local businesses sending SMS
+                to domestic numbers, a SIM card in your drawer is the cheapest option by far.
+            </p>
+            <p class="text-center" style="font-size: 16px; color: #017e84;">
+                <strong>This module turns any Android phone into a full SMS gateway for Odoo &mdash;
+                no IAP credits, no third-party API, no per-message cost.</strong>
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">How It Works</h3>
+        <div class="oe_span4">
+            <div class="text-center" style="padding: 20px;">
+                <span style="font-size: 48px; color: #017e84;">&#x1F4F1;</span>
+                <h4><strong>Step 1: Register Your Phone</strong></h4>
+                <p>
+                    Add your Android phone in Odoo, generate an API key, and scan the QR code
+                    with the companion app. Pairing takes 30 seconds.
+                </p>
+            </div>
+        </div>
+        <div class="oe_span4">
+            <div class="text-center" style="padding: 20px;">
+                <span style="font-size: 48px; color: #017e84;">&#x1F4E9;</span>
+                <h4><strong>Step 2: Send SMS as Usual</strong></h4>
+                <p>
+                    Use Odoo SMS features normally &mdash; individual messages, mass mailings,
+                    automated actions. The module intercepts outgoing SMS and routes them
+                    to your phone instead of IAP.
+                </p>
+            </div>
+        </div>
+        <div class="oe_span4">
+            <div class="text-center" style="padding: 20px;">
+                <span style="font-size: 48px; color: #017e84;">&#10003;</span>
+                <h4><strong>Step 3: Track Delivery</strong></h4>
+                <p>
+                    Your phone sends the SMS from its SIM card and reports delivery status
+                    back to Odoo in real time. Every message is tracked with full
+                    mailing.trace integration.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Send Campaign from Your Phone in 3 Steps</h3>
+        <div class="oe_span12 text-center">
+            <img src="screenshot_app_flow.png" alt="Send SMS Campaign from Android phone - select template, choose segment, confirm and send"
+                 style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"/>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Phone Management &amp; Setup</h3>
+        <div class="oe_span12 text-center">
+            <img src="screenshot_phone_setup.png" alt="Phone management dashboard - limits, statistics, load balancing"
+                 style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"/>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">SMS Campaign Wizard</h3>
+        <div class="oe_span12 text-center">
+            <img src="screenshot_campaign_wizard.png" alt="SMS Campaign Wizard - targeting, preview, phone selection"
+                 style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"/>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">SMS Campaign Templates</h3>
+        <div class="oe_span12 text-center">
+            <img src="screenshot_templates.png" alt="SMS Campaign Templates - pre-configure for non-marketers"
+                 style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"/>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Key Features</h3>
+        <div class="oe_span12">
+            <table class="table" style="font-size: 15px;">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Multiple Phones</strong></td>
+                        <td>Register as many Android phones as you need. The module distributes messages across them automatically with load balancing (least-loaded phone first).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dual SIM Support</strong></td>
+                        <td>Phones with two SIM cards can use either number. Assign a specific SIM per campaign or let the phone choose automatically.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>QR Code Pairing</strong></td>
+                        <td>Generate an API key and QR code in Odoo. Scan it with the companion app &mdash; no manual URL/key entry needed.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Daily &amp; Monthly Limits</strong></td>
+                        <td>Set per-phone daily and monthly SMS caps to stay within carrier limits. Counters reset automatically. Configurable billing period start day.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rate Limiting</strong></td>
+                        <td>Control SMS-per-minute rate to avoid carrier throttling. Messages queue automatically and send at the configured pace.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Domain Filtering</strong></td>
+                        <td>Route SMS to specific phones based on partner attributes. Example: Czech numbers go to Phone A, Slovak numbers to Phone B.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FCM Push Wake</strong></td>
+                        <td>When new SMS are queued, the module sends a Firebase push notification to wake the phone app instantly &mdash; no polling delay.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Heartbeat Monitoring</strong></td>
+                        <td>Phones report battery level, signal strength, and online status. Automatic offline detection after configurable timeout.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stuck SMS Recovery</strong></td>
+                        <td>SMS stuck in processing for more than 30 minutes are automatically reset to pending and re-queued.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Segment-aware Counting</strong></td>
+                        <td>Limits are counted in SMS segments (not messages) so multi-part SMS are tracked accurately.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Mass Mailing Integration</h3>
+        <div class="oe_span12">
+            <p class="text-center" style="font-size: 16px;">
+                The module plugs directly into <strong>Odoo SMS Marketing</strong> (mass_mailing_sms).
+                Every feature you already know works &mdash; just without IAP costs.
+            </p>
+            <table class="table" style="font-size: 15px;">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>How it works with SMS Gateway</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>SMS Campaigns</strong></td>
+                        <td>Create campaigns in Odoo Mass Mailing as usual. Select "SMS Gateway" as provider &mdash; messages are routed to your phones.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Marketing Segments</strong></td>
+                        <td>Built-in segments: "No order in 3 months", "Single order only", "New customers (30 days)". Or create your own with custom domain filters.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Marketing Templates</strong></td>
+                        <td>Reusable SMS templates with placeholder support ({{object.name}}, {{object.email}}, etc.). Set default limits and segments per template.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Recipient Exclusion</strong></td>
+                        <td>Automatically skip partners who received an SMS in the last N days. Prevents over-contacting. Configurable per campaign.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Unsubscribe Handling</strong></td>
+                        <td>Long Odoo unsubscribe URLs are replaced with a short "odhl. sms: STOP" text to save SMS characters. Respects blacklist.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Delivery Tracking</strong></td>
+                        <td>Full mailing.trace integration. See sent/error/pending counts per campaign. Campaign auto-completes when all SMS are delivered.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pause &amp; Resume</strong></td>
+                        <td>Pause a running campaign at any time. Queued SMS wait until you resume. No messages are lost.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">IAP vs. SMS Gateway</h3>
+        <div class="oe_span12">
+            <table class="table" style="font-size: 15px;">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Odoo IAP SMS</th>
+                        <th>SMS Gateway (this module)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Cost per SMS</td>
+                        <td style="color: #c0392b;">&#10007; IAP credits (varies by country)</td>
+                        <td style="color: green;">&#10003; Your SIM plan (often unlimited or flat-rate)</td>
+                    </tr>
+                    <tr>
+                        <td>Setup</td>
+                        <td style="color: #888;">Buy credits, configure IAP account</td>
+                        <td style="color: green;">&#10003; Scan QR code with your phone</td>
+                    </tr>
+                    <tr>
+                        <td>Sender number</td>
+                        <td style="color: #c0392b;">&#10007; Random / shared number</td>
+                        <td style="color: green;">&#10003; Your own phone number (recipients know you)</td>
+                    </tr>
+                    <tr>
+                        <td>Multiple phones</td>
+                        <td style="color: #c0392b;">&#10007; Not applicable</td>
+                        <td style="color: green;">&#10003; Unlimited phones with load balancing</td>
+                    </tr>
+                    <tr>
+                        <td>Works offline</td>
+                        <td style="color: #c0392b;">&#10007; Requires internet to IAP service</td>
+                        <td style="color: green;">&#10003; Phone queues and sends when connected</td>
+                    </tr>
+                    <tr>
+                        <td>Delivery tracking</td>
+                        <td style="color: #888;">Basic</td>
+                        <td style="color: green;">&#10003; Real-time status with mailing.trace</td>
+                    </tr>
+                    <tr>
+                        <td>Mass mailing</td>
+                        <td style="color: green;">&#10003; Built-in</td>
+                        <td style="color: green;">&#10003; Full integration</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">REST API for the Mobile App</h3>
+        <div class="oe_span12">
+            <p class="text-center" style="font-size: 16px;">
+                The module exposes a simple REST API that the companion Android app uses to poll
+                for pending SMS, confirm delivery, and send heartbeats. The API is secured with
+                per-phone API keys (X-API-Key header).
+            </p>
+            <ul style="font-size: 15px;">
+                <li><strong>GET /sms-gateway/pending</strong> &mdash; fetch queued SMS for this phone</li>
+                <li><strong>POST /sms-gateway/confirm</strong> &mdash; report delivery status (sent/error)</li>
+                <li><strong>POST /sms-gateway/heartbeat</strong> &mdash; update online status, battery, signal</li>
+                <li><strong>POST /sms-gateway/register-fcm</strong> &mdash; register FCM token for push wake</li>
+                <li><strong>POST /sms-gateway/inbound</strong> &mdash; forward received SMS to Odoo</li>
+            </ul>
+            <p class="text-center" style="font-size: 16px; color: #017e84;">
+                <strong>Companion Android app available separately (free, open source).</strong>
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Quick Setup</h3>
+        <div class="oe_span12">
+            <ul style="font-size: 15px;">
+                <li><strong>Install the module</strong> &mdash; it adds a new "SMS Gateway" menu under Settings</li>
+                <li><strong>Add a phone</strong> &mdash; enter a name, phone number, and click "Generate API Key"</li>
+                <li><strong>Scan the QR code</strong> &mdash; open the companion Android app and scan</li>
+                <li><strong>Enable "Force SMS Gateway"</strong> in Settings &mdash; all outgoing SMS will use your phones instead of IAP</li>
+                <li><strong>Send SMS</strong> &mdash; from any Odoo app (Contacts, Sales, Marketing) as usual</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Real-world Screenshots</h3>
+        <div class="oe_span12 text-center" style="margin-bottom: 20px;">
+            <p style="font-size: 15px; color: #6b7280; margin-bottom: 16px;">Mobile App &mdash; sending campaigns from the gateway phone</p>
+            <img src="SMS-gateway-app-campaign.jpg" alt="SMS Gateway Android app - campaign flow with segments and results"
+                 style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 20px;"/>
+        </div>
+        <div class="oe_span12 text-center" style="margin-bottom: 20px;">
+            <p style="font-size: 15px; color: #6b7280; margin-bottom: 16px;">Phone Setup &mdash; limits, statistics, and multi-phone load balancing</p>
+            <img src="SMS-gateway-phone-setup.jpg" alt="Phone setup in Odoo - daily/monthly limits, dual SIM, domain filter"
+                 style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 20px;"/>
+        </div>
+        <div class="oe_span12 text-center">
+            <p style="font-size: 15px; color: #6b7280; margin-bottom: 16px;">Template Configuration &mdash; pre-configure everything for your team</p>
+            <img src="SMS-gateway-phone-templates.jpg" alt="SMS campaign template setup in Odoo - segments, limits, gateway phone"
+                 style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"/>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Who Is This For?</h3>
+        <div class="oe_span12">
+            <ul style="font-size: 15px;">
+                <li><strong>E-commerce businesses</strong> &mdash; send order confirmations, shipping updates, and marketing SMS without IAP costs</li>
+                <li><strong>Local businesses</strong> &mdash; appointment reminders, promotional campaigns to domestic customers</li>
+                <li><strong>Multi-location companies</strong> &mdash; different phones for different regions, each with its own local number</li>
+                <li><strong>Marketing teams</strong> &mdash; run SMS campaigns with segments, templates, and contact-frequency controls</li>
+                <li><strong>Anyone paying too much for Odoo IAP SMS credits</strong></li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Requirements</h3>
+        <div class="oe_span12 text-center">
+            <p style="font-size: 15px;">
+                Odoo 18.0 Community or Enterprise<br/>
+                Depends on: <strong>sms</strong>, <strong>mass_mailing_sms</strong>, <strong>phone_validation</strong>, <strong>sale</strong>, <strong>point_of_sale</strong><br/>
+                Python: <strong>qrcode</strong> (installed automatically)<br/>
+                Android companion app (free, open source)
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan" style="color: #017e84;">Support</h3>
+        <div class="oe_span12 text-center">
+            <p style="font-size: 16px;">
+                Need help? Contact us at <a href="mailto:info@michalvarys.eu"><strong>info@michalvarys.eu</strong></a>
+            </p>
+        </div>
+    </div>
+</section>

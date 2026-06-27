@@ -1,20 +1,15 @@
 {
-    'name': 'SMS Campaign Scheduler',
+    'name': 'SMS Campaign Scheduler - automatic SMS campaigns with SMS Gateway',
     'version': '18.0.1.0.0',
-    'category': 'Marketing/SMS',
-    'summary': 'Schedule recurring SMS campaigns with timezone-aware timing',
-    'description': """
-SMS Campaign Scheduler
-======================
-Create automated, recurring SMS campaigns:
-
-* Select template, segment, and optional domain filter
-* Schedule: daily / weekly (pick day) / monthly (pick day of month)
-* Timezone-aware execution time
-* Each run creates a real mailing.mailing campaign via sms_gateway
-* Execution log with links to created campaigns
-    """,
-    'author': 'VaryShop',
+    'category': 'Marketing/SMS Marketing',
+    'summary': 'Automate recurring SMS campaigns - daily, weekly, or monthly with timezone-aware scheduling',
+    'description': 'Schedule SMS campaigns that run automatically on a recurring basis. Pick a template, segment, frequency (daily / weekly / monthly) and timezone-aware send time. Each execution creates a real Odoo mass mailing campaign with full delivery tracking. Requires SMS Gateway module.',
+    'author': 'Michal Varys',
+    'website': 'https://michalvarys.eu',
+    'support': 'info@michalvarys.eu',
+    'license': 'OPL-1',
+    'price': 49.00,
+    'currency': 'EUR',
     'depends': [
         'sms_gateway',
     ],
@@ -24,8 +19,8 @@ Create automated, recurring SMS campaigns:
         'views/campaign_schedule_views.xml',
         'views/menu_views.xml',
     ],
+    'images': ['static/description/cover.png'],
     'installable': True,
     'application': False,
     'auto_install': False,
-    'license': 'LGPL-3',
 }
