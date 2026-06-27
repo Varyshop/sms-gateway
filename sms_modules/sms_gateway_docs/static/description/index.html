@@ -403,56 +403,70 @@
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
           <h2>Varyshop SMS</h2>
-          <small>Uzivatelska prirucka</small>
+          <small>User Guide</small>
         </div>
         <nav id="sidebarNav">
-          <div class="nav-group">Zakladni informace</div>
+          <div class="nav-group">Basic information</div>
           <a href="#jak-to-funguje" data-section="jak-to-funguje"
-            >Jak to funguje</a
+            >How it works</a
           >
           <a href="#co-potrebujete" data-section="co-potrebujete"
-            >Co potrebujete</a
+            >What you need</a
           >
 
-          <div class="nav-group">Nastaveni</div>
+          <div class="nav-group">Settings</div>
           <a href="#nastaveni-v-Varyshop" data-section="nastaveni-v-Varyshop"
-            >Nastaveni v administraci</a
+            >Admin settings</a
           >
           <a href="#pridani-telefonu" data-section="pridani-telefonu"
-            >Pridani telefonu</a
+            >Adding a phone</a
           >
           <a href="#instalace-aplikace" data-section="instalace-aplikace"
-            >Instalace aplikace</a
+            >App installation</a
           >
-          <a href="#sparovani" data-section="sparovani">Sparovani telefonu</a>
+          <a href="#sparovani" data-section="sparovani">Phone pairing</a>
 
-          <div class="nav-group">Kampane</div>
+          <div class="nav-group">Campaigns</div>
           <a href="#prvni-kampan" data-section="prvni-kampan"
-            >Vase prvni kampan</a
+            >Your first campaign</a
+          >
+          <a href="#kampan-z-appky" data-section="kampan-z-appky"
+            >Campaign from mobile app</a
           >
           <a href="#jak-se-odesilaji" data-section="jak-se-odesilaji"
-            >Jak se odesilaji SMS</a
+            >How SMS are sent</a
           >
           <a href="#pozastaveni" data-section="pozastaveni"
-            >Pozastaveni kampane</a
+            >Pausing a campaign</a
           >
 
-          <div class="nav-group">Pokrocile funkce</div>
+          <div class="nav-group">Advanced features</div>
           <a href="#vice-telefonu" data-section="vice-telefonu"
-            >Vice telefonu</a
+            >Multiple phones</a
           >
-          <a href="#filtrovani" data-section="filtrovani">Smerovani SMS</a>
-          <a href="#limity" data-section="limity">Limity a rychlost</a>
+          <a href="#filtrovani" data-section="filtrovani">SMS routing</a>
+          <a href="#limity" data-section="limity">Limits and speed</a>
           <a href="#dual-sim" data-section="dual-sim">Dual SIM</a>
 
-          <div class="nav-group">Sledovani a GDPR</div>
-          <a href="#odkazy" data-section="odkazy">Odkazy a kliknuti</a>
-          <a href="#odhlaseni" data-section="odhlaseni">Odhlaseni a STOP</a>
-          <a href="#statistiky" data-section="statistiky">Statistiky</a>
+          <div class="nav-group">Tracking and GDPR</div>
+          <a href="#odkazy" data-section="odkazy">Links and clicks</a>
+          <a href="#odhlaseni" data-section="odhlaseni">Unsubscribe and STOP</a>
+          <a href="#prichozi-sms" data-section="prichozi-sms">Incoming SMS</a>
+          <a href="#statistiky" data-section="statistiky">Statistics</a>
 
-          <div class="nav-group">Pomoc</div>
-          <a href="#overeni" data-section="overeni">Overeni funkce</a>
-          <a href="#casty-dotazy" data-section="casty-dotazy">Caste dotazy</a>
+          <div class="nav-group">Advanced settings</div>
+          <a href="#fcm" data-section="fcm">FCM Push notifications</a>
+          <a href="#background" data-section="background">Background and reliability</a>
+
+          <div class="nav-group">Help</div>
+          <a href="#overeni" data-section="overeni">Verification</a>
+          <a href="#casty-dotazy" data-section="casty-dotazy">FAQ</a>
+
+          <div class="nav-group" style="margin-top:24px; border-top:1px solid #e5e7eb; padding-top:16px">Other pages</div>
+          <a href="developer.html" style="color:#2563eb; font-weight:600">API &amp; Developer Docs</a>
+          <a href="https://github.com/Varyshop/sms-gateway-app/releases" style="color:#059669; font-weight:600" target="_blank">Download APK</a>
+          <a href="https://github.com/Varyshop/sms-gateway" target="_blank">GitHub</a>
+          <a href="https://varyshop.github.io/sms-gateway/cs/" target="_blank">Česká verze</a>
         </nav>
       </aside>
 
@@ -460,103 +474,111 @@
       <main class="main-content">
         <h1>Varyshop SMS</h1>
         <p class="subtitle">
-          Odesilani SMS kampani primo z vasich Android telefonu &mdash; bez
-          externiho poskytovatele, bez poplatku za kazde SMS.
+          Send SMS campaigns directly from your Android phones &mdash; no
+          external provider, no per-SMS fees.
         </p>
 
         <div class="highlight-box">
-          <strong>Co tento modul dela?</strong><br />
-          Misto placeni za kazdou odeslanou SMS pres cloudovou sluzbu pouzijete
-          vlastni Android telefon(y) jako SMS branu. Telefon se spoji s vasim
-          systemem, automaticky prijima zpravy z front a odesila je jako bezne
-          SMS. Muzete pouzit vice telefonu najednou &mdash; system sam rozdeli
-          zatez.
+          <strong>What does this module do?</strong><br />
+          Instead of paying for every SMS sent through a cloud service, you use
+          your own Android phone(s) as an SMS gateway. The phone connects to your
+          system, automatically picks up messages from the queue and sends them as
+          regular SMS. You can use multiple phones at once &mdash; the system
+          automatically distributes the load.
+        </div>
+
+        <div class="highlight-box">
+          <strong>New in v1.3.0: Campaigns from the mobile app</strong><br />
+          The new <strong>Campaigns</strong> tab lets you create and send SMS campaigns
+          directly from your phone. Select a template, a customer segment, edit the text
+          and send &mdash; including statistics (clicks, orders, revenue).
+          <a href="#kampan-z-appky">More info &darr;</a>
         </div>
 
         <!-- ==================== JAK TO FUNGUJE ==================== -->
-        <h2 id="jak-to-funguje">Jak to funguje</h2>
+        <h2 id="jak-to-funguje">How it works</h2>
 
-        <p>Cely system ma tri casti, ktere spolupracuji:</p>
+        <p>The entire system consists of three parts that work together:</p>
 
         <div class="flow">
           <div class="flow-row">
             <div class="flow-box" style="border-color: #2563eb">
-              <strong>1. Vaše Varyshop instance</strong>
-              <small>Vytvari kampane a frontu SMS</small>
+              <strong>1. Your Varyshop instance</strong>
+              <small>Creates campaigns and an SMS queue</small>
             </div>
             <span class="flow-arrow">&rarr;</span>
             <div class="flow-box" style="border-color: #059669">
-              <strong>2. Aplikace na telefonu</strong>
-              <small>Vyzveda SMS z fronty a odesila</small>
+              <strong>2. App on the phone</strong>
+              <small>Picks up SMS from the queue and sends them</small>
             </div>
             <span class="flow-arrow">&rarr;</span>
             <div class="flow-box" style="border-color: #d97706">
-              <strong>3. Prijemce</strong>
-              <small>Dostane beznou SMS zpravu</small>
+              <strong>3. Recipient</strong>
+              <small>Receives a regular SMS message</small>
             </div>
           </div>
         </div>
 
-        <p>V praxi to vypada takto:</p>
+        <p>In practice, it looks like this:</p>
         <ol class="steps">
           <li>
-            V administraci vytvorite SMS kampan a kliknete
-            <span class="btn">Odeslat</span>
+            In the admin panel, you create an SMS campaign and click
+            <span class="btn">Send</span>
           </li>
-          <li>Varyshop pripravi SMS zpravy a zaradi je do fronty</li>
+          <li>Varyshop prepares the SMS messages and adds them to the queue</li>
           <li>
-            Aplikace na vasem Android telefonu se kazdy par sekund pta:
-            <em>&bdquo;Mate pro me neco k odeslani?&ldquo;</em>
-          </li>
-          <li>
-            Kdyz najde novou zpravu, odesle ji jako normalni SMS z vaseho
-            telefonniho cisla
+            The app on your Android phone checks every few seconds:
+            <em>&ldquo;Do you have anything for me to send?&rdquo;</em>
           </li>
           <li>
-            Po odeslani hlasi zpet do Varyshopu:
-            <em>&bdquo;Odeslano&ldquo;</em> nebo
-            <em>&bdquo;Nepodario se&ldquo;</em>
+            When it finds a new message, it sends it as a regular SMS from your
+            phone number
+          </li>
+          <li>
+            After sending, it reports back to Varyshop:
+            <em>&ldquo;Sent&rdquo;</em> or
+            <em>&ldquo;Failed&rdquo;</em>
           </li>
         </ol>
 
         <div class="tip">
-          <strong>Proc to tak funguje?</strong> Protoze SMS odesilate z
-          vlastniho cisla, neplatiite zadne poplatky za SMS sluzbu. Plati se
-          pouze standardni cena SMS dle vaseho tarifu u operatora. U vetsiny
-          paualnich tarifu je to tedy zadarmo.
+          <strong>Why does it work this way?</strong> Because you send SMS from
+          your own number, you don't pay any SMS service fees. You only pay the
+          standard SMS price according to your carrier plan. With most unlimited
+          plans, it's essentially free.
         </div>
 
         <!-- ==================== CO POTREBUJETE ==================== -->
-        <h2 id="co-potrebujete">Co potrebujete</h2>
+        <h2 id="co-potrebujete">What you need</h2>
 
         <div class="two-col">
           <div>
-            <strong>Na strane Varyshopu:</strong>
+            <strong>On the Varyshop side:</strong>
             <ul>
               <li>
-                Varyshop instance s Odoo 18 s modulem Varyshop SMS (nainstaluje
-                vas spravce)
+                A Varyshop instance with Odoo 18 and the Varyshop SMS module
+                installed (your admin will set this up)
               </li>
-              <li>Pristup do sekce <em>Email Marketing</em></li>
+              <li>Access to the <em>Email Marketing</em> section</li>
             </ul>
           </div>
           <div>
-            <strong>Na strane telefonu:</strong>
+            <strong>On the phone side:</strong>
             <ul>
-              <li>Android telefon (verze 12 nebo novejsi)</li>
-              <li>SIM karta s aktivnim tarifem pro SMS</li>
-              <li>Pripojeni k internetu (Wi-Fi nebo mobilni data)</li>
-              <li>Aplikace Varyshop SMS (nainstaluje vas spravce)</li>
+              <li>An Android phone (version 12 or newer)</li>
+              <li>A SIM card with an active SMS plan</li>
+              <li>Internet connection (Wi-Fi or mobile data)</li>
+              <li>The Varyshop SMS app (your admin will install it)</li>
             </ul>
           </div>
         </div>
 
         <!-- ==================== NASTAVENI V Varyshop ==================== -->
-        <h2 id="nastaveni-v-Varyshop">Nastaveni ve Varyshop administraci</h2>
+        <h2 id="nastaveni-v-Varyshop">Settings in Varyshop admin panel</h2>
 
         <p>
-          Po instalaci modulu (tu provede vas technik) najdete novou sekci v
-          menu:
+          After the module is installed (done by your technician), you'll find a
+          new section in the menu:
         </p>
 
         <p>
@@ -565,221 +587,261 @@
           >
         </p>
 
-        <p>Zde budete spravovat vsechny telefony pripojene k vasemu systemu.</p>
+        <p>Here you will manage all phones connected to your system.</p>
 
         <div class="info">
-          <strong>Kde najdu nastaveni?</strong> Pokud mate modul nainstalovany,
-          uvidite v hlavnim menu <em>Email Marketing</em> polozku
-          <em>Varyshop SMS</em>. Pokud ji nevidite, kontaktujte svého spravce
-          &mdash; je mozne ze modul jeste neni nainstalovany nebo nemate
-          dostatecna opravneni.
+          <strong>Where do I find the settings?</strong> If you have the module
+          installed, you'll see a <em>Varyshop SMS</em> item under the main
+          <em>Email Marketing</em> menu. If you don't see it, contact your admin
+          &mdash; the module may not be installed yet or you may not have
+          sufficient permissions.
         </div>
 
         <!-- ==================== PRIDANI TELEFONU ==================== -->
-        <h2 id="pridani-telefonu">Pridani telefonu</h2>
+        <h2 id="pridani-telefonu">Adding a phone</h2>
 
         <p>
-          Kazdy fyzicky telefon, ktery chcete pouzit pro odesilani, musite
-          zaregistrovat ve Varyshop administraci.
+          Every physical phone you want to use for sending must be registered in
+          the Varyshop admin panel.
         </p>
 
         <ol class="steps">
           <li>
-            Prejdete do
+            Go to
             <span class="path"
               >Email Marketing &rarr; Varyshop SMS &rarr; Gateway Phones</span
             >
           </li>
-          <li>Kliknete <span class="btn">Novy</span></li>
+          <li>Click <span class="btn">New</span></li>
           <li>
-            Vyplnte zakladni udaje:
+            Fill in the basic details:
             <table class="field-table">
               <tr>
-                <th>Pole</th>
-                <th>Co vyplnit</th>
-                <th>Priklad</th>
+                <th>Field</th>
+                <th>What to enter</th>
+                <th>Example</th>
               </tr>
               <tr>
-                <td><strong>Nazev</strong></td>
-                <td>Pojmenujte si telefon, at ho pozdej pozinate</td>
+                <td><strong>Name</strong></td>
+                <td>Give the phone a name so you can identify it later</td>
                 <td>Samsung &ndash; O2</td>
               </tr>
               <tr>
-                <td><strong>Telefonni cislo</strong></td>
-                <td>Cislo SIM karty v mezinarodnim formatu</td>
+                <td><strong>Phone number</strong></td>
+                <td>The SIM card number in international format</td>
                 <td>+420777123456</td>
               </tr>
               <tr>
-                <td><strong>Druhe cislo</strong></td>
-                <td>Pokud ma telefon dve SIM, zadejte i druhe (nepovinne)</td>
+                <td><strong>Second number</strong></td>
+                <td>If the phone has two SIMs, enter the second one (optional)</td>
                 <td>+420608987654</td>
               </tr>
               <tr>
-                <td><strong>Denni limit</strong></td>
-                <td>Kolik SMS maximalne muze telefon odeslat za den</td>
+                <td><strong>Daily limit</strong></td>
+                <td>Maximum number of SMS the phone can send per day</td>
                 <td>500</td>
               </tr>
               <tr>
-                <td><strong>SMS za minutu</strong></td>
-                <td>Maximalni rychlost odesilani</td>
+                <td><strong>SMS per minute</strong></td>
+                <td>Maximum sending speed</td>
                 <td>100</td>
               </tr>
             </table>
           </li>
           <li>
-            Kliknete <span class="btn">Generovat API klic</span> &mdash; objevi
-            se QR kod, ktery pouzijete k parovani
+            Click <span class="btn">Generate API Key</span> &mdash; a QR code
+            will appear that you'll use for pairing
           </li>
-          <li>Zaznam ulozte</li>
+          <li>Save the record</li>
         </ol>
 
         <div class="tip">
-          <strong>Kolik telefonu potrebuji?</strong> Pro zacatek staci jeden.
-          Pokud planuete rozsilat tisice SMS denne, doporucujeme pridat vice
-          telefonu &mdash; system zatez automaticky rozdeli.
+          <strong>How many phones do I need?</strong> One is enough to start.
+          If you plan to send thousands of SMS daily, we recommend adding more
+          phones &mdash; the system automatically distributes the load.
         </div>
 
         <!-- ==================== INSTALACE APLIKACE ==================== -->
-        <h2 id="instalace-aplikace">Instalace aplikace na telefon</h2>
+        <h2 id="instalace-aplikace">Installing the app on your phone</h2>
 
         <p>
-          Na Android telefon je potreba nainstalovat aplikaci
-          <strong>Varyshop SMS</strong>. Instalaci za vas provede vas
-          technik/spravce.
+          You need to install the <strong>Varyshop SMS</strong> app on your
+          Android phone.
         </p>
 
-        <p>Po spusteni aplikace budete pozadani o nasledujici opravneni:</p>
+        <h3>Downloading the APK</h3>
+        <p>
+          The app is not on Google Play. Download the APK file directly from
+          <a href="https://github.com/Varyshop/sms-gateway-app/releases" target="_blank"><strong>GitHub Releases</strong></a>:
+        </p>
+        <ol class="steps">
+          <li>On your phone, open the link to <a href="https://github.com/Varyshop/sms-gateway-app/releases" target="_blank">Releases</a> and download the latest <strong>.apk</strong> file</li>
+          <li>Open the downloaded file &mdash; if a warning appears, allow <em>Install from unknown sources</em></li>
+          <li>Complete the installation</li>
+        </ol>
+
+        <div class="info">
+          <strong>Why isn't it on Google Play?</strong> The app uses
+          <code>SEND_SMS</code> and <code>READ_SMS</code> permissions, which
+          require a special review on the Play Store. Installing the APK directly
+          from GitHub Releases is the intended distribution method.
+        </div>
+
+        <p>After launching the app, you will be asked for the following permissions:</p>
 
         <table class="field-table">
           <tr>
-            <th>Opravneni</th>
-            <th>Proc ho potrebujeme</th>
+            <th>Permission</th>
+            <th>Why we need it</th>
           </tr>
           <tr>
-            <td><strong>Odesilani SMS</strong></td>
-            <td>Aby aplikace mohla odesilat SMS zpravy z vaseho cisla</td>
+            <td><strong>Send SMS</strong></td>
+            <td>So the app can send SMS messages from your number</td>
           </tr>
           <tr>
-            <td><strong>Prijimani SMS</strong></td>
-            <td>Aby aplikace zachytila odpovedi s textem STOP (odhlaseni)</td>
+            <td><strong>Receive SMS</strong></td>
+            <td>So the app can capture replies containing the word STOP (unsubscribe)</td>
           </tr>
           <tr>
-            <td><strong>Kamera</strong></td>
-            <td>Pro naskenovat QR kodu pri parovani</td>
+            <td><strong>Camera</strong></td>
+            <td>To scan the QR code during pairing</td>
           </tr>
           <tr>
-            <td><strong>Informace o telefonu</strong></td>
-            <td>Pro zjisteni cisel vasich SIM karet</td>
+            <td><strong>Phone information</strong></td>
+            <td>To detect your SIM card numbers</td>
+          </tr>
+          <tr>
+            <td><strong>Notifications</strong></td>
+            <td>To display sending status and background service status (Android 13+ asks in a dialog)</td>
           </tr>
         </table>
 
+        <p>
         <div class="warning">
-          <strong>Dulezite:</strong> Vsechna opravneni je treba povolit, jinak
-          nebude aplikace spravne fungovat. Pokud jste omylem opravneni
-          zamitnuli, muzete ho dodatecne povolit v
+          <strong>Increasing the SMS limit (WRITE_SECURE_SETTINGS):</strong> To increase
+          the native Android limit on outgoing SMS, the app needs the
+          <code>WRITE_SECURE_SETTINGS</code> permission. This cannot be granted from
+          the phone &mdash; you need to connect the phone to a computer via USB and run:
+          <pre><code>adb shell pm grant com.varyshop.smsgatewayapp android.permission.WRITE_SECURE_SETTINGS</code></pre>
+          If you're building from source, you can use: <code>yarn grant-permission</code>
+        </div>
+
+        <p>
+          In addition to these permissions, the app will also show a dialog for
+          <strong>battery optimization exemption</strong>. This exemption is
+          essential so that Android doesn't put the app to sleep in the background
+          and SMS are reliably sent even when the screen is locked. See the
+          <a href="#background">Background and reliability</a> section for more.
+        </p>
+
+        <div class="warning">
+          <strong>Important:</strong> All permissions must be granted, otherwise
+          the app will not work properly. Also allow the battery optimization
+          exemption &mdash; without it, Android may stop sending SMS in the
+          background. If you accidentally denied a permission, you can grant it
+          later in
           <em
-            >Nastaveni telefonu &rarr; Aplikace &rarr; Varyshop SMS &rarr;
-            Opravneni</em
+            >Phone Settings &rarr; Apps &rarr; Varyshop SMS &rarr;
+            Permissions</em
           >.
         </div>
 
         <!-- ==================== SPAROVANI ==================== -->
-        <h2 id="sparovani">Sparovani telefonu s Varyshop administrací</h2>
+        <h2 id="sparovani">Pairing the phone with Varyshop admin</h2>
 
         <p>
-          Po instalaci aplikace ji musite propojit s vasim Varyshop systemem. To
-          se dela jednorazove pomoci QR kodu.
+          After installing the app, you need to connect it to your Varyshop
+          system. This is done once using a QR code.
         </p>
 
         <ol class="steps">
           <li>
-            V Varyshop administraci otevrete zaznam vaseho telefonu (tam kde
-            jste klikli <em>Generovat API klic</em>) &mdash; uvidite QR kod
+            In the Varyshop admin panel, open your phone record (where you
+            clicked <em>Generate API Key</em>) &mdash; you'll see a QR code
           </li>
-          <li>Na telefonu otevrete aplikaci <strong>Varyshop SMS</strong></li>
+          <li>On the phone, open the <strong>Varyshop SMS</strong> app</li>
           <li>
-            Prejdete na zarazku <strong>Nastaveni</strong> (ikona ozubeného kola
-            dole)
+            Go to the <strong>Settings</strong> tab (gear icon at the bottom)
           </li>
-          <li>Kliknete na <span class="btn">Naskenovat QR kod</span></li>
+          <li>Tap <span class="btn">Scan QR Code</span></li>
           <li>
-            Namirte kameru telefonu na QR kod zobrazeny na obrazovce v Varyshop
-            administraci
+            Point the phone camera at the QR code displayed on the screen in the
+            Varyshop admin panel
           </li>
-          <li>Aplikace potvrdi uspesne sparovani &mdash; hotovo!</li>
+          <li>The app will confirm successful pairing &mdash; done!</li>
         </ol>
 
         <div class="tip">
-          <strong>Jak poznam, ze to funguje?</strong> Po uspesnem sparovani se
-          stav telefonu v administraci Varyshop zmeni z
-          <span class="status status-red">Offline</span> na
-          <span class="status status-green">Online</span>. To znamena, ze
-          telefon je pripojeny a pripraveny odesilat SMS.
+          <strong>How do I know it works?</strong> After successful pairing, the
+          phone status in Varyshop admin will change from
+          <span class="status status-red">Offline</span> to
+          <span class="status status-green">Online</span>. This means the
+          phone is connected and ready to send SMS.
         </div>
 
         <div class="warning">
-          <strong>Telefon zustavava Offline?</strong> Zkontrolujte:
+          <strong>Phone stays Offline?</strong> Check:
           <ul style="margin-bottom: 0">
-            <li>Ma telefon pripojeni k internetu? (Wi-Fi nebo mobilni data)</li>
+            <li>Does the phone have an internet connection? (Wi-Fi or mobile data)</li>
             <li>
-              Bezi aplikace na telefonu? (neni zavrena, neni v uspornem rezimu)
+              Is the app running on the phone? (not closed, not in power saving mode)
             </li>
             <li>
-              Je adresa serveru spravna? (v nastaveni aplikace vidite URL)
+              Is the server address correct? (you can see the URL in the app settings)
             </li>
           </ul>
         </div>
 
         <!-- ==================== PRVNI KAMPAN ==================== -->
-        <h2 id="prvni-kampan">Vase prvni SMS kampan</h2>
+        <h2 id="prvni-kampan">Your first SMS campaign</h2>
 
         <p>
-          Kdyz mate alespon jeden telefon
-          <span class="status status-green">Online</span>, muzete odeslat prvni
-          kampan.
+          Once you have at least one phone
+          <span class="status status-green">Online</span>, you can send your
+          first campaign.
         </p>
 
         <ol class="steps">
           <li>
-            Prejdete do
+            Go to
             <span class="path">Email Marketing &rarr; SMS Marketing</span>
           </li>
-          <li>Kliknete <span class="btn">Novy</span></li>
+          <li>Click <span class="btn">New</span></li>
           <li>
-            Vyplnte kampan:
+            Fill in the campaign:
             <table class="field-table">
               <tr>
-                <th>Pole</th>
-                <th>Co vyplnit</th>
+                <th>Field</th>
+                <th>What to enter</th>
               </tr>
               <tr>
-                <td><strong>Nazev</strong></td>
-                <td>Interni nazev kampane (zakaznik ho neuvidi)</td>
+                <td><strong>Name</strong></td>
+                <td>Internal campaign name (the customer won't see it)</td>
               </tr>
               <tr>
-                <td><strong>Prijemci</strong></td>
+                <td><strong>Recipients</strong></td>
                 <td>
-                  Komu se SMS posle &mdash; vyberete skupinu kontaktu nebo
-                  nastavite filtr
+                  Who will receive the SMS &mdash; select a contact group or
+                  set up a filter
                 </td>
               </tr>
               <tr>
-                <td><strong>Text zpravy</strong></td>
+                <td><strong>Message text</strong></td>
                 <td>
-                  Samotny text SMS (max. 160 znaku pro jednu SMS, delsi se
-                  rozdeli)
+                  The actual SMS text (max 160 characters for a single SMS,
+                  longer messages will be split)
                 </td>
               </tr>
             </table>
           </li>
-          <li>Zkontrolujte nahled zpravy</li>
+          <li>Review the message preview</li>
           <li>
-            Kliknete <span class="btn">Odeslat</span> (pro okamzite odeslani)
-            nebo <span class="btn">Naplanovat</span> (pro odeslani v urcity cas)
+            Click <span class="btn">Send</span> (for immediate sending) or
+            <span class="btn">Schedule</span> (for sending at a specific time)
           </li>
         </ol>
 
-        <h3>Priklad textu SMS</h3>
+        <h3>SMS text example</h3>
         <div
           style="
             background: #f0fdf4;
@@ -790,609 +852,892 @@
             margin: 12px 0;
           "
         >
-          Ahoj {{ object.name }}! Mate 20% slevu na cely sortiment do konce
-          tydne. Nakupte na https://www.example.cz/akce
+          Hi {{ object.name }}! Get 20% off our entire range until the end of
+          the week. Shop at https://www.example.com/sale
         </div>
 
         <div class="info">
-          <strong>Personalizace:</strong> Pomoci
-          <code>{{ object.name }}</code> vlozite do textu jmeno kazdeho
-          prijemce. Dalsi pole najdete pres tlacitko dynamickeho obsahu v
-          editoru zpravy.
+          <strong>Personalization:</strong> Use
+          <code>{{ object.name }}</code> to insert each recipient's name into the
+          text. You can find more fields via the dynamic content button in the
+          message editor.
+        </div>
+
+        <!-- ==================== KAMPAN Z APPKY ==================== -->
+        <h2 id="kampan-z-appky">Campaign from mobile app</h2>
+
+        <p>
+          <strong>New in v1.3.0:</strong> You can create campaigns directly
+          from the mobile app without accessing the Odoo backend. Just open
+          the <strong>Campaigns</strong> tab in the app.
+        </p>
+
+        <h3>Prerequisites</h3>
+        <ul>
+          <li>
+            At least one <strong>SMS template</strong> must be created in the
+            admin panel and assigned to your phone
+            (<span class="path">SMS Gateway &rarr; Marketing Templates</span>)
+          </li>
+          <li>
+            The template must have assigned <strong>segments</strong>
+            (recipient groups)
+          </li>
+        </ul>
+
+        <h3>Wizard in the app (3 steps)</h3>
+        <ol class="steps">
+          <li>
+            <strong>Select template</strong> &mdash; templates assigned to
+            your phone will be displayed. Select one by tapping.
+          </li>
+          <li>
+            <strong>Segment and count</strong> &mdash; select a segment
+            (e.g. &ldquo;Haven't ordered in 3 months&rdquo;) and set the number
+            of recipients. For each segment, you can see how many customers match the filter.
+          </li>
+          <li>
+            <strong>Preview and confirm</strong> &mdash; you'll see an SMS
+            preview with a sample name. You can edit the text before sending.
+            Choose <strong>Send now</strong> or
+            <strong>Add to queue</strong>.
+          </li>
+        </ol>
+
+        <h3>Sending and tracking</h3>
+        <p>
+          After creating the campaign, a status card is displayed with real-time
+          counters (sent / pending / errors). If you chose &ldquo;Add to queue&rdquo;,
+          you can send the SMS later with the
+          <strong>Send now</strong> button.
+        </p>
+        <p>
+          On phones with two SIM cards, the app will offer a choice:
+          send via one SIM or split between both.
+        </p>
+
+        <h3>Marketing statistics</h3>
+        <p>
+          After sending a campaign, the app displays:
+        </p>
+        <ul>
+          <li><strong>Clicked</strong> &mdash; how many recipients clicked a link</li>
+          <li><strong>Orders</strong> &mdash; number of orders from the campaign (UTM tracking)</li>
+          <li><strong>Revenue</strong> &mdash; total revenue from orders</li>
+          <li><strong>Unsubscribed</strong> &mdash; number of STOP replies</li>
+          <li><strong>CTR, Conversion, Unsubscribe %</strong> &mdash; percentage metrics</li>
+        </ul>
+
+        <div class="info">
+          <strong>Tip:</strong> Segments and templates are set up by the admin in Odoo.
+          The operator in the app only selects and sends &mdash; they cannot change
+          filters or recipients outside the configured segments.
         </div>
 
         <!-- ==================== JAK SE ODESILAJI ==================== -->
-        <h2 id="jak-se-odesilaji">Jak se odesilaji SMS</h2>
+        <h2 id="jak-se-odesilaji">How SMS are sent</h2>
 
-        <p>Po kliknuti na <em>Odeslat</em> se deje nasledujici:</p>
+        <p>After clicking <em>Send</em>, the following happens:</p>
 
         <div class="flow">
           <div class="flow-row">
             <div class="flow-box">
-              <strong>Pripraveno</strong>
-              <small>Varyshop vytvori SMS pro kazdeho prijemce</small>
+              <strong>Prepared</strong>
+              <small>Varyshop creates an SMS for each recipient</small>
             </div>
             <span class="flow-arrow">&rarr;</span>
             <div class="flow-box" style="border-color: #2563eb">
-              <strong>Ve fronte</strong>
-              <small>SMS se priradi jednomu z vasich telefonu</small>
+              <strong>In queue</strong>
+              <small>SMS is assigned to one of your phones</small>
             </div>
             <span class="flow-arrow">&rarr;</span>
             <div class="flow-box" style="border-color: #d97706">
-              <strong>Odesila se</strong>
-              <small>Telefon prevzal SMS a odesila</small>
+              <strong>Sending</strong>
+              <small>Phone has picked up the SMS and is sending</small>
             </div>
             <span class="flow-arrow">&rarr;</span>
             <div class="flow-box" style="border-color: #059669">
-              <strong>Odeslano</strong>
-              <small>Uspesne odeslano</small>
+              <strong>Sent</strong>
+              <small>Successfully sent</small>
             </div>
           </div>
         </div>
 
-        <p>Prubeh muzete sledovat v realnem case:</p>
+        <p>You can track progress in real time:</p>
         <ul>
           <li>
-            <strong>V kampani</strong> &mdash; pocitadla v zahlavi ukazuji kolik
-            SMS je odeslano, kolik ceka, kolik selhalo
+            <strong>In the campaign</strong> &mdash; counters in the header show
+            how many SMS have been sent, how many are pending, how many failed
           </li>
           <li>
-            <strong>Na telefonu</strong> &mdash; aplikace ukazuje kolik SMS
-            odesila a kolik jich jeste ceka ve fronte
+            <strong>On the phone</strong> &mdash; the app shows how many SMS it
+            has sent and how many are still waiting in the queue
           </li>
           <li>
-            <strong>U telefonu v administraci Varyshop</strong> &mdash; na kartě
-            telefonu vidite <em>Odeslano dnes</em> a <em>Cekajici</em>
+            <strong>On the phone card in Varyshop admin</strong> &mdash; you can
+            see <em>Sent today</em> and <em>Pending</em>
           </li>
         </ul>
 
         <!-- ==================== POZASTAVENI ==================== -->
-        <h2 id="pozastaveni">Pozastaveni kampane</h2>
+        <h2 id="pozastaveni">Pausing a campaign</h2>
 
         <p>
-          Pokud potrebujete kampan docasne zastavit (treba jste si vsimli chyby
-          v textu), muzete ji pozastavit bez zruseni:
+          If you need to temporarily stop a campaign (e.g. you noticed a mistake
+          in the text), you can pause it without canceling:
         </p>
 
         <ol class="steps">
-          <li>Otevrete kampan, ktera se prave odesila</li>
+          <li>Open the campaign that is currently being sent</li>
           <li>
-            Zapnete prepinac <span class="btn">Paused</span> (Pozastaveno)
+            Turn on the <span class="btn">Paused</span> toggle
           </li>
-          <li>SMS, ktere jsou jeste ve fronte, se nebudou odesilat</li>
+          <li>SMS still in the queue will not be sent</li>
           <li>
-            SMS, ktere uz byly odeslany, zustanou odeslane &mdash; ty nelze vzit
-            zpet
+            SMS that have already been sent will remain sent &mdash; they cannot
+            be taken back
           </li>
         </ol>
 
         <p>
-          Pro obnoveni odesilani jednodusse prepinac <em>Paused</em> vypnete.
+          To resume sending, simply turn off the <em>Paused</em> toggle.
         </p>
 
         <div class="info">
-          <strong>Co kdyz se SMS nevytvorily?</strong> Nekdy se stane, ze se SMS
-          pro nektere prijemce nevytvorily (treba kvuli chybe). V tom pripade
-          pouzijte tlacitko <span class="btn">Force Create SMS Queue</span>
-          &mdash; system dotvori SMS pro vsechny prijemce, kteri je jeste
-          nemaji.
+          <strong>What if SMS were not created?</strong> Sometimes SMS for some
+          recipients are not created (e.g. due to an error). In that case, use
+          the <span class="btn">Force Create SMS Queue</span> button &mdash;
+          the system will create SMS for all recipients who don't have them yet.
         </div>
 
         <!-- ==================== VICE TELEFONU ==================== -->
-        <h2 id="vice-telefonu">Vice telefonu a rozdeleni zateze</h2>
+        <h2 id="vice-telefonu">Multiple phones and load distribution</h2>
 
         <p>
-          Muzete pripojit libovolny pocet telefonu. System automaticky rozdeluje
-          SMS rovnomerne &mdash; kazda nova SMS se priradi telefonu, ktery ma
-          momentalne
-          <strong>nejmene prace</strong> (nejmene cekajicich SMS ve fronte).
+          You can connect any number of phones. The system automatically
+          distributes SMS evenly &mdash; each new SMS is assigned to the phone
+          that currently has the
+          <strong>least work</strong> (fewest pending SMS in its queue).
         </p>
 
-        <h3>Priklad se tremi telefony</h3>
+        <h3>Example with three phones</h3>
         <table class="field-table">
           <tr>
-            <th>Telefon</th>
-            <th>Ceka ve fronte</th>
-            <th>Dostane dalsi SMS?</th>
+            <th>Phone</th>
+            <th>Pending in queue</th>
+            <th>Gets the next SMS?</th>
           </tr>
           <tr>
             <td>Samsung &ndash; O2</td>
             <td>15 SMS</td>
-            <td>Ne</td>
+            <td>No</td>
           </tr>
           <tr>
             <td>Xiaomi &ndash; T-Mobile</td>
             <td>8 SMS</td>
-            <td>Ne</td>
+            <td>No</td>
           </tr>
           <tr>
             <td>Pixel &ndash; Vodafone</td>
             <td style="color: #059669; font-weight: 600">3 SMS</td>
             <td style="color: #059669; font-weight: 600">
-              Ano &mdash; ma nejmene
+              Yes &mdash; has the fewest
             </td>
           </tr>
         </table>
 
         <div class="tip">
-          <strong>Doporuceni:</strong> Pro rozsilku vice nez 500 SMS denne
-          doporucujeme alespon 2 telefony. Pro tisice SMS denne pouzijte
-          3&ndash;5 telefonu. System si porada &mdash; vy se nemusite o nic
-          starat.
+          <strong>Recommendation:</strong> For sending more than 500 SMS daily,
+          we recommend at least 2 phones. For thousands of SMS daily, use
+          3&ndash;5 phones. The system handles it &mdash; you don't need to
+          worry about anything.
         </div>
 
         <!-- ==================== FILTROVANI ==================== -->
-        <h2 id="filtrovani">Smerovani SMS na konkretni telefony</h2>
+        <h2 id="filtrovani">SMS routing to specific phones</h2>
 
         <p>
-          Pokrocila funkce: muzete nastavit, aby urcity telefon odesilal SMS
-          <strong>pouze pro urcitou skupinu zakazniku</strong>. Napriklad
-          chcete, aby SMS pro VIP zakazniky sly z jineho cisla nez SMS pro
-          ostatni.
+          Advanced feature: you can configure a specific phone to send SMS
+          <strong>only for a specific group of customers</strong>. For example,
+          you want VIP customer SMS to go from a different number than SMS for
+          other customers.
         </p>
 
-        <h3>Jak to nastavit</h3>
+        <h3>How to set it up</h3>
         <ol class="steps">
           <li>
-            Otevrete zaznam telefonu v
+            Open the phone record in
             <span class="path">Varyshop SMS &rarr; Gateway Phones</span>
           </li>
-          <li>Najdete pole <strong>Partner Domain Filter</strong></li>
+          <li>Find the <strong>Partner Domain Filter</strong> field</li>
           <li>
-            Zadejte podminku, kteri zakaznici maji byt smerovani na tento
-            telefon
+            Enter the condition for which customers should be routed to this
+            phone
           </li>
         </ol>
 
-        <h3>Priklady</h3>
+        <h3>Examples</h3>
         <table class="field-table">
           <tr>
-            <th>Chci aby telefon odesilal pro...</th>
-            <th>Co zadat do filtru</th>
+            <th>I want the phone to send for...</th>
+            <th>What to enter in the filter</th>
           </tr>
           <tr>
-            <td>Vsechny zakazniky (bez omezeni)</td>
-            <td><em>Nechat prazdne</em></td>
+            <td>All customers (no restriction)</td>
+            <td><em>Leave empty</em></td>
           </tr>
           <tr>
-            <td>Pouze VIP zakazniky (kategorie s ID 10)</td>
+            <td>VIP customers only (category with ID 10)</td>
             <td>[("category_id", "in", [10])]</td>
           </tr>
           <tr>
-            <td>Pouze zakazniky z Ceska</td>
+            <td>Customers from Czech Republic only</td>
             <td>[("country_id.code", "=", "CZ")]</td>
           </tr>
           <tr>
-            <td>Pouze firemni zakazniky</td>
+            <td>Company customers only</td>
             <td>[("is_company", "=", True)]</td>
           </tr>
         </table>
 
         <div class="warning">
-          <strong>Dulezite:</strong> Pokud pouzivate filtry,
-          <strong>nechte alespon jeden telefon bez filtru</strong> (prazdne
-          pole). Ten bude slouzit jako zalon &mdash; dostane SMS pro zakazniky,
-          kteri neodpovidaji zadnemu jinemu filtru. Pokud by zadny telefon
-          neodpovidel, SMS se oznaci jako chyba.
+          <strong>Important:</strong> If you use filters,
+          <strong>leave at least one phone without a filter</strong> (empty
+          field). It will serve as a fallback &mdash; it will receive SMS for
+          customers that don't match any other filter. If no phone matches,
+          the SMS will be marked as an error.
         </div>
 
         <div class="info">
-          <strong>Pro pokrocile uzivatele:</strong> Filtr pouziva stejny format
-          jako filtry v Varyshop pohledech (doménovy zapis). Pokud si nejste
-          jisti syntaxi, pozadejte svého spravce o pomoc.
+          <strong>For advanced users:</strong> The filter uses the same format
+          as filters in Varyshop views (domain notation). If you're not sure
+          about the syntax, ask your admin for help.
         </div>
 
         <!-- ==================== LIMITY ==================== -->
-        <h2 id="limity">Denni limity a rychlost odesilani</h2>
+        <h2 id="limity">Daily limits and sending speed</h2>
 
-        <p>Kazdy telefon ma dva limity, ktere muzete nastavit:</p>
+        <p>Each phone has two limits you can configure:</p>
 
         <table class="field-table">
           <tr>
             <th>Limit</th>
-            <th>Co dela</th>
-            <th>Vychozi hodnota</th>
+            <th>What it does</th>
+            <th>Default value</th>
           </tr>
           <tr>
-            <td><strong>Denni limit</strong></td>
+            <td><strong>Daily limit</strong></td>
             <td>
-              Maximalni pocet SMS, ktere telefon odesle za jeden den. O pulnoci
-              se pocitadlo automaticky resetuje.
+              Maximum number of SMS the phone will send per day. The counter
+              automatically resets at midnight.
             </td>
-            <td>500 SMS/den</td>
+            <td>500 SMS/day</td>
           </tr>
           <tr>
-            <td><strong>SMS za minutu</strong></td>
+            <td><strong>SMS per minute</strong></td>
             <td>
-              Jak rychle za sebou telefon odesila SMS. Vyssi cislo = rychlejsi,
-              ale hrozilo riziko blokovani operatorem.
+              How quickly the phone sends SMS in succession. A higher number
+              means faster, but there's a risk of being blocked by the carrier.
             </td>
             <td>100 SMS/min</td>
           </tr>
         </table>
 
-        <h3>Co se stane kdyz telefon dosahne limitu?</h3>
+        <h3>What happens when a phone reaches its limit?</h3>
         <ul>
-          <li>Nove SMS se automaticky presmeruji na dalsi dostupny telefon</li>
+          <li>New SMS are automatically redirected to the next available phone</li>
           <li>
-            Pokud zadny dalsi telefon neni k dispozici, SMS zustane ve fronte do
-            dalsiho dne
+            If no other phone is available, the SMS will stay in the queue until
+            the next day
           </li>
           <li>
-            V Varyshop uvidite na kartě telefonu, kolik SMS jeste muze dnes
-            odeslat
+            In Varyshop, you can see on the phone card how many more SMS it can
+            send today
           </li>
         </ul>
 
         <div class="warning">
-          <strong>Upozorneni na limit Androidu:</strong> Nektera Android
-          zarizeni maji vlastni omezeni na pocet odeslanych SMS (typicky ~30 SMS
-          za 30 minut). Pokud na to narazite, aplikace to ohlasi jako chybu.
-          Toto omezeni resi vas technik v nastaveni telefonu.
+          <strong>Android limit warning:</strong> Some Android devices have their
+          own limit on the number of sent SMS (typically ~30 SMS per 30 minutes).
+          If you encounter this, the app will report it as an error. Your
+          technician can resolve this in the phone settings.
         </div>
 
         <!-- ==================== DUAL SIM ==================== -->
-        <h2 id="dual-sim">Telefony s dvema SIM kartami</h2>
+        <h2 id="dual-sim">Phones with two SIM cards</h2>
 
         <p>
-          Pokud ma vas telefon dve SIM karty, muzete je obe zaregistrovat u
-          jednoho zaznamu telefonu v Varyshop:
+          If your phone has two SIM cards, you can register both under a single
+          phone record in Varyshop:
         </p>
 
         <ul>
           <li>
-            <strong>Telefonni cislo</strong> &mdash; cislo prvni SIM karty
+            <strong>Phone number</strong> &mdash; first SIM card number
           </li>
-          <li><strong>Druhe cislo</strong> &mdash; cislo druhe SIM karty</li>
+          <li><strong>Second number</strong> &mdash; second SIM card number</li>
         </ul>
 
         <p>
-          Aplikace automaticky rozpozna obe SIM karty a zobrazi je v nastaveni.
-          SMS se odesilaji pres spravnou SIM kartu podle toho, kteremu cislu
-          byly v Varyshop prirazeny.
+          The app automatically detects both SIM cards and displays them in the
+          settings. SMS are sent via the correct SIM card based on which number
+          they were assigned to in Varyshop.
         </p>
 
         <div class="info">
-          <strong>V praxi:</strong> Jeden telefon s dvema SIM kartami se chova
-          jako dva odesilajici telefony. Kazde cislo ma svoji vlastni frontu a
-          svoje vlastni pocitadlo odeslanych SMS.
+          <strong>In practice:</strong> One phone with two SIM cards behaves
+          like two sending phones. Each number has its own queue and its own
+          sent SMS counter.
         </div>
 
         <!-- ==================== ODKAZY ==================== -->
-        <h2 id="odkazy">Odkazy v SMS a sledovani kliknuti</h2>
+        <h2 id="odkazy">Links in SMS and click tracking</h2>
 
         <p>
-          Pokud vlozite do textu SMS odkaz (URL adresu), system ho automaticky
-          zkrati a prida sledovani.
+          If you include a link (URL) in your SMS text, the system automatically
+          shortens it and adds tracking.
         </p>
 
-        <h3>Co se deje s odkazem</h3>
+        <h3>What happens to the link</h3>
         <table class="field-table">
           <tr>
-            <th>Faze</th>
-            <th>Jak odkaz vypada</th>
+            <th>Stage</th>
+            <th>How the link looks</th>
           </tr>
           <tr>
-            <td>Jak ho napisete</td>
-            <td>https://www.vas-eshop.cz/akce-jaro-2026</td>
+            <td>As you write it</td>
+            <td>https://www.your-shop.com/spring-sale-2026</td>
           </tr>
           <tr>
-            <td>Jak dojde prijemci</td>
-            <td>https://vas-admin.cz/r/Ab3x (kratky trackovaci odkaz)</td>
+            <td>As the recipient receives it</td>
+            <td>https://your-admin.com/r/Ab3x (short tracking link)</td>
           </tr>
         </table>
 
-        <h3>Co se stane kdyz prijemce klikne</h3>
+        <h3>What happens when the recipient clicks</h3>
         <ol class="steps">
-          <li>Prijemce klikne na kratky odkaz v SMS</li>
-          <li>Vas server zaznamena kliknuti &mdash; kdo klikl, kdy, odkud</li>
+          <li>The recipient clicks the short link in the SMS</li>
+          <li>Your server records the click &mdash; who clicked, when, from where</li>
           <li>
-            Prijemce je okamzite presmerovan na puvodni stranku
-            (vas-eshop.cz/akce-jaro-2026)
+            The recipient is immediately redirected to the original page
+            (your-shop.com/spring-sale-2026)
           </li>
         </ol>
 
         <p>
-          Diky tomu
-          <strong>vidite v Varyshop kolik lidi kliklo na odkaz</strong> a kdo
-          presne to byl. Nemusite nic nastavovat &mdash; deje se to automaticky.
+          Thanks to this, you can
+          <strong>see in Varyshop how many people clicked the link</strong> and
+          who exactly it was. You don't need to set anything up &mdash; it
+          happens automatically.
         </p>
 
-        <h3>Kde najdu statistiky odkazu</h3>
+        <h3>Where to find link statistics</h3>
         <p>
-          Prejdete do
+          Go to
           <span class="path">Email Marketing &rarr; Link Tracker</span> &mdash;
-          uvidite vsechny kratke odkazy, pocet kliknuti a dalsi detaily.
+          you'll see all short links, click counts, and other details.
         </p>
 
         <div class="tip">
-          <strong>Google Analytics:</strong> Pokud pouzivate Google Analytics,
-          sledovaci odkazy automaticky pridavaji UTM parametry (kampan, zdroj,
-          medium). Navstevnost z SMS kampani tak uvidite primo v reportech
-          Google Analytics.
+          <strong>Google Analytics:</strong> If you use Google Analytics, the
+          tracking links automatically add UTM parameters (campaign, source,
+          medium). Traffic from SMS campaigns will appear directly in your
+          Google Analytics reports.
         </div>
 
         <!-- ==================== ODHLASENI ==================== -->
-        <h2 id="odhlaseni">Odhlaseni prijemcu a STOP zpravy</h2>
+        <h2 id="odhlaseni">Recipient unsubscribe and STOP messages</h2>
 
         <p>
-          Podle zakona (GDPR) musi mit kazdy prijemce moznost se z
-          marketingovych SMS odhlasit. Nas system to resi automaticky.
+          By law (GDPR), every recipient must have the option to unsubscribe
+          from marketing SMS. Our system handles this automatically.
         </p>
 
-        <h3>Jak to funguje</h3>
+        <h3>How it works</h3>
         <ol class="steps">
           <li>
-            Na konci kazde SMS zpravy je automaticky text:
-            <strong>STOP pro odhlaseni</strong>
+            At the end of every SMS message, there is automatically the text:
+            <strong>STOP to unsubscribe</strong>
           </li>
           <li>
-            Pokud prijemce odpovi SMS zpravou obsahujici slovo
+            If the recipient replies with an SMS containing the word
             <strong>STOP</strong>...
           </li>
-          <li>...aplikace na telefonu tuto odpoved zachyti</li>
+          <li>...the app on the phone captures this reply</li>
           <li>
-            Automaticky prida cislo prijemce na <strong>cernou listinu</strong>
+            It automatically adds the recipient's number to the <strong>blacklist</strong>
           </li>
-          <li>Vsechny budouci kampane toto cislo automaticky preskoci</li>
+          <li>All future campaigns will automatically skip this number</li>
         </ol>
 
         <div class="danger">
-          <strong>GDPR povinnost:</strong> Text &bdquo;STOP pro odhlaseni&ldquo;
-          se pridava automaticky a <strong>nesmi byt odstranen</strong>.
-          Odesilani marketingovych SMS bez moznosti odhlaseni je poruseni
-          legislativy.
+          <strong>GDPR requirement:</strong> The text &ldquo;STOP to unsubscribe&rdquo;
+          is added automatically and <strong>must not be removed</strong>.
+          Sending marketing SMS without the option to unsubscribe is a violation
+          of the law.
         </div>
 
-        <h3>Kde najdu cernou listinu</h3>
+        <h3>Where to find the blacklist</h3>
         <p>
           <span class="path"
-            >SMS Marketing &rarr; Konfigurace &rarr; Phone Blacklist</span
+            >SMS Marketing &rarr; Configuration &rarr; Phone Blacklist</span
           >
         </p>
 
-        <p>Zde muzete:</p>
+        <p>Here you can:</p>
         <ul>
-          <li>Videt vsechna odhlasena cisla</li>
+          <li>View all unsubscribed numbers</li>
           <li>
-            Pridat cislo rucne (pokud vas zakaznik pozada telefonicky ci
-            emailem)
+            Manually add a number (if your customer requests it by phone or
+            email)
           </li>
           <li>
-            Odebrat cislo z listiny (pokud zakaznik svuj souhlas obnovi &mdash;
-            napr. pisemne)
+            Remove a number from the list (if the customer renews their consent
+            &mdash; e.g. in writing)
           </li>
         </ul>
 
-        <!-- ==================== STATISTIKY ==================== -->
-        <h2 id="statistiky">Statistiky kampane</h2>
+        <!-- ==================== PRICHOZI SMS ==================== -->
+        <h2 id="prichozi-sms">Incoming SMS</h2>
 
-        <p>Po odeslani kampane najdete statistiky primo v zahlavi kampane:</p>
+        <p>
+          Since version 1.2.0, the app includes a new <strong>Incoming</strong>
+          tab where you can monitor all received SMS messages on your gateway phone.
+        </p>
+
+        <h3>What the Incoming tab shows</h3>
+        <ul>
+          <li><strong>Sender</strong> &mdash; the sender's number and partner name (if they exist in the system)</li>
+          <li><strong>Message text</strong> &mdash; content of the received SMS</li>
+          <li><strong>Blacklist status</strong> &mdash; whether the number is on the blacklist</li>
+          <li><strong>Date and time</strong> &mdash; when the message was received</li>
+        </ul>
+
+        <h3>Filtering</h3>
+        <p>
+          At the top of the screen, you can switch between
+          <strong>All messages</strong> and <strong>STOP only</strong>.
+          The list supports pagination for easier browsing of large volumes of messages.
+        </p>
+
+        <h3>Chatter integration</h3>
+        <p>
+          All received SMS are automatically displayed in the <strong>partner's chatter</strong>
+          in Odoo. Each incoming message is shown as a formatted note with the text
+          in a blockquote and optionally with a STOP tag if the message contained an unsubscribe keyword.
+        </p>
+
+        <h3>Re-scanning the inbox</h3>
+        <p>
+          If some incoming messages are missing, go to
+          <em>Settings &rarr; Service</em> in the app and tap
+          <span class="btn">Re-scan received SMS</span>. The app will read
+          the SMS inbox for the last 30 days and send all found messages to the server.
+          Duplicates are automatically ignored.
+        </p>
+
+        <!-- ==================== STATISTIKY ==================== -->
+        <h2 id="statistiky">Campaign statistics</h2>
+
+        <p>After sending a campaign, you'll find statistics directly in the campaign header:</p>
 
         <table class="field-table">
           <tr>
-            <th>Ukazatel</th>
-            <th>Co znamena</th>
+            <th>Metric</th>
+            <th>What it means</th>
           </tr>
           <tr>
-            <td><strong>Odeslano (Sent)</strong></td>
-            <td>Pocet uspesne odeslanych SMS</td>
+            <td><strong>Sent</strong></td>
+            <td>Number of successfully sent SMS</td>
           </tr>
           <tr>
-            <td><strong>Kliknuto (Clicked)</strong></td>
-            <td>Kolik prijemcu kliklo na odkaz ve zprave</td>
+            <td><strong>Clicked</strong></td>
+            <td>How many recipients clicked a link in the message</td>
           </tr>
           <tr>
-            <td><strong>Chyby (Failed)</strong></td>
-            <td>Pocet SMS, ktere se nepodarilo odeslat</td>
+            <td><strong>Failed</strong></td>
+            <td>Number of SMS that could not be sent</td>
           </tr>
           <tr>
             <td><strong>Bounced</strong></td>
-            <td>Neplatna telefonni cisla</td>
+            <td>Invalid phone numbers</td>
+          </tr>
+          <tr>
+            <td><strong>Orders</strong></td>
+            <td>Number of orders created from the campaign (UTM tracking)</td>
+          </tr>
+          <tr>
+            <td><strong>Revenue</strong></td>
+            <td>Total revenue from orders attributed to the campaign</td>
+          </tr>
+          <tr>
+            <td><strong>Opt-out</strong></td>
+            <td>Number of recipients who replied STOP</td>
           </tr>
         </table>
 
         <p>
-          Kliknutim na kterykoliv ukazatel zobrazite detailni seznam &mdash;
-          vidite presne, kterym kontaktum byla SMS odeslana, kdo klikl atd.
+          Clicking on any metric shows a detailed list &mdash; you can see
+          exactly which contacts received the SMS, who clicked, etc.
         </p>
 
-        <h3>Statistiky telefonu</h3>
+        <h3>Phone statistics</h3>
         <p>
-          Na kartě kazdeho telefonu v
-          <span class="path">Varyshop SMS &rarr; Gateway Phones</span> vidite:
+          On each phone's card in
+          <span class="path">Varyshop SMS &rarr; Gateway Phones</span> you can see:
         </p>
         <ul>
           <li>
-            <strong>Odeslano dnes</strong> &mdash; kolik SMS telefon dnes
-            odeslal (z denního limitu)
+            <strong>Sent today</strong> &mdash; how many SMS the phone has sent
+            today (out of the daily limit)
           </li>
           <li>
-            <strong>Celkem odeslano</strong> &mdash; celkovy pocet SMS za celou
-            dobu
+            <strong>Total sent</strong> &mdash; total number of SMS sent over
+            the entire period
           </li>
           <li>
-            <strong>Cekajici</strong> &mdash; kolik SMS ceka ve fronte na
-            odeslani
+            <strong>Pending</strong> &mdash; how many SMS are waiting in the
+            queue to be sent
           </li>
           <li>
-            <strong>Chyby</strong> &mdash; kolik SMS se nepodarilo odeslat
+            <strong>Errors</strong> &mdash; how many SMS failed to send
           </li>
         </ul>
 
-        <!-- ==================== OVERENI ==================== -->
-        <h2 id="overeni">Jak overit ze vse funguje</h2>
+        <!-- ==================== FCM PUSH NOTIFIKACE ==================== -->
+        <h2 id="fcm">FCM Push notifications</h2>
 
         <p>
-          Predtim nez spustite prvni velkou kampan, doporucujeme vse otestovat:
+          By default, the phone app <strong>polls every few seconds</strong>
+          for new SMS from the queue. This works well, but there can be a delay
+          of up to 10 seconds between creating the SMS in the admin panel and
+          the start of sending.
+        </p>
+
+        <p>
+          <strong>FCM (Firebase Cloud Messaging)</strong> eliminates this delay.
+          When FCM is enabled, the admin panel sends the phone an instant
+          &ldquo;push&rdquo; impulse &mdash; the app starts sending virtually
+          immediately.
+        </p>
+
+        <h3>How to enable FCM</h3>
+        <ol class="steps">
+          <li>
+            Go to
+            <span class="path">Settings &rarr; SMS Gateway</span>
+          </li>
+          <li>
+            Turn on the <strong>FCM Push Enabled</strong> toggle
+          </li>
+          <li>
+            Upload the <strong>Firebase Service Account JSON</strong> file
+            &mdash; you can get it from the
+            <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a>
+            (Project Settings &rarr; Service accounts &rarr; Generate new private key)
+          </li>
+          <li>Save the settings</li>
+        </ol>
+
+        <div class="info">
+          <strong>One Firebase project for all instances.</strong>
+          If you run multiple Varyshop instances (e.g. for different
+          customers), one Firebase project and one Service Account JSON
+          file is sufficient. Each instance uses it independently.
+        </div>
+
+        <div class="tip">
+          <strong>What if I don't set up FCM?</strong> The app works
+          perfectly fine without FCM &mdash; it uses standard polling.
+          SMS will be sent, just with a slightly higher delay (up to 10 seconds).
+          FCM is an optional enhancement, not a requirement.
+        </div>
+
+        <!-- ==================== POZADI A SPOLEHLIVOST ==================== -->
+        <h2 id="background">Background and reliability</h2>
+
+        <p>
+          The Varyshop SMS app sends messages even when the
+          <strong>screen is locked</strong> or when you're using another
+          app. For this to work reliably, battery optimization must be
+          configured correctly.
+        </p>
+
+        <h3>Battery optimization</h3>
+        <p>
+          Android tries to save battery and may restrict background app
+          activity. For Varyshop SMS, this restriction needs to be disabled:
+        </p>
+        <ol class="steps">
+          <li>
+            Open <span class="path">Phone Settings &rarr; Battery &rarr; App battery usage</span>
+          </li>
+          <li>
+            Find the <strong>SMS Gateway</strong> app
+          </li>
+          <li>
+            Select <strong>Unrestricted</strong>
+          </li>
+        </ol>
+
+        <div class="info">
+          <strong>How to verify:</strong>
+          <span class="path">Settings &rarr; Battery &rarr; App battery usage &rarr; SMS Gateway</span>
+          &mdash; it should be set to <em>Unrestricted</em>.
+        </div>
+
+        <h3>Xiaomi / MIUI &mdash; extra steps</h3>
+        <p>
+          Xiaomi phones with MIUI have more aggressive battery management.
+          In addition to the battery optimization exemption, you also need to:
+        </p>
+        <ul>
+          <li>
+            Enable <strong>Autostart</strong>:
+            <span class="path">Settings &rarr; Apps &rarr; Permissions &rarr; Autostart</span>
+            &mdash; turn on for SMS Gateway
+          </li>
+          <li>
+            In the battery settings for the app, select <strong>No restrictions</strong>
+          </li>
+        </ul>
+
+        <div class="warning">
+          <strong>Important:</strong> If SMS are not being sent while the screen
+          is locked, battery optimization is the most common cause. Always
+          check this setting first.
+        </div>
+
+        <!-- ==================== OVERENI ==================== -->
+        <h2 id="overeni">How to verify everything works</h2>
+
+        <p>
+          Before launching your first big campaign, we recommend testing
+          everything:
         </p>
 
         <ol class="steps">
           <li>
-            <strong>Zkontrolujte stav telefonu</strong><br />
-            V <span class="path">Varyshop SMS &rarr; Gateway Phones</span> by
-            mel byt alespon jeden telefon
+            <strong>Check the phone status</strong><br />
+            In <span class="path">Varyshop SMS &rarr; Gateway Phones</span>,
+            at least one phone should be
             <span class="status status-green">Online</span>
           </li>
           <li>
-            <strong>Poslete testovaci SMS</strong><br />
-            Vytvorte kampan s jedinym prijemcem (napr. sami sobe) a odeslat ji
+            <strong>Send a test SMS</strong><br />
+            Create a campaign with a single recipient (e.g. yourself) and send it
           </li>
           <li>
-            <strong>Zkontrolujte doruceni</strong><br />
-            Zkontrolujte, ze vam SMS prisla na telefon prijemce
+            <strong>Check delivery</strong><br />
+            Verify that the SMS arrived on the recipient's phone
           </li>
           <li>
-            <strong>Overit sledovani</strong><br />
-            Kliknete na odkaz v SMS a zkontrolujte v Varyshop (Link Tracker), ze
-            se kliknuti zaznamenalo
+            <strong>Verify tracking</strong><br />
+            Click the link in the SMS and check in Varyshop (Link Tracker) that
+            the click was recorded
           </li>
           <li>
-            <strong>Otestujte odhlaseni</strong><br />
-            Odpovezte na SMS zpravou &bdquo;STOP&ldquo; a overit, ze se vase
-            cislo objevi na cerne listine v Varyshop
+            <strong>Test unsubscribe</strong><br />
+            Reply to the SMS with &ldquo;STOP&rdquo; and verify that your
+            number appears on the blacklist in Varyshop
           </li>
         </ol>
 
         <div class="tip">
-          <strong>Vse funguje?</strong> Skvele! Muzete spustit plnohodnotnou
-          kampan. Pokud neco nefunguje, podivejte se do sekce
-          <a href="#casty-dotazy">Caste dotazy a reseni problemu</a> nize.
+          <strong>Everything works?</strong> Great! You can launch a full-scale
+          campaign. If something doesn't work, check the
+          <a href="#casty-dotazy">FAQ and troubleshooting</a> section below.
         </div>
 
         <!-- ==================== CASTE DOTAZY ==================== -->
-        <h2 id="casty-dotazy">Caste dotazy a reseni problemu</h2>
+        <h2 id="casty-dotazy">FAQ and troubleshooting</h2>
 
         <p class="faq-q">
-          Telefon je v Varyshop stale Offline, i kdyz aplikace bezi
+          The phone is still Offline in Varyshop, even though the app is running
         </p>
         <div class="faq-a">
           <ul>
             <li>
-              Zkontrolujte, ze ma telefon pripojeni k internetu (otevrete
-              prohlizec a zkuste nacist stranku)
+              Check that the phone has an internet connection (open a browser
+              and try loading a page)
             </li>
             <li>
-              V aplikaci v zarazce <em>Nastaveni</em> overite, ze je zobrazena
-              URL adresa vaseho serveru
+              In the app's <em>Settings</em> tab, verify that your server's URL
+              address is displayed
             </li>
-            <li>Zkuste aplikaci zavrit a znovu otevrit</li>
-            <li>Pokud nic nepomuze, znovu naskenujte QR kod</li>
+            <li>Try closing and reopening the app</li>
+            <li>If nothing helps, re-scan the QR code</li>
           </ul>
         </div>
 
-        <p class="faq-q">SMS se neodesilaji, zustavaji ve fronte</p>
+        <p class="faq-q">SMS are not being sent, they stay in the queue</p>
         <div class="faq-a">
           <ul>
-            <li>Je telefon <span class="status status-green">Online</span>?</li>
+            <li>Is the phone <span class="status status-green">Online</span>?</li>
             <li>
-              Je v aplikaci zapnuto odesilani? (Dashboard &rarr; prepinac
-              <em>Start</em>)
+              Is sending enabled in the app? (Dashboard &rarr; the
+              <em>Start</em> toggle)
             </li>
             <li>
-              Nedosahl telefon denniho limitu? (zkontrolujte
-              <em>Odeslano dnes</em> vs. <em>Denni limit</em>)
+              Has the phone reached its daily limit? (check
+              <em>Sent today</em> vs. <em>Daily limit</em>)
             </li>
             <li>
-              Ma aplikace opravneni k odesilani SMS? (Nastaveni Android &rarr;
-              Aplikace &rarr; Varyshop SMS &rarr; Opravneni)
-            </li>
-          </ul>
-        </div>
-
-        <p class="faq-q">Nektera SMS se oznacila jako chyba</p>
-        <div class="faq-a">
-          <ul>
-            <li>
-              Cislo prijemce muze byt neplatne (spatny format, neexistujici
-              cislo)
-            </li>
-            <li>Telefon mohl ztratit signal v prubehu odesilani</li>
-            <li>Android mohl zablokvat odesilani kvuli limitu (viz nize)</li>
-            <li>
-              Chybove SMS muzete zkusit odeslat znovu tlacitkem
-              <span class="btn">Force Create SMS Queue</span> v kampani
+              Does the app have SMS sending permission? (Android Settings &rarr;
+              Apps &rarr; Varyshop SMS &rarr; Permissions)
             </li>
           </ul>
         </div>
 
-        <p class="faq-q">Android blokuje odesilani po 30 SMS</p>
+        <p class="faq-q">Some SMS were marked as errors</p>
         <div class="faq-a">
-          Nektere Android telefony maji vestaveny limit na pocet SMS (typicky 30
-          za 30 minut). Reseni:<br />
           <ul>
             <li>
-              Snizit <em>SMS za minutu</em> na 1 (jedno SMS za minutu) &mdash;
-              pomalejsi, ale nenarazite na limit
+              The recipient's number may be invalid (wrong format, non-existent
+              number)
+            </li>
+            <li>The phone may have lost signal during sending</li>
+            <li>Android may have blocked sending due to a limit (see below)</li>
+            <li>
+              You can try resending failed SMS with the
+              <span class="btn">Force Create SMS Queue</span> button in the campaign
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">Android blocks sending after 30 SMS</p>
+        <div class="faq-a">
+          Some Android phones have a built-in SMS limit (typically 30 per 30
+          minutes). Solutions:<br />
+          <ul>
+            <li>
+              Reduce <em>SMS per minute</em> to 1 (one SMS per minute) &mdash;
+              slower, but you won't hit the limit
             </li>
             <li>
-              Pozadat spravce o zmenu nastaveni telefonu (technicke reseni)
+              Ask your admin to change the phone settings (technical solution)
             </li>
             <li>
-              Pouzit vice telefonu &mdash; limit plati na kazdy telefon zvlast
+              Use multiple phones &mdash; the limit applies to each phone
+              separately
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">SMS are not being sent when the screen is locked</p>
+        <div class="faq-a">
+          <ul>
+            <li>
+              Most common cause: <strong>battery optimization</strong> puts the
+              app to sleep in the background. Check
+              <span class="path">Settings &rarr; Battery &rarr; App battery usage &rarr; SMS Gateway</span>
+              and set to <em>Unrestricted</em>
+            </li>
+            <li>
+              On Xiaomi/MIUI: also enable <em>Autostart</em> (see the
+              <a href="#background">Background and reliability</a> section)
+            </li>
+            <li>
+              Verify that the app has notification permissions enabled (required for the background service)
             </li>
           </ul>
         </div>
 
         <p class="faq-q">
-          STOP zprava nefunguje &mdash; cislo se neprida na cernou listinu
+          STOP messages don't appear in the blacklist
         </p>
         <div class="faq-a">
           <ul>
-            <li>Overit, ze aplikace ma opravneni <em>Prijimani SMS</em></li>
             <li>
-              Prijemce musi odpovedet na <strong>stejne cislo</strong>, ze
-              ktereho SMS prisel
+              Verify that the app has <strong>Receive SMS</strong> permission
+              (<em>RECEIVE_SMS</em>) &mdash; without it, the app won't see replies
             </li>
             <li>
-              Zprava musi obsahovat slovo STOP (velka/mala pismena nehraji roli)
+              Check internet connection &mdash; the app needs to send the STOP
+              message information back to the server
+            </li>
+            <li>
+              The recipient must reply to the <strong>same number</strong> from
+              which the SMS was sent
+            </li>
+            <li>
+              The message must contain the word STOP (case doesn't matter)
+            </li>
+            <li>
+              <strong>Re-scan received SMS:</strong> In the app, go to
+              <em>Settings &rarr; Service</em> and tap the
+              <span class="btn">Re-scan received SMS</span> button. The app will
+              re-read the SMS inbox for the last 30 days and send found messages to the server
+              (with deduplication &mdash; duplicates are ignored).
             </li>
           </ul>
         </div>
 
-        <p class="faq-q">Odkazy v SMS nefunguji nebo vedou na chybu</p>
+        <p class="faq-q">
+          STOP message doesn't work &mdash; number is not added to the blacklist
+        </p>
+        <div class="faq-a">
+          <ul>
+            <li>Verify that the app has <em>Receive SMS</em> permission</li>
+            <li>
+              The recipient must reply to the <strong>same number</strong> from
+              which the SMS was sent
+            </li>
+            <li>
+              The message must contain the word STOP (case doesn't matter)
+            </li>
+          </ul>
+        </div>
+
+        <p class="faq-q">Links in SMS don't work or lead to an error</p>
         <div class="faq-a">
           <ul>
             <li>
-              Odkaz vyzaduje, aby byl vas Varyshop server verejne dostupny z
-              internetu
+              The link requires your Varyshop server to be publicly accessible
+              from the internet
             </li>
             <li>
-              Pokud pouzivate HTTPS (doporuceno), certifikat musi byt platny
+              If you use HTTPS (recommended), the certificate must be valid
             </li>
             <li>
-              Kontaktujte spravce, at zkontroluje nastaveni
-              <em>web.base.url</em> v Varyshop
+              Contact your admin to check the <em>web.base.url</em> setting in
+              Varyshop
             </li>
           </ul>
         </div>
 
-        <p class="faq-q">Jak odpojim telefon od systemu?</p>
+        <p class="faq-q">How do I disconnect a phone from the system?</p>
         <div class="faq-a">
-          V aplikaci na telefonu prejdete do <em>Nastaveni</em> a kliknete
+          In the app on the phone, go to <em>Settings</em> and tap
           <span
             class="btn"
             style="background: #fee2e2; color: #991b1b; border-color: #fca5a5"
-            >Odpojit</span
-          >. Telefon prestane odesilat a v Varyshop se oznaci jako Offline. V
-          Varyshop muzete zaznam telefonu take smazat nebo archivovat.
+            >Disconnect</span
+          >. The phone will stop sending and will be marked as Offline in
+          Varyshop. In Varyshop, you can also delete or archive the phone record.
         </div>
 
-        <p class="faq-q">Muzu menit text SMS potom co jsem kampan odeslal?</p>
+        <p class="faq-q">Can I change the SMS text after I've sent the campaign?</p>
         <div class="faq-a">
-          Ne. SMS, ktere uz byly odeslany, nelze zmenit &mdash; prisly na
-          telefon prijemce. Muzete vsak kampan
-          <strong>pozastavit</strong> (prepinac Paused) a upravit text. SMS,
-          ktere jeste nebyly odeslany, budou mit puvodni text. Pro novy text je
-          treba vytvorit novou kampan.
+          No. SMS that have already been sent cannot be changed &mdash; they've
+          arrived on the recipient's phone. However, you can
+          <strong>pause</strong> the campaign (Paused toggle) and edit the text.
+          SMS that haven't been sent yet will have the original text. For new
+          text, you need to create a new campaign.
         </div>
 
-        <p class="faq-q">Kolik SMS muzu odeslat denne?</p>
+        <p class="faq-q">How many SMS can I send per day?</p>
         <div class="faq-a">
-          Zalezi na poctu telefonu a jejich nastaveni. Kazdy telefon muze
-          typicky odeslat 200&ndash;1000 SMS denne (dle vaseho nastaveni denniho
-          limitu a tarifu operatora). S peti telefony tedy muzete odeslat az
-          5000 SMS denne.
+          It depends on the number of phones and their settings. Each phone can
+          typically send 200&ndash;1000 SMS per day (depending on your daily
+          limit setting and carrier plan). With five phones, you can send up to
+          5000 SMS per day.
+        </div>
+
+        <div class="info">
+          If you have any questions or need help with setup, contact
+          <a href="mailto:info@varyshop.eu">info@varyshop.eu</a> or the developer directly at
+          <a href="mailto:info@michalvarys.eu">info@michalvarys.eu</a>
         </div>
 
         <hr />
@@ -1405,7 +1750,7 @@
             font-size: 0.9em;
           "
         >
-          Varyshop SMS v18.0.1.0.0 &bull; VaryShop &bull; 2026
+          Varyshop SMS v18.0.2.2.0 &bull; VaryShop &bull; 2026
         </p>
       </main>
     </div>
