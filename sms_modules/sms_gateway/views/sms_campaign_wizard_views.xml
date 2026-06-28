@@ -91,11 +91,11 @@
         <field name="target">new</field>
     </record>
 
-    <!-- Menu item under SMS Marketing -->
+    <!-- Menu item under SMS Gateway -->
     <menuitem id="sms_campaign_wizard_menu"
-              name="Nová kampaň"
-              parent="sms_marketing_menu_root"
+              name="New Campaign"
+              parent="sms_gateway_menu_root"
               action="sms_campaign_wizard_action"
-              sequence="1"/>
+              sequence="5"/>
 
 </odoo>

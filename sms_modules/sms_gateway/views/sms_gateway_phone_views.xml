@@ -138,7 +138,7 @@
         </field>
     </record>
 
-    <!-- Menu under SMS Marketing -->
+    <!-- SMS Gateway menu -->
     <menuitem id="sms_gateway_menu_root"
               name="SMS Gateway"
               parent="mass_mailing_sms.mass_mailing_sms_menu_root"
