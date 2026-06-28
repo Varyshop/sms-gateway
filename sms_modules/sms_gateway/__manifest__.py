@@ -7,7 +7,7 @@
     'author': 'Michal Varys',
     'website': 'https://michalvarys.eu',
     'support': 'info@michalvarys.eu',
-    'license': 'OPL-1',
+    'license': 'LGPL-3',
     'price': 99.00,
     'currency': 'EUR',
     'depends': ['base_setup', 'sms', 'mass_mailing_sms', 'phone_validation', 'sale', 'point_of_sale'],
