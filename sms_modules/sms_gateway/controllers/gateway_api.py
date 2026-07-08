@@ -63,6 +63,41 @@ class SmsGatewayController(http.Controller):
             digits = digits[3:]
         return digits[-9:] if len(digits) >= 9 else digits
 
+    def _find_partner_by_phone(self, number):
+        """Find a partner by phone number, tolerant to formatting
+        differences (spaces, dashes, +420 vs 00420 vs national format).
+
+        Numbers are compared digit-only so '+420 777 123 456' stored on
+        the partner matches '+420777123456' reported by the phone.
+        """
+        Partner = request.env['res.partner'].sudo()
+        if not number:
+            return Partner
+        partner = Partner.search([
+            '|',
+            ('mobile', '=', number),
+            ('phone', '=', number),
+        ], limit=1)
+        if partner:
+            return partner
+        tail = self._normalize_phone(number)
+        if len(tail) >= 9:
+            request.env.cr.execute(
+                """
+                SELECT id FROM res_partner
+                WHERE active = TRUE
+                  AND (regexp_replace(COALESCE(mobile, ''), '[^0-9]', '', 'g') LIKE %s
+                       OR regexp_replace(COALESCE(phone, ''), '[^0-9]', '', 'g') LIKE %s)
+                ORDER BY id
+                LIMIT 1
+                """,
+                ['%' + tail, '%' + tail],
+            )
+            row = request.env.cr.fetchone()
+            if row:
+                partner = Partner.browse(row[0])
+        return partner
+
     # ---- Heartbeat ----
 
     @http.route('/sms-gateway/heartbeat', type='http', auth='public',
@@ -508,6 +543,23 @@ class SmsGatewayController(http.Controller):
             if not from_number or not message:
                 return self._error_response('from_number and message are required')
 
+            # Deduplicate: the app may report the same SMS twice
+            # (WorkManager + live service path) — skip if an identical
+            # message was already recorded recently
+            recent = request.env['sms.gateway.inbound'].sudo().search([
+                ('from_number', '=', from_number),
+                ('message', '=', message),
+                ('received_at', '>=', fields.Datetime.subtract(
+                    fields.Datetime.now(), minutes=10)),
+            ], limit=1)
+            if recent:
+                return self._json_response({
+                    'success': True,
+                    'blacklisted': recent.blacklisted,
+                    'partner_found': bool(recent.partner_id),
+                    'duplicate': True,
+                })
+
             blacklisted = False
 
             if 'STOP' in message.upper():
@@ -518,19 +570,7 @@ class SmsGatewayController(http.Controller):
                 except Exception as e:
                     _logger.error('SMS Gateway: Failed to blacklist %s: %s', from_number, e)
 
-            partner = request.env['res.partner'].sudo().search([
-                '|',
-                ('mobile', '=', from_number),
-                ('phone', '=', from_number),
-            ], limit=1)
-
-            if not partner:
-                sanitized = from_number.replace(' ', '').replace('-', '')
-                partner = request.env['res.partner'].sudo().search([
-                    '|',
-                    ('mobile', 'ilike', sanitized),
-                    ('phone', 'ilike', sanitized),
-                ], limit=1)
+            partner = self._find_partner_by_phone(from_number)
 
             if partner:
                 stop_html = (
@@ -643,18 +683,7 @@ class SmsGatewayController(http.Controller):
                     continue
 
                 # Find partner
-                partner = request.env['res.partner'].sudo().search([
-                    '|',
-                    ('mobile', '=', from_number),
-                    ('phone', '=', from_number),
-                ], limit=1)
-                if not partner:
-                    sanitized = from_number.replace(' ', '').replace('-', '')
-                    partner = request.env['res.partner'].sudo().search([
-                        '|',
-                        ('mobile', 'ilike', sanitized),
-                        ('phone', 'ilike', sanitized),
-                    ], limit=1)
+                partner = self._find_partner_by_phone(from_number)
 
                 is_stop = 'STOP' in message.upper()
                 blacklisted = False
