@@ -65,38 +65,8 @@ class SmsGatewayController(http.Controller):
 
     def _find_partner_by_phone(self, number):
         """Find a partner by phone number, tolerant to formatting
-        differences (spaces, dashes, +420 vs 00420 vs national format).
-
-        Numbers are compared digit-only so '+420 777 123 456' stored on
-        the partner matches '+420777123456' reported by the phone.
-        """
-        Partner = request.env['res.partner'].sudo()
-        if not number:
-            return Partner
-        partner = Partner.search([
-            '|',
-            ('mobile', '=', number),
-            ('phone', '=', number),
-        ], limit=1)
-        if partner:
-            return partner
-        tail = self._normalize_phone(number)
-        if len(tail) >= 9:
-            request.env.cr.execute(
-                """
-                SELECT id FROM res_partner
-                WHERE active = TRUE
-                  AND (regexp_replace(COALESCE(mobile, ''), '[^0-9]', '', 'g') LIKE %s
-                       OR regexp_replace(COALESCE(phone, ''), '[^0-9]', '', 'g') LIKE %s)
-                ORDER BY id
-                LIMIT 1
-                """,
-                ['%' + tail, '%' + tail],
-            )
-            row = request.env.cr.fetchone()
-            if row:
-                partner = Partner.browse(row[0])
-        return partner
+        differences — delegates to sms.gateway.inbound._match_partner."""
+        return request.env['sms.gateway.inbound'].sudo()._match_partner(number)
 
     # ---- Heartbeat ----
 
@@ -572,30 +542,10 @@ class SmsGatewayController(http.Controller):
 
             partner = self._find_partner_by_phone(from_number)
 
-            if partner:
-                stop_html = (
-                    '<br/><span style="color: #dc2626; font-weight: bold;">'
-                    '&#9940; Cislo pridano na blacklist (STOP)</span>'
-                ) if blacklisted else ''
-                body = (
-                    f'<b>&#128233; Prichozi SMS od {from_number}</b>'
-                    f'<br/><blockquote style="border-left: 3px solid #3B82F6; '
-                    f'padding-left: 8px; margin: 4px 0; color: #374151;">'
-                    f'{message}</blockquote>{stop_html}'
-                )
-                try:
-                    partner.message_post(
-                        body=body,
-                        message_type='comment',
-                        subtype_xmlid='mail.mt_note',
-                    )
-                except Exception as e:
-                    _logger.error('SMS Gateway: Failed to post chatter message: %s', e)
-
-            # Persist inbound SMS
+            # Persist inbound SMS and post to partner chatter
             is_stop = 'STOP' in message.upper()
             try:
-                request.env['sms.gateway.inbound'].sudo().create({
+                record = request.env['sms.gateway.inbound'].sudo().create({
                     'from_number': from_number,
                     'to_number': to_number,
                     'message': message,
@@ -604,6 +554,7 @@ class SmsGatewayController(http.Controller):
                     'is_stop': is_stop,
                     'blacklisted': blacklisted,
                 })
+                record._post_partner_chatter()
             except Exception as e:
                 _logger.error('SMS Gateway: Failed to save inbound SMS: %s', e)
 
@@ -662,23 +613,15 @@ class SmsGatewayController(http.Controller):
                     ('phone_id', 'in', phones.ids),
                 ], limit=1)
                 if existing_inbound:
-                    # Already recorded — but still ensure STOP is blacklisted
-                    is_stop = 'STOP' in message.upper()
-                    if is_stop:
-                        bl = request.env['phone.blacklist'].sudo().search([
-                            '|',
-                            ('number', '=', self._normalize_phone(from_number)),
-                            ('number', '=', from_number),
-                        ], limit=1)
-                        if bl:
-                            already_blacklisted += 1
-                        else:
-                            try:
-                                request.env['phone.blacklist'].sudo().add(from_number)
-                                blacklisted_count += 1
-                                _logger.info('SMS Gateway: Retroactive blacklist %s (STOP, dedup)', from_number)
-                            except Exception as e:
-                                _logger.error('SMS Gateway: Failed to blacklist %s: %s', from_number, e)
+                    # Already recorded — backfill partner match, chatter
+                    # post and STOP blacklisting for records created
+                    # before those were fixed
+                    was_blacklisted = existing_inbound.blacklisted
+                    existing_inbound.action_reprocess()
+                    if existing_inbound.blacklisted and not was_blacklisted:
+                        blacklisted_count += 1
+                    elif existing_inbound.blacklisted:
+                        already_blacklisted += 1
                     skipped += 1
                     continue
 
@@ -706,9 +649,9 @@ class SmsGatewayController(http.Controller):
                         except Exception as e:
                             _logger.error('SMS Gateway: Failed to blacklist %s: %s', from_number, e)
 
-                # Record inbound SMS
+                # Record inbound SMS and post to partner chatter
                 try:
-                    Inbound.create({
+                    record = Inbound.create({
                         'from_number': from_number,
                         'to_number': to_number,
                         'message': message,
@@ -717,33 +660,14 @@ class SmsGatewayController(http.Controller):
                         'is_stop': is_stop,
                         'blacklisted': blacklisted,
                     })
+                    record._post_partner_chatter()
                     recorded += 1
                 except Exception as e:
                     _logger.error('SMS Gateway: Failed to save inbound SMS: %s', e)
 
-                # Post to partner chatter
-                if partner:
-                    stop_html = (
-                        '<br/><span style="color: #dc2626; font-weight: bold;">'
-                        '&#9940; Cislo pridano na blacklist (STOP)</span>'
-                    ) if blacklisted else ''
-                    body_html = (
-                        f'<b>&#128233; Prichozi SMS od {from_number}</b>'
-                        f'<br/><blockquote style="border-left: 3px solid #3B82F6; '
-                        f'padding-left: 8px; margin: 4px 0; color: #374151;">'
-                        f'{message}</blockquote>{stop_html}'
-                    )
-                    try:
-                        partner.message_post(
-                            body=body_html,
-                            message_type='comment',
-                            subtype_xmlid='mail.mt_note',
-                        )
-                    except Exception as e:
-                        _logger.error('SMS Gateway: Failed to post chatter: %s', e)
-
-            if recorded > 0 or blacklisted_count > 0:
-                request.env.cr.commit()
+            # Reprocessing deduped records may also have written changes
+            # (partner backfill, blacklist), so always commit
+            request.env.cr.commit()
 
             return self._json_response({
                 'success': True,
